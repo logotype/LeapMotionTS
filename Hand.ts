@@ -141,9 +141,9 @@ export class Hand
 	 * @return True, if this Hand object contains valid tracking data.
 	 *
 	 */
-	public isValid():Boolean
+	public isValid():bool
 	{
-		var returnValue:Boolean = false;
+		var returnValue:bool = false;
 		
 		if ( ( this.direction && this.direction.isValid()) && ( this.palmNormal && this.palmNormal.isValid()) && ( this.palmPosition && this.palmPosition.isValid()) && ( this.palmVelocity && this.palmVelocity.isValid()) && ( this.sphereCenter && this.sphereCenter.isValid()) )
 			returnValue = true;
@@ -162,9 +162,9 @@ export class Hand
 	 * @return True; if equal. False otherwise.
 	 * 
 	 */
-	public isEqualTo( other:Hand ):Boolean
+	public isEqualTo( other:Hand ):bool
 	{
-		var returnValue:Boolean = false;
+		var returnValue:bool = false;
 
 		if( this.id == other.id && this.frame == other.frame && this.isValid() && other.isValid() )
 			returnValue = true;

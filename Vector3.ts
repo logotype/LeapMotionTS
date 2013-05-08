@@ -161,9 +161,9 @@ export class Vector3
 	 * @return True; if equal, False otherwise.
 	 *
 	 */
-	public isEqualTo( other:Vector3 ):Boolean
+	public isEqualTo( other:Vector3 ):bool
 	{
-		var returnValue:Boolean;
+		var returnValue:bool;
 
 		if ( this.x != other.x || this.y != other.y || this.z != other.z )
 			returnValue = false;
@@ -245,7 +245,7 @@ export class Vector3
 	 * @return If any component is NaN or infinite, then this returns false.
 	 *
 	 */
-	public isValid():Boolean
+	public isValid():bool
 	{
 		return ( this.x <= Number.MAX_VALUE && this.x >= -Number.MAX_VALUE ) && ( this.y <= Number.MAX_VALUE && this.y >= -Number.MAX_VALUE ) && ( this.z <= Number.MAX_VALUE && this.z >= -Number.MAX_VALUE );
 	}
