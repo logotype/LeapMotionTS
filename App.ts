@@ -10,6 +10,7 @@
 /// <reference path="KeyTapGesture.ts"/>
 /// <reference path="ScreenTapGesture.ts"/>
 /// <reference path="SwipeGesture.ts"/>
+/// <reference path="Controller.ts"/>
 import fingerModule = module('Finger');
 import frameModule = module('Frame');
 import handModule = module('Hand');
@@ -22,10 +23,10 @@ import circleGestureModule = module('CircleGesture');
 import keyTapGestureModule = module('KeyTapGesture');
 import screenTapGestureModule = module('ScreenTapGesture');
 import swipeGestureModule = module('SwipeGesture');
+import controllerModule = module('Controller');
 export class App
 {
 	constructor()
 	{
-
 	}
 }

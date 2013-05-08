@@ -174,7 +174,7 @@ export class Matrix
 		var yBasis:vectorModule.Vector3 = new vectorModule.Vector3( 0, 1, 0 );
 		var zBasis:vectorModule.Vector3 = new vectorModule.Vector3( 0, 0, 1 );
 
-		return new Matrix( this.xBasis, this.yBasis, this.zBasis );
+		return new Matrix( xBasis, yBasis, zBasis );
 	}
 
 	/**

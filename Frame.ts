@@ -5,6 +5,7 @@
 /// <reference path="Tool.ts"/>
 /// <reference path="Matrix.ts"/>
 /// <reference path="Gesture.ts"/>
+/// <reference path="Controller.ts"/>
 import vectorModule = module('Vector3');
 import handModule = module('Hand');
 import pointableModule = module('Pointable');
@@ -12,6 +13,7 @@ import fingerModule = module('Finger');
 import toolModule = module('Tool');
 import matrixModule = module('Matrix');
 import gestureModule = module('Gesture');
+import controllerModule = module('Controller');
 /**
  * The Frame class represents a set of hand and finger tracking
  * data detected in a single frame.
@@ -100,6 +102,8 @@ export class Frame
 	 * Translation since last Frame.
 	 */
 	public translationVector:vectorModule.Vector3;
+
+    public controller:controllerModule.Controller;
 
 	/**
 	 * Constructs a Frame object.
@@ -312,7 +316,7 @@ export class Frame
 	 * @return The list of gestures.
 	 * 
 	 */
-	public gestures( sinceFrame:Frame = null ):gestureModule.Gesture
+	public gestures( sinceFrame:Frame = null ):gestureModule.Gesture[]
 	{
 		if( !sinceFrame )
 		{
@@ -325,14 +329,13 @@ export class Frame
 			var gesturesSinceFrame:gestureModule.Gesture[] = [];
 			var i:number = 0;
 			var j:number = 0;
-			var controller:Controller = Controller.getInstance();
-			
-			for( i; i < controller.frameHistory.length; ++i )
-			{
-				for( j; j < controller.frameHistory[ i ]._gestures.length; ++j )
-					gesturesSinceFrame.push( controller.frameHistory[ i ]._gestures[ j ] );
 
-				if( sinceFrame == controller.frameHistory[ i ] )
+			for( i; i < this.controller.frameHistory.length; ++i )
+			{
+				for( j; j < this.controller.frameHistory[ i ]._gestures.length; ++j )
+					gesturesSinceFrame.push( this.controller.frameHistory[ i ]._gestures[ j ] );
+
+				if( sinceFrame == this.controller.frameHistory[ i ] )
 					break;
 			}
 			

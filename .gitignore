@@ -63,3 +63,4 @@ native/win-visualstudio/ipch
 
 *-app.xml
 *.map
+*.js
