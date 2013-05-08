@@ -4,12 +4,14 @@
 /// <reference path="Finger.ts"/>
 /// <reference path="Tool.ts"/>
 /// <reference path="Matrix.ts"/>
+/// <reference path="Gesture.ts"/>
 import vectorModule = module('Vector3');
 import handModule = module('Hand');
 import pointableModule = module('Pointable');
 import fingerModule = module('Finger');
 import toolModule = module('Tool');
 import matrixModule = module('Matrix');
+import gestureModule = module('Gesture');
 /**
  * The Frame class represents a set of hand and finger tracking
  * data detected in a single frame.
@@ -64,7 +66,7 @@ export class Frame
 	 * <p>Circle and swipe gestures are updated every frame.
 	 * Tap gestures only appear in the list when they start.</p>
 	 */
-	//public _gestures:Vector.<Gesture> = new Vector.<Gesture>();
+	public _gestures:gestureModule.Gesture[] = [];
 
 	/**
 	 * A unique ID for this Frame.
@@ -280,23 +282,23 @@ export class Frame
 	 * exists; Otherwise, an Invalid Gesture object.
 	 *
 	 */
-	/*public gesture( id:number ):Gesture
+	public gesture( id:number ):gestureModule.Gesture
 	{
-		var returnValue:Gesture = Gesture.invalid();
+		var returnValue:gestureModule.Gesture = gestureModule.Gesture.invalid();
 		var i:number = 0;
-		var length:number = _gestures.length;
+		var length:number = this._gestures.length;
 
 		for ( i; i < length; ++i )
 		{
-			if ( _gestures[ i ].id == id )
+			if ( this._gestures[ i ].id == id )
 			{
-				returnValue = _gestures[ i ];
+				returnValue = this._gestures[ i ];
 				break;
 			}
 		}
 
 		return returnValue;
-	}*/
+	}
 	
 	/**
 	 * Returns a Gesture vector containing all gestures that have occured
@@ -310,17 +312,17 @@ export class Frame
 	 * @return The list of gestures.
 	 * 
 	 */
-	/*public gestures( sinceFrame:Frame = null ):Vector.<Gesture>
+	public gestures( sinceFrame:Frame = null ):gestureModule.Gesture
 	{
 		if( !sinceFrame )
 		{
 			// The gestures recognized or continuing in this frame.
-			return _gestures;
+			return this._gestures;
 		}
 		else
 		{
 			// Returns a Gesture vector containing all gestures that have occured since the specified frame.
-			var gesturesSinceFrame:Vector.<Gesture> = new Vector.<Gesture>();
+			var gesturesSinceFrame:gestureModule.Gesture[] = [];
 			var i:number = 0;
 			var j:number = 0;
 			var controller:Controller = Controller.getInstance();
@@ -336,7 +338,7 @@ export class Frame
 			
 			return gesturesSinceFrame;
 		}
-	}*/
+	}
 
 	/**
 	 * The axis of rotation derived from the overall rotational

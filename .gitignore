@@ -62,3 +62,4 @@ native/win-visualstudio/LeapNative/Release
 native/win-visualstudio/ipch
 
 *-app.xml
+*.map
