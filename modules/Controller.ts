@@ -5,6 +5,71 @@
 /// <reference path="SwipeGesture.ts"/>
 module Leap
 {
+    export class LeapEvent {
+        static public LEAPMOTION_FRAME:string = "leapMotionFrame";
+
+        private _type:string;
+        private _target:any;
+
+        public frame:Frame;
+
+        constructor(type:string, targetObj:any, frame:Frame) {
+            this._type = type;
+            this._target = targetObj;
+            this.frame = frame;
+        }
+
+        public getTarget():any {
+            return this._target;
+        }
+
+        public getType():string {
+            return this._type;
+        }
+    }
+
+    export class EventDispatcher {
+        private _listeners:any[];
+        constructor() {
+            this._listeners = [];
+        }
+
+        public hasEventListener(type:string, listener:Function):Boolean {
+            var exists:Boolean = false;
+            for (var i = 0; i < this._listeners.length; i++) {
+                if (this._listeners[i].type === type && this._listeners[i].listener === listener) {
+                    exists = true;
+                }
+            }
+
+            return exists;
+        }
+
+        public addEventListener (typeStr:string, listenerFunc:Function):void {
+            if (this.hasEventListener(typeStr, listenerFunc)) {
+                return;
+            }
+
+            this._listeners.push({type: typeStr, listener: listenerFunc});
+        }
+
+        public removeEventListener (typeStr:string, listenerFunc:Function):void {
+            for (var i = 0; i < this._listeners.length; i++) {
+                if (this._listeners[i].type === typeStr && this._listeners[i].listener === listenerFunc) {
+                    this._listeners.splice(i, 1);
+                }
+            }
+        }
+
+        public dispatchEvent (evt:LeapEvent) {
+            for (var i = 0; i < this._listeners.length; i++) {
+                if (this._listeners[i].type === evt.getType()) {
+                    this._listeners[i].listener.call(this, evt);
+                }
+            }
+        }
+    }
+
     /**
      * The Controller class is your main interface to the Leap Motion Controller.
      *
@@ -44,7 +109,7 @@ module Leap
      * @author logotype
      *
      */
-    export class Controller
+    export class Controller extends EventDispatcher
     {
         /**
          * The default policy.
@@ -65,22 +130,43 @@ module Leap
         static public POLICY_BACKGROUND_FRAMES:number = (1 << 0);
 
         /**
-         * @private
          * History of frame of tracking data from the Leap.
          */
-        public frameHistory:Leap.Frame[] = [];
+        public frameHistory:Frame[] = [];
 
         /**
-         * @private
          * Most recent received Frame.
          */
-        public latestFrame:Frame;
+        private latestFrame:Frame;
 
         /**
-         * @private
          * Socket connection.
          */
         public connection:WebSocket;
+
+        /**
+         * Finds a Hand object by ID.
+         *
+         * @param frame The Frame object in which the Hand contains
+         * @param id The ID of the Hand object
+         * @return The Hand object if found, otherwise null
+         *
+         */
+        private getHandByID( frame:Frame, id:number ):Hand
+        {
+            var returnValue:Hand = null;
+            var i:number = 0;
+
+            for( i; i < frame.hands.length; ++i )
+            {
+                if ( (<Hand>frame.hands[ i ]).id == id )
+                {
+                    returnValue = (<Hand>frame.hands[ i ]);
+                    break;
+                }
+            }
+            return returnValue;
+        }
 
         /**
          * Constructs a Controller object.
@@ -90,6 +176,8 @@ module Leap
          */
             constructor( host:string = null )
         {
+            super();
+
             if(!host)
             {
                 this.connection = new WebSocket("ws://localhost:6437");
@@ -103,7 +191,6 @@ module Leap
             this.connection.onclose = this.onWebsocketCloseHandler;
             this.connection.onmessage = ( data:Object ) =>
             {
-                // TODO: Fix scope of this! using lambdas or fat arrows
                 var i:number;
                 var json:Object;
                 var currentFrame:Frame;
@@ -329,10 +416,9 @@ module Leap
                     this.frameHistory.splice( 59, 1 );
 
                 this.frameHistory.unshift( this.latestFrame );
-
                 this.latestFrame = currentFrame;
 
-                console.log(this.latestFrame);
+                this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this.latestFrame.controller, this.latestFrame));
                 //controller.leapmotion::listener.onFrame( controller, latestFrame );
             };
         }
@@ -345,30 +431,6 @@ module Leap
         private onWebsocketCloseHandler( data:Object ):void
         {
             console.log( "Connection closed..." );
-        }
-
-        /**
-         * Finds a Hand object by ID.
-         *
-         * @param frame The Frame object in which the Hand contains
-         * @param id The ID of the Hand object
-         * @return The Hand object if found, otherwise null
-         *
-         */
-        private getHandByID( frame:Frame, id:number ):Hand
-        {
-            var returnValue:Hand = null;
-            var i:number = 0;
-
-            for( i; i < frame.hands.length; ++i )
-            {
-                if ( (<Hand>frame.hands[ i ]).id == id )
-                {
-                    returnValue = (<Hand>frame.hands[ i ]);
-                    break;
-                }
-            }
-            return returnValue;
         }
 
         /**

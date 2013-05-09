@@ -1,4 +1,4 @@
-module LeapMotion
+export module LeapMotion
 {
     /**
      * The Pointable class reports the physical characteristics of a detected finger or tool.
@@ -2681,6 +2681,75 @@ module LeapMotion
         }
     }
 
+    export class LeapEvent {
+        static public LEAPMOTION_INIT:string = "leapMotionInit";
+        static public LEAPMOTION_CONNECTED:string = "leapMotionConnected";
+        static public LEAPMOTION_DISCONNECTED:string = "leapMotionDisconnected";
+        static public LEAPMOTION_EXIT:string = "leapMotionExit";
+        static public LEAPMOTION_FRAME:string = "leapMotionFrame";
+
+        private _type:string;
+        private _target:any;
+
+        public frame:Frame;
+
+        constructor(type:string, targetObj:any, frame:Frame = null) {
+            this._type = type;
+            this._target = targetObj;
+            this.frame = frame;
+        }
+
+        public getTarget():any {
+            return this._target;
+        }
+
+        public getType():string {
+            return this._type;
+        }
+    }
+
+    export class EventDispatcher {
+        private _listeners:any[];
+        constructor() {
+            this._listeners = [];
+        }
+
+        public hasEventListener(type:string, listener:Function):Boolean {
+            var exists:Boolean = false;
+            for (var i = 0; i < this._listeners.length; i++) {
+                if (this._listeners[i].type === type && this._listeners[i].listener === listener) {
+                    exists = true;
+                }
+            }
+
+            return exists;
+        }
+
+        public addEventListener (typeStr:string, listenerFunc:Function):void {
+            if (this.hasEventListener(typeStr, listenerFunc)) {
+                return;
+            }
+
+            this._listeners.push({type: typeStr, listener: listenerFunc});
+        }
+
+        public removeEventListener (typeStr:string, listenerFunc:Function):void {
+            for (var i = 0; i < this._listeners.length; i++) {
+                if (this._listeners[i].type === typeStr && this._listeners[i].listener === listenerFunc) {
+                    this._listeners.splice(i, 1);
+                }
+            }
+        }
+
+        public dispatchEvent (evt:LeapEvent) {
+            for (var i = 0; i < this._listeners.length; i++) {
+                if (this._listeners[i].type === evt.getType()) {
+                    this._listeners[i].listener.call(this, evt);
+                }
+            }
+        }
+    }
+
     /**
      * The Controller class is your main interface to the Leap Motion Controller.
      *
@@ -2720,7 +2789,7 @@ module LeapMotion
      * @author logotype
      *
      */
-    export class Controller
+    export class Controller extends EventDispatcher
     {
         /**
          * The default policy.
@@ -2787,6 +2856,8 @@ module LeapMotion
          */
         constructor( host:string = null )
         {
+            super();
+
             if(!host)
             {
                 this.connection = new WebSocket("ws://localhost:6437");
@@ -2796,11 +2867,20 @@ module LeapMotion
                 this.connection = new WebSocket("ws://" + host + ":6437");
             }
 
-            this.connection.onopen = this.onWebsocketOpenHandler;
-            this.connection.onclose = this.onWebsocketCloseHandler;
+            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
+
+            this.connection.onopen = ( event:Event ) =>
+            {
+                this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
+            };
+
+            this.connection.onclose = ( data:Object ) =>
+            {
+                this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, this));
+            };
+
             this.connection.onmessage = ( data:Object ) =>
             {
-                // TODO: Fix scope of this! using lambdas or fat arrows
                 var i:number;
                 var json:Object;
                 var currentFrame:Frame;
@@ -3026,22 +3106,11 @@ module LeapMotion
                     this.frameHistory.splice( 59, 1 );
 
                 this.frameHistory.unshift( this.latestFrame );
-
                 this.latestFrame = currentFrame;
 
-                console.log(this.latestFrame);
+                this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this.latestFrame.controller, this.latestFrame));
                 //controller.leapmotion::listener.onFrame( controller, latestFrame );
             };
-        }
-
-        private onWebsocketOpenHandler( event:Event ):void
-        {
-            console.log( "Connection open..." );
-        }
-
-        private onWebsocketCloseHandler( data:Object ):void
-        {
-            console.log( "Connection closed..." );
         }
 
         /**

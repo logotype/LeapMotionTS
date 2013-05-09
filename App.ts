@@ -1,35 +1,89 @@
-/// <reference path="modules/CircleGesture.ts"/>
-/// <reference path="modules/Controller.ts"/>
-/// <reference path="modules/Finger.ts"/>
-/// <reference path="modules/Frame.ts"/>
-/// <reference path="modules/Gesture.ts"/>
-/// <reference path="modules/Hand.ts"/>
-/// <reference path="modules/KeyTapGesture.ts"/>
-/// <reference path="modules/Matrix.ts"/>
-/// <reference path="modules/Pointable.ts"/>
-/// <reference path="modules/ScreenTapGesture.ts"/>
-/// <reference path="modules/SwipeGesture.ts"/>
-/// <reference path="modules/Tool.ts"/>
-/// <reference path="modules/Vector3.ts"/>
-export module AppModule
-{
-    export class App
+import api = module('LeapMotionTS');
+var controller:api.LeapMotion.Controller = new api.LeapMotion.Controller();
+controller.addEventListener( api.LeapMotion.LeapEvent.LEAPMOTION_FRAME, (event:api.LeapMotion.LeapEvent) => {
+    var frame:api.LeapMotion.Frame = event.frame;
+    console.log( "Frame id: " + frame.id + ", timestamp: " + frame.timestamp + ", hands: " + frame.hands.length + ", fingers: " + frame.fingers.length + ", tools: " + frame.tools.length + ", gestures: " + frame.gestures().length );
+
+    if ( frame.hands.length > 0 )
     {
-        constructor()
+        // Get the first hand
+        var hand:api.LeapMotion.Hand = frame.hands[ 0 ];
+
+        // Check if the hand has any fingers
+        var fingers:api.LeapMotion.Finger[] = hand.fingers;
+        if ( fingers.length > 0 )
         {
-            var circleGesture:Leap.CircleGesture = new Leap.CircleGesture();
-            var controller:Leap.Controller = new Leap.Controller();
-            var finger:Leap.Finger = new Leap.Finger();
-            var frame:Leap.Frame = new Leap.Frame();
-            var gesture:Leap.Gesture = new Leap.Gesture();
-            var hand:Leap.Hand = new Leap.Hand();
-            var keyTapGesture:Leap.KeyTapGesture = new Leap.KeyTapGesture();
-            var pointable:Leap.Pointable = new Leap.Pointable();
-            var screenTapGesture:Leap.ScreenTapGesture = new Leap.ScreenTapGesture();
-            var swipeGesture:Leap.SwipeGesture = new Leap.SwipeGesture();
-            var tool:Leap.Tool = new Leap.Tool();
-            var vector3:Leap.Vector3 = new Leap.Vector3(0, 0, 0);
-            var matrix:Leap.Matrix = new Leap.Matrix(vector3, vector3, vector3);
+            // Calculate the hand's average finger tip position
+            var avgPos:api.LeapMotion.Vector3 = api.LeapMotion.Vector3.zero();
+            for(var i:number = 0; i < fingers.length; i++ )
+                avgPos = avgPos.plus( (<api.LeapMotion.Finger>fingers[ i ]).tipPosition );
+
+            avgPos = avgPos.divide( fingers.length );
+            console.log( "Hand has " + fingers.length + " fingers, average finger tip position: " + avgPos );
+        }
+
+        // Get the hand's sphere radius and palm position
+        console.log( "Hand sphere radius: " + hand.sphereRadius + " mm, palm position: " + hand.palmPosition );
+
+        // Get the hand's normal vector and direction
+        var normal:api.LeapMotion.Vector3 = hand.palmNormal;
+        var direction:api.LeapMotion.Vector3 = hand.direction;
+
+        // Calculate the hand's pitch, roll, and yaw angles
+        //console.log( "Hand pitch: " + LeapUtil.toDegrees( direction.pitch ) + " degrees, " + "roll: " + LeapUtil.toDegrees( normal.roll ) + " degrees, " + "yaw: " + LeapUtil.toDegrees( direction.yaw ) + " degrees\n" );
+    }
+
+    var gestures:api.LeapMotion.Gesture[] = frame.gestures();
+    for ( var i:number = 0; i < gestures.length; i++ )
+    {
+        var gesture:api.LeapMotion.Gesture = gestures[ i ];
+
+        switch ( gesture.type )
+        {
+            case api.LeapMotion.Gesture.TYPE_CIRCLE:
+                var circle:api.LeapMotion.CircleGesture = <api.LeapMotion.CircleGesture>gesture;
+
+                // Calculate clock direction using the angle between circle normal and pointable
+                var clockwiseness:String;
+                if ( circle.pointable.direction.angleTo( circle.normal ) <= Math.PI / 4 )
+                {
+                    // Clockwise if angle is less than 90 degrees
+                    clockwiseness = "clockwise";
+                }
+                else
+                {
+                    clockwiseness = "counterclockwise";
+                }
+
+                // Calculate angle swept since last frame
+                var sweptAngle:Number = 0;
+                if ( circle.state != api.LeapMotion.Gesture.STATE_START )
+                {
+                    var previousGesture:api.LeapMotion.Gesture = controller.frame( 1 ).gesture( circle.id );
+                    if( previousGesture.isValid() )
+                    {
+                        var previousUpdate:api.LeapMotion.CircleGesture = (<api.LeapMotion.CircleGesture>controller.frame( 1 ).gesture( circle.id ) );
+                        sweptAngle = ( circle.progress - previousUpdate.progress ) * 2 * Math.PI;
+                    }
+                }
+
+                console.log( "Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + sweptAngle + ", " + clockwiseness );
+                break;
+            case api.LeapMotion.Gesture.TYPE_SWIPE:
+                var swipe:api.LeapMotion.SwipeGesture = <api.LeapMotion.SwipeGesture>gesture;
+                console.log( "Swipe id: " + swipe.id + ", " + swipe.state + ", position: " + swipe.position + ", direction: " + swipe.direction + ", speed: " + swipe.speed );
+                break;
+            case api.LeapMotion.Gesture.TYPE_SCREEN_TAP:
+                var screenTap:api.LeapMotion.ScreenTapGesture = <api.LeapMotion.ScreenTapGesture>gesture;
+                console.log( "Screen Tap id: " + screenTap.id + ", " + screenTap.state + ", position: " + screenTap.position + ", direction: " + screenTap.direction );
+                break;
+            case api.LeapMotion.Gesture.TYPE_KEY_TAP:
+                var keyTap:api.LeapMotion.KeyTapGesture = <api.LeapMotion.KeyTapGesture>gesture;
+                console.log( "Key Tap id: " + keyTap.id + ", " + keyTap.state + ", position: " + keyTap.position + ", direction: " + keyTap.direction );
+                break;
+            default:
+                console.log( "Unknown gesture type." );
+                break;
         }
     }
-}
+} );
