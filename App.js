@@ -1,15 +1,15 @@
-define(["require", "exports", 'LeapMotionTS'], function(require, exports, __api__) {
-    var api = __api__;
+define(["require", "exports", 'LeapMotionTS'], function(require, exports, __Leap__) {
+    var Leap = __Leap__;
 
-    var controller = new api.LeapMotion.Controller();
-    controller.addEventListener(api.LeapMotion.LeapEvent.LEAPMOTION_FRAME, function (event) {
+    var controller = new Leap.Controller();
+    controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, function (event) {
         var frame = event.frame;
         console.log("Frame id: " + frame.id + ", timestamp: " + frame.timestamp + ", hands: " + frame.hands.length + ", fingers: " + frame.fingers.length + ", tools: " + frame.tools.length + ", gestures: " + frame.gestures().length);
         if(frame.hands.length > 0) {
             var hand = frame.hands[0];
             var fingers = hand.fingers;
             if(fingers.length > 0) {
-                var avgPos = api.LeapMotion.Vector3.zero();
+                var avgPos = Leap.Vector3.zero();
                 for(var i = 0; i < fingers.length; i++) {
                     avgPos = avgPos.plus((fingers[i]).tipPosition);
                 }
@@ -24,7 +24,7 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __api_
         for(var i = 0; i < gestures.length; i++) {
             var gesture = gestures[i];
             switch(gesture.type) {
-                case api.LeapMotion.Gesture.TYPE_CIRCLE:
+                case Leap.Gesture.TYPE_CIRCLE:
                     var circle = gesture;
                     var clockwiseness;
                     if(circle.pointable.direction.angleTo(circle.normal) <= Math.PI / 4) {
@@ -33,7 +33,7 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __api_
                         clockwiseness = "counterclockwise";
                     }
                     var sweptAngle = 0;
-                    if(circle.state != api.LeapMotion.Gesture.STATE_START) {
+                    if(circle.state != Leap.Gesture.STATE_START) {
                         var previousGesture = controller.frame(1).gesture(circle.id);
                         if(previousGesture.isValid()) {
                             var previousUpdate = (controller.frame(1).gesture(circle.id));
@@ -42,15 +42,15 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __api_
                     }
                     console.log("Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + sweptAngle + ", " + clockwiseness);
                     break;
-                case api.LeapMotion.Gesture.TYPE_SWIPE:
+                case Leap.Gesture.TYPE_SWIPE:
                     var swipe = gesture;
                     console.log("Swipe id: " + swipe.id + ", " + swipe.state + ", position: " + swipe.position + ", direction: " + swipe.direction + ", speed: " + swipe.speed);
                     break;
-                case api.LeapMotion.Gesture.TYPE_SCREEN_TAP:
+                case Leap.Gesture.TYPE_SCREEN_TAP:
                     var screenTap = gesture;
                     console.log("Screen Tap id: " + screenTap.id + ", " + screenTap.state + ", position: " + screenTap.position + ", direction: " + screenTap.direction);
                     break;
-                case api.LeapMotion.Gesture.TYPE_KEY_TAP:
+                case Leap.Gesture.TYPE_KEY_TAP:
                     var keyTap = gesture;
                     console.log("Key Tap id: " + keyTap.id + ", " + keyTap.state + ", position: " + keyTap.position + ", direction: " + keyTap.direction);
                     break;
