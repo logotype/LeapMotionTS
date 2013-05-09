@@ -879,3 +879,14 @@ var LeapMotion;
     })();
     LeapMotion.Controller = Controller;    
 })(LeapMotion || (LeapMotion = {}));
+var HelloWorldModule;
+(function (HelloWorldModule) {
+    var HelloWorld = (function () {
+        function HelloWorld() {
+            var controller = new LeapMotion.Controller();
+            console.log(controller);
+        }
+        return HelloWorld;
+    })();
+    HelloWorldModule.HelloWorld = HelloWorld;    
+})(HelloWorldModule || (HelloWorldModule = {}));
