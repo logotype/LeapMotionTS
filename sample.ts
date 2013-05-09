@@ -1,6 +1,6 @@
 import Leap = module('LeapMotionTS');
 var controller:Leap.Controller = new Leap.Controller();
-controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEvent) => {
+controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapEvent ) => {
     var frame:Leap.Frame = event.frame;
     console.log( "Frame id: " + frame.id + ", timestamp: " + frame.timestamp + ", hands: " + frame.hands.length + ", fingers: " + frame.fingers.length + ", tools: " + frame.tools.length + ", gestures: " + frame.gestures().length );
 
@@ -30,7 +30,7 @@ controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEv
         var direction:Leap.Vector3 = hand.direction;
 
         // Calculate the hand's pitch, roll, and yaw angles
-        //console.log( "Hand pitch: " + LeapUtil.toDegrees( direction.pitch ) + " degrees, " + "roll: " + LeapUtil.toDegrees( normal.roll ) + " degrees, " + "yaw: " + LeapUtil.toDegrees( direction.yaw ) + " degrees\n" );
+        console.log( "Hand pitch: " + Leap.LeapUtil.toDegrees( direction.pitch ) + " degrees, " + "roll: " + Leap.LeapUtil.toDegrees( normal.roll ) + " degrees, " + "yaw: " + Leap.LeapUtil.toDegrees( direction.yaw ) + " degrees\n" );
     }
 
     var gestures:Leap.Gesture[] = frame.gestures();
@@ -56,7 +56,7 @@ controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEv
                 }
 
                 // Calculate angle swept since last frame
-                var sweptAngle:Number = 0;
+                var sweptAngle:number = 0;
                 if ( circle.state != Leap.Gesture.STATE_START )
                 {
                     var previousGesture:Leap.Gesture = controller.frame( 1 ).gesture( circle.id );
@@ -67,7 +67,7 @@ controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEv
                     }
                 }
 
-                console.log( "Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + sweptAngle + ", " + clockwiseness );
+                console.log( "Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + Leap.LeapUtil.toDegrees( sweptAngle ) + ", " + clockwiseness );
                 break;
             case Leap.Gesture.TYPE_SWIPE:
                 var swipe:Leap.SwipeGesture = <Leap.SwipeGesture>gesture;

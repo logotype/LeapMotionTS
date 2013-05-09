@@ -19,6 +19,7 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __Leap
             console.log("Hand sphere radius: " + hand.sphereRadius + " mm, palm position: " + hand.palmPosition);
             var normal = hand.palmNormal;
             var direction = hand.direction;
+            console.log("Hand pitch: " + Leap.LeapUtil.toDegrees(direction.pitch) + " degrees, " + "roll: " + Leap.LeapUtil.toDegrees(normal.roll) + " degrees, " + "yaw: " + Leap.LeapUtil.toDegrees(direction.yaw) + " degrees\n");
         }
         var gestures = frame.gestures();
         for(var i = 0; i < gestures.length; i++) {
@@ -40,7 +41,7 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __Leap
                             sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                         }
                     }
-                    console.log("Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + sweptAngle + ", " + clockwiseness);
+                    console.log("Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + Leap.LeapUtil.toDegrees(sweptAngle) + ", " + clockwiseness);
                     break;
                 case Leap.Gesture.TYPE_SWIPE:
                     var swipe = gesture;

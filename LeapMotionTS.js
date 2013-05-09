@@ -601,15 +601,27 @@ define(["require", "exports"], function(require, exports) {
             denom = 1 / Math.sqrt(denom);
             return new Vector3(this.x * denom, this.y * denom, this.z * denom);
         };
-        Vector3.prototype.pitch = function () {
-            return Math.atan2(this.y, -this.z);
-        };
-        Vector3.prototype.yaw = function () {
-            return Math.atan2(this.x, -this.z);
-        };
-        Vector3.prototype.roll = function () {
-            return Math.atan2(this.x, -this.y);
-        };
+        Object.defineProperty(Vector3.prototype, "pitch", {
+            get: function () {
+                return Math.atan2(this.y, -this.z);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector3.prototype, "yaw", {
+            get: function () {
+                return Math.atan2(this.x, -this.z);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector3.prototype, "roll", {
+            get: function () {
+                return Math.atan2(this.x, -this.y);
+            },
+            enumerable: true,
+            configurable: true
+        });
         Vector3.zero = function zero() {
             return new Vector3(0, 0, 0);
         };
@@ -939,5 +951,103 @@ define(["require", "exports"], function(require, exports) {
         return Controller;
     })(EventDispatcher);
     exports.Controller = Controller;    
+    var LeapUtil = (function () {
+        function LeapUtil() { }
+        LeapUtil.PI = 3.1415926536;
+        LeapUtil.DEG_TO_RAD = 0.0174532925;
+        LeapUtil.RAD_TO_DEG = 57.295779513;
+        LeapUtil.TWO_PI = Math.PI + Math.PI;
+        LeapUtil.HALF_PI = Math.PI * 0.5;
+        LeapUtil.EPSILON = 0.00001;
+        LeapUtil.prototype.LeapUtil = function () {
+        };
+        LeapUtil.toDegrees = function toDegrees(radians) {
+            return radians * 180 / Math.PI;
+        };
+        LeapUtil.isNearZero = function isNearZero(value) {
+            return Math.abs(value) <= LeapUtil.EPSILON;
+        };
+        LeapUtil.vectorIsNearZero = function vectorIsNearZero(inVector) {
+            return LeapUtil.isNearZero(inVector.x) && LeapUtil.isNearZero(inVector.y) && LeapUtil.isNearZero(inVector.z);
+        };
+        LeapUtil.extractRotation = function extractRotation(mtxTransform) {
+            return new Matrix(mtxTransform.xBasis, mtxTransform.yBasis, mtxTransform.zBasis);
+        };
+        LeapUtil.rotationInverse = function rotationInverse(mtxRot) {
+            return new Matrix(new Vector3(mtxRot.xBasis.x, mtxRot.yBasis.x, mtxRot.zBasis.x), new Vector3(mtxRot.xBasis.y, mtxRot.yBasis.y, mtxRot.zBasis.y), new Vector3(mtxRot.xBasis.z, mtxRot.yBasis.z, mtxRot.zBasis.z));
+        };
+        LeapUtil.rigidInverse = function rigidInverse(mtxTransform) {
+            var rigidInverse = LeapUtil.rotationInverse(mtxTransform);
+            rigidInverse.origin = rigidInverse.transformDirection(mtxTransform.origin.opposite());
+            return rigidInverse;
+        };
+        LeapUtil.componentWiseMin = function componentWiseMin(vLHS, vRHS) {
+            return new Vector3(Math.min(vLHS.x, vRHS.x), Math.min(vLHS.y, vRHS.y), Math.min(vLHS.z, vRHS.z));
+        };
+        LeapUtil.componentWiseMax = function componentWiseMax(vLHS, vRHS) {
+            return new Vector3(Math.max(vLHS.x, vRHS.x), Math.max(vLHS.y, vRHS.y), Math.max(vLHS.z, vRHS.z));
+        };
+        LeapUtil.componentWiseScale = function componentWiseScale(vLHS, vRHS) {
+            return new Vector3(vLHS.x * vRHS.x, vLHS.y * vRHS.y, vLHS.z * vRHS.z);
+        };
+        LeapUtil.componentWiseReciprocal = function componentWiseReciprocal(inVector) {
+            return new Vector3(1.0 / inVector.x, 1.0 / inVector.y, 1.0 / inVector.z);
+        };
+        LeapUtil.minComponent = function minComponent(inVector) {
+            return Math.min(inVector.x, Math.min(inVector.y, inVector.z));
+        };
+        LeapUtil.maxComponent = function maxComponent(inVector) {
+            return Math.max(inVector.x, Math.max(inVector.y, inVector.z));
+        };
+        LeapUtil.heading = function heading(inVector) {
+            return Math.atan2(inVector.z, inVector.x);
+        };
+        LeapUtil.elevation = function elevation(inVector) {
+            return Math.atan2(inVector.y, Math.sqrt(inVector.z * inVector.z + inVector.x * inVector.x));
+        };
+        LeapUtil.normalizeSpherical = function normalizeSpherical(vSpherical) {
+            var fHeading = vSpherical.y;
+            var fElevation = vSpherical.z;
+            while(fElevation <= -Math.PI) {
+                fElevation += LeapUtil.TWO_PI;
+            }
+            while(fElevation > Math.PI) {
+                fElevation -= LeapUtil.TWO_PI;
+            }
+            if(Math.abs(fElevation) > LeapUtil.HALF_PI) {
+                fHeading += Math.PI;
+                fElevation = fElevation > 0 ? (Math.PI - fElevation) : -(Math.PI + fElevation);
+            }
+            while(fHeading <= -Math.PI) {
+                fHeading += LeapUtil.TWO_PI;
+            }
+            while(fHeading > Math.PI) {
+                fHeading -= LeapUtil.TWO_PI;
+            }
+            return new Vector3(1, fHeading, fElevation);
+        };
+        LeapUtil.cartesianToSpherical = function cartesianToSpherical(vCartesian) {
+            return new Vector3(vCartesian.magnitude(), LeapUtil.heading(vCartesian), LeapUtil.elevation(vCartesian));
+        };
+        LeapUtil.sphericalToCartesian = function sphericalToCartesian(vSpherical) {
+            var fMagnitude = vSpherical.x;
+            var fCosHeading = Math.cos(vSpherical.y);
+            var fSinHeading = Math.sin(vSpherical.y);
+            var fCosElevation = Math.cos(vSpherical.z);
+            var fSinElevation = Math.sin(vSpherical.z);
+            return new Vector3(fCosHeading * fCosElevation * fMagnitude, fSinElevation * fMagnitude, fSinHeading * fCosElevation * fMagnitude);
+        };
+        LeapUtil.clamp = function clamp(inVal, minVal, maxVal) {
+            return (inVal < minVal) ? minVal : ((inVal > maxVal) ? maxVal : inVal);
+        };
+        LeapUtil.lerp = function lerp(a, b, coefficient) {
+            return a + ((b - a) * coefficient);
+        };
+        LeapUtil.lerpVector = function lerpVector(vec1, vec2, coefficient) {
+            return vec1.plus(vec2.minus(vec1).multiply(coefficient));
+        };
+        return LeapUtil;
+    })();
+    exports.LeapUtil = LeapUtil;    
 })
 //@ sourceMappingURL=LeapMotionTS.js.map
