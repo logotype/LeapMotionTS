@@ -43,6 +43,32 @@ define(["require", "exports"], function(require, exports) {
         return EventDispatcher;
     })();
     exports.EventDispatcher = EventDispatcher;    
+    var DefaultListener = (function (_super) {
+        __extends(DefaultListener, _super);
+        function DefaultListener() {
+            _super.apply(this, arguments);
+
+        }
+        DefaultListener.prototype.DefaultListener = function () {
+        };
+        DefaultListener.prototype.onConnect = function (controller) {
+            controller.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
+        };
+        DefaultListener.prototype.onDisconnect = function (controller) {
+            controller.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, this));
+        };
+        DefaultListener.prototype.onExit = function (controller) {
+            controller.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_EXIT, this));
+        };
+        DefaultListener.prototype.onFrame = function (controller, frame) {
+            controller.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this, frame));
+        };
+        DefaultListener.prototype.onInit = function (controller) {
+            controller.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
+        };
+        return DefaultListener;
+    })(EventDispatcher);
+    exports.DefaultListener = DefaultListener;    
     var LeapEvent = (function () {
         function LeapEvent(type, targetObj, frame) {
             if (typeof frame === "undefined") { frame = null; }
@@ -169,17 +195,18 @@ define(["require", "exports"], function(require, exports) {
             var _this = this;
             _super.call(this);
             this.frameHistory = [];
+            this.listener = new DefaultListener();
             if (!host) {
                 this.connection = new WebSocket("ws://localhost:6437");
             } else {
                 this.connection = new WebSocket("ws://" + host + ":6437");
             }
-            this.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
+            this.listener.onInit(this);
             this.connection.onopen = function (event) {
-                _this.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, _this));
+                _this.listener.onConnect(_this);
             };
             this.connection.onclose = function (data) {
-                _this.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, _this));
+                _this.listener.onDisconnect(_this);
             };
             this.connection.onmessage = function (data) {
                 var i;
@@ -355,7 +382,7 @@ define(["require", "exports"], function(require, exports) {
                 }
                 _this.frameHistory.unshift(_this.latestFrame);
                 _this.latestFrame = currentFrame;
-                _this.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_FRAME, _this.latestFrame.controller, _this.latestFrame));
+                _this.listener.onFrame(_this, _this.latestFrame);
             };
         }
         Controller.POLICY_DEFAULT = 0;
@@ -391,6 +418,9 @@ define(["require", "exports"], function(require, exports) {
                 returnValue = this.frameHistory[history];
             }
             return returnValue;
+        };
+        Controller.prototype.setListener = function (listener) {
+            this.listener = listener;
         };
         return Controller;
     })(EventDispatcher);
@@ -1028,3 +1058,4 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Vector3 = Vector3;    
 })
+//@ sourceMappingURL=LeapMotionTS.js.map

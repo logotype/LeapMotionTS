@@ -1,4 +1,5 @@
 /// <reference path="./../Frame.ts"/>
+/// <reference path="./../Listener.ts"/>
 class LeapEvent
 {
     public static LEAPMOTION_INIT:string = "leapMotionInit";
@@ -12,7 +13,7 @@ class LeapEvent
 
     public frame:Frame;
 
-    constructor( type:string, targetObj:any, frame:Frame = null )
+    constructor( type:string, targetObj:Listener, frame:Frame = null )
     {
         this._type = type;
         this._target = targetObj;

@@ -1,4 +1,5 @@
 /// <reference path="./util/EventDispatcher.ts"/>
+/// <reference path="./interfaces/DefaultListener.ts"/>
 /// <reference path="./util/LeapEvent.ts"/>
 /// <reference path="./Frame.ts"/>
 /// <reference path="./CircleGesture.ts"/>
@@ -80,6 +81,11 @@ class Controller extends EventDispatcher
     public connection:WebSocket;
 
     /**
+     * Listener connection.
+     */
+    public listener:Listener;
+
+    /**
      * Finds a Hand object by ID.
      *
      * @param frame The Frame object in which the Hand contains
@@ -109,9 +115,11 @@ class Controller extends EventDispatcher
      * (currently only supported for socket connections).
      *
      */
-        constructor( host:string = null )
+    constructor( host:string = null )
     {
         super();
+
+        this.listener = new DefaultListener();
 
         if( !host )
         {
@@ -122,16 +130,16 @@ class Controller extends EventDispatcher
             this.connection = new WebSocket("ws://" + host + ":6437");
         }
 
-        this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
+        this.listener.onInit( this );
 
         this.connection.onopen = ( event:Event ) =>
         {
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
+            this.listener.onConnect( this );
         };
 
         this.connection.onclose = ( data:Object ) =>
         {
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, this));
+            this.listener.onDisconnect( this );
         };
 
         this.connection.onmessage = ( data:Object ) =>
@@ -362,9 +370,7 @@ class Controller extends EventDispatcher
 
             this.frameHistory.unshift( this.latestFrame );
             this.latestFrame = currentFrame;
-
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this.latestFrame.controller, this.latestFrame));
-            //controller.leapmotion::listener.onFrame( controller, latestFrame );
+            this.listener.onFrame( this, this.latestFrame );
         };
     }
 
@@ -420,4 +426,20 @@ class Controller extends EventDispatcher
 
         return returnValue;
     }
+
+    /**
+     * Update the object that receives direct updates from the Leap Motion Controller.
+     *
+     * <p>The default listener will make the controller dispatch flash events.
+     * You can override this behaviour, by implementing the IListener interface
+     * in your own classes, and use this method to set the listener to your
+     * own implementation.</p>
+     *
+     * @param listener
+     */
+    public setListener( listener:Listener ):void
+    {
+        this.listener = listener;
+    }
+
 }

@@ -49,6 +49,147 @@ export class EventDispatcher
         }
     }
 }
+
+/**
+ * The Listener export interface defines a set of callback functions that you can
+ * implement to respond to events dispatched by the Leap.
+ *
+ * <p>To handle Leap events, implement the Listener export interface and assign
+ * it to the Controller instance. The Controller calls the relevant Listener
+ * callback when an event occurs, passing in a reference to itself.
+ * You have to implement callbacks for every method specified in the interface.</p>
+ *
+ * <p>Note: you have to create an instance of the LeapMotion export class and set the Listener to your class:</p>
+ *
+ * <listing>
+ * leap = new LeapMotion();
+ * leap.controller.setListener( this );</listing>
+ *
+ * @author logotype
+ *
+ */
+export interface Listener
+{
+    /**
+     * Called when the Controller object connects to the Leap software,
+     * or when this Listener object is added to a Controller that is already connected.
+     *
+     * @param controller The Controller object invoking this callback function.
+     *
+     */
+        onConnect( controller:Controller ):void;
+
+    /**
+     * Called when the Controller object disconnects from the Leap software.
+     *
+     * <p>The controller can disconnect when the Leap device is unplugged,
+     * the user shuts the Leap software down, or the Leap software encounters
+     * an unrecoverable error.</p>
+     *
+     * <listing>
+     * public onDisconnect( controller:Controller ):void {
+     *     trace( "Disconnected" );
+     * }</listing>
+     *
+     * <p>Note: When you launch a Leap-enabled application in a debugger,
+     * the Leap library does not disconnect from the application.
+     * This is to allow you to step through code without losing the connection
+     * because of time outs.</p>
+     *
+     * @param controller The Controller object invoking this callback function.
+     *
+     */
+        onDisconnect( controller:Controller ):void;
+
+    /**
+     * Called when this Listener object is removed from the Controller or
+     * the Controller instance is destroyed.
+     *
+     * <listing>
+     * public onExit( controller:Controller ):void {
+     *     trace( "Exited" );
+     * }</listing>
+     *
+     * @param controller The Controller object invoking this callback function.
+     *
+     */
+        onExit( controller:Controller ):void;
+
+    /**
+     * Called when a new frame of hand and finger tracking data is available.
+     *
+     * <p>Access the new frame data using the <code>controller.frame()</code> function.</p>
+     *
+     * <listing>
+     * public onFrame( controller:Controller, frame:Frame ):void {
+     *     trace( "New frame" );
+     * }</listing>
+     *
+     * <p>Note, the Controller skips any pending onFrame events while your
+     * onFrame handler executes. If your implementation takes too long to
+     * return, one or more frames can be skipped. The Controller still inserts
+     * the skipped frames into the frame history. You can access recent frames
+     * by setting the history parameter when calling the <code>controller.frame()</code>
+     * function. You can determine if any pending onFrame events were skipped
+     * by comparing the ID of the most recent frame with the ID of the last
+     * received frame.</p>
+     *
+     * @param controller The Controller object invoking this callback function.
+     * @param frame The most recent frame object.
+     *
+     */
+        onFrame( controller:Controller, frame:Frame ):void;
+
+    /**
+     * Called once, when this Listener object is newly added to a Controller.
+     *
+     * <listing>
+     * public onInit( controller:Controller ):void {
+     *     trace( "Init" );
+     * }</listing>
+     *
+     * @param controller The Controller object invoking this callback function.
+     *
+     */
+        onInit( controller:Controller ):void;
+}
+
+
+
+export class DefaultListener extends EventDispatcher implements Listener
+{
+
+    public DefaultListener()
+    {
+    }
+
+    public onConnect( controller:Controller ):void
+    {
+        controller.dispatchEvent( new LeapEvent( LeapEvent.LEAPMOTION_CONNECTED, this ) );
+    }
+
+    public onDisconnect( controller:Controller ):void
+    {
+        controller.dispatchEvent( new LeapEvent( LeapEvent.LEAPMOTION_DISCONNECTED, this ) );
+    }
+
+    public onExit( controller:Controller ):void
+    {
+        controller.dispatchEvent( new LeapEvent( LeapEvent.LEAPMOTION_EXIT, this ) );
+    }
+
+    public onFrame( controller:Controller, frame:Frame ):void
+    {
+        controller.dispatchEvent( new LeapEvent( LeapEvent.LEAPMOTION_FRAME, this, frame ) );
+    }
+
+    public onInit( controller:Controller ):void
+    {
+        controller.dispatchEvent( new LeapEvent( LeapEvent.LEAPMOTION_INIT, this ) );
+    }
+}
+
+
 export class LeapEvent
 {
     public static LEAPMOTION_INIT:string = "leapMotionInit";
@@ -62,7 +203,7 @@ export class LeapEvent
 
     public frame:Frame;
 
-    constructor( type:string, targetObj:any, frame:Frame = null )
+    constructor( type:string, targetObj:Listener, frame:Frame = null )
     {
         this._type = type;
         this._target = targetObj;
@@ -335,8 +476,9 @@ export class LeapUtil
 
 
 
+
 /**
- * The Controller export class is your main interface to the Leap Motion Controller.
+ * The Controller export class is your main export interface to the Leap Motion Controller.
  *
  * <p>Create an instance of this Controller export class to access frames of tracking
  * data and configuration information. Frame data can be polled at any time using
@@ -346,7 +488,7 @@ export class LeapUtil
  *
  * <p>Polling is an appropriate strategy for applications which already have an
  * intrinsic update loop, such as a game. You can also implement the Leap::Listener
- * interface to handle events as they occur. The Leap dispatches events to the listener
+ * export interface to handle events as they occur. The Leap dispatches events to the listener
  * upon initialization and exiting, on connection changes, and when a new frame
  * of tracking data is available. When these events occur, the controller object
  * invokes the appropriate callback defined in the Listener interface.</p>
@@ -354,7 +496,7 @@ export class LeapUtil
  * <p>To access frames of tracking data as they become available:</p>
  *
  * <ul>
- * <li>Implement the Listener interface and override the <code>Listener::onFrame()</code> .</li>
+ * <li>Implement the Listener export interface and override the <code>Listener::onFrame()</code> .</li>
  * <li>In your <code>Listener::onFrame()</code> , call the <code>Controller::frame()</code> to access the newest frame of tracking data.</li>
  * <li>To start receiving frames, create a Controller object and add event listeners to the <code>Controller::addEventListener()</code> .</li>
  * </ul>
@@ -410,6 +552,11 @@ export class Controller extends EventDispatcher
     public connection:WebSocket;
 
     /**
+     * Listener connection.
+     */
+    public listener:Listener;
+
+    /**
      * Finds a Hand object by ID.
      *
      * @param frame The Frame object in which the Hand contains
@@ -439,9 +586,11 @@ export class Controller extends EventDispatcher
      * (currently only supported for socket connections).
      *
      */
-        constructor( host:string = null )
+    constructor( host:string = null )
     {
         super();
+
+        this.listener = new DefaultListener();
 
         if( !host )
         {
@@ -452,16 +601,16 @@ export class Controller extends EventDispatcher
             this.connection = new WebSocket("ws://" + host + ":6437");
         }
 
-        this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
+        this.listener.onInit( this );
 
         this.connection.onopen = ( event:Event ) =>
         {
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
+            this.listener.onConnect( this );
         };
 
         this.connection.onclose = ( data:Object ) =>
         {
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, this));
+            this.listener.onDisconnect( this );
         };
 
         this.connection.onmessage = ( data:Object ) =>
@@ -692,9 +841,7 @@ export class Controller extends EventDispatcher
 
             this.frameHistory.unshift( this.latestFrame );
             this.latestFrame = currentFrame;
-
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this.latestFrame.controller, this.latestFrame));
-            //controller.leapmotion::listener.onFrame( controller, latestFrame );
+            this.listener.onFrame( this, this.latestFrame );
         };
     }
 
@@ -750,6 +897,22 @@ export class Controller extends EventDispatcher
 
         return returnValue;
     }
+
+    /**
+     * Update the object that receives direct updates from the Leap Motion Controller.
+     *
+     * <p>The default listener will make the controller dispatch flash events.
+     * You can override this behaviour, by implementing the IListener interface
+     * in your own classes, and use this method to set the listener to your
+     * own implementation.</p>
+     *
+     * @param listener
+     */
+    public setListener( listener:Listener ):void
+    {
+        this.listener = listener;
+    }
+
 }
 
 

@@ -105,6 +105,7 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
         }
     } );
 
+Optionally, you can simply call `controller.frame()` e.g. in your main loop, or implement the `Listener` interface for callbacks.
 
 Authors
 -------
