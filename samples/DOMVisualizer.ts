@@ -46,11 +46,11 @@ controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapE
         }
         handIds[hand.id] = true;
     }
-    for (var handId in spheres) {
-        if (!handIds[handId]) {
-            var sphereDiv =  <HTMLDivElement>document.getElementById(spheres[handId]);
+    for (var handIdSphere in spheres) {
+        if (!handIds[handIdSphere]) {
+            var sphereDiv =  <HTMLDivElement>document.getElementById(spheres[handIdSphere]);
             sphereDiv.parentNode.removeChild(sphereDiv);
-            delete spheres[handId];
+            delete spheres[handIdSphere];
         }
     }
 

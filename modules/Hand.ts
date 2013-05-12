@@ -4,459 +4,449 @@
 /// <reference path="Tool.ts"/>
 /// <reference path="Matrix.ts"/>
 /// <reference path="Frame.ts"/>
-module Leap
+/**
+ * The Hand class reports the physical characteristics of a detected hand.
+ *
+ * <p>Hand tracking data includes a palm position and velocity; vectors for
+ * the palm normal and direction to the fingers; properties of a sphere fit
+ * to the hand; and lists of the attached fingers and tools.</p>
+ *
+ * <p>Note that Hand objects can be invalid, which means that they do not
+ * contain valid tracking data and do not correspond to a physical entity.
+ * Invalid Hand objects can be the result of asking for a Hand object using
+ * an ID from an earlier frame when no Hand objects with that ID exist in
+ * the current frame. A Hand object created from the Hand constructor is
+ * also invalid. Test for validity with the <code>Hand.isValid()</code> function.</p>
+ *
+ * @author logotype
+ *
+ */
+class Hand
 {
     /**
-     * The Hand class reports the physical characteristics of a detected hand.
+     * The direction from the palm position toward the fingers.
      *
-     * <p>Hand tracking data includes a palm position and velocity; vectors for
-     * the palm normal and direction to the fingers; properties of a sphere fit
-     * to the hand; and lists of the attached fingers and tools.</p>
+     * <p>The direction is expressed as a unit vector pointing in the same
+     * direction as the directed line from the palm position to the fingers.</p>
+     */
+    public direction:Vector3;
+
+    /**
+     * The list of Finger objects detected in this frame that are attached
+     * to this hand, given in arbitrary order.
+     * @see Finger
+     */
+    public fingers:Finger[] = [];
+
+    /**
+     * The Frame associated with this Hand.
+     * @see Frame
+     */
+    public frame:Frame;
+
+    /**
+     * A unique ID assigned to this Hand object, whose value remains
+     * the same across consecutive frames while the tracked hand remains visible.
      *
-     * <p>Note that Hand objects can be invalid, which means that they do not
-     * contain valid tracking data and do not correspond to a physical entity.
-     * Invalid Hand objects can be the result of asking for a Hand object using
-     * an ID from an earlier frame when no Hand objects with that ID exist in
-     * the current frame. A Hand object created from the Hand constructor is
-     * also invalid. Test for validity with the <code>Hand.isValid()</code> function.</p>
+     * <p>If tracking is lost (for example, when a hand is occluded by another
+     * hand or when it is withdrawn from or reaches the edge of the Leap field
+     * of view), the Leap may assign a new ID when it detects the hand in a future frame.</p>
      *
-     * @author logotype
+     * <p>Use the ID value with the <code>Frame.hand()</code> to find this Hand object
+     * in future frames.</p>
+     */
+    public id:number;
+
+    /**
+     * The normal vector to the palm.
+     */
+    public palmNormal:Vector3;
+
+    /**
+     * The center position of the palm in millimeters from the Leap origin.
+     */
+    public palmPosition:Vector3;
+
+    /**
+     * The rate of change of the palm position in millimeters/second.
+     */
+    public palmVelocity:Vector3;
+
+    /**
+     * The list of Pointable objects (fingers and tools) detected in this
+     * frame that are associated with this hand, given in arbitrary order.
+     *
+     * <p>The list can be empty if no fingers or tools associated with this hand are detected.
+     * Use the <code>Pointable.isFinger()</code> to determine whether or not an item in the
+     * list represents a finger. Use the <code>Pointable.isTool()</code> to determine
+     * whether or not an item in the list represents a tool. You can also get
+     * only fingers using the <code>Hand.fingers()</code> or only tools using
+     * the <code>Hand.tools()</code> function.</p>
+     *
+     * @see Pointable
      *
      */
-    export class Hand
-    {
-        /**
-         * The direction from the palm position toward the fingers.
-         *
-         * <p>The direction is expressed as a unit vector pointing in the same
-         * direction as the directed line from the palm position to the fingers.</p>
-         */
-        public direction:Leap.Vector3;
+    public pointables:Pointable[] = [];
 
-        /**
-         * The list of Finger objects detected in this frame that are attached
-         * to this hand, given in arbitrary order.
-         * @see Finger
-         */
-        public fingers:Leap.Finger[] = [];
+    /**
+     * The center of a sphere fit to the curvature of this hand.
+     */
+    public sphereCenter:Vector3;
+    /**
+     * The radius of a sphere fit to the curvature of this hand.
+     */
+    public sphereRadius:number;
 
-        /**
-         * The Frame associated with this Hand.
-         * @see Frame
-         */
-        public frame:Leap.Frame;
+    /**
+     * The list of Tool objects detected in this frame that are held by this hand, given in arbitrary order.
+     * @see Tool
+     */
+    public tools:Tool[] =[];
 
-        /**
-         * A unique ID assigned to this Hand object, whose value remains
-         * the same across consecutive frames while the tracked hand remains visible.
-         *
-         * <p>If tracking is lost (for example, when a hand is occluded by another
-         * hand or when it is withdrawn from or reaches the edge of the Leap field
-         * of view), the Leap may assign a new ID when it detects the hand in a future frame.</p>
-         *
-         * <p>Use the ID value with the <code>Frame.hand()</code> to find this Hand object
-         * in future frames.</p>
-         */
-        public id:number;
+    /**
+     * Rotation matrix.
+     */
+    public rotation:Matrix;
 
-        /**
-         * The normal vector to the palm.
-         */
-        public palmNormal:Leap.Vector3;
+    /**
+     * Scale factor since last Frame.
+     */
+    public scaleFactorNumber:number;
 
-        /**
-         * The center position of the palm in millimeters from the Leap origin.
-         */
-        public palmPosition:Leap.Vector3;
+    /**
+     * Translation since last Frame.
+     */
+    public translationVector:Vector3;
 
-        /**
-         * The rate of change of the palm position in millimeters/second.
-         */
-        public palmVelocity:Leap.Vector3;
-
-        /**
-         * The list of Pointable objects (fingers and tools) detected in this
-         * frame that are associated with this hand, given in arbitrary order.
-         *
-         * <p>The list can be empty if no fingers or tools associated with this hand are detected.
-         * Use the <code>Pointable.isFinger()</code> to determine whether or not an item in the
-         * list represents a finger. Use the <code>Pointable.isTool()</code> to determine
-         * whether or not an item in the list represents a tool. You can also get
-         * only fingers using the <code>Hand.fingers()</code> or only tools using
-         * the <code>Hand.tools()</code> function.</p>
-         *
-         * @see Pointable
-         *
-         */
-        public pointables:Leap.Pointable[] = [];
-
-        /**
-         * The center of a sphere fit to the curvature of this hand.
-         */
-        public sphereCenter:Leap.Vector3;
-        /**
-         * The radius of a sphere fit to the curvature of this hand.
-         */
-        public sphereRadius:number;
-
-        /**
-         * The list of Tool objects detected in this frame that are held by this hand, given in arbitrary order.
-         * @see Tool
-         */
-        public tools:Leap.Tool[] =[];
-
-        /**
-         * Rotation matrix.
-         */
-        public rotation:Leap.Matrix;
-
-        /**
-         * Scale factor since last Frame.
-         */
-        public scaleFactorNumber:number;
-
-        /**
-         * Translation since last Frame.
-         */
-        public translationVector:Leap.Vector3;
-
-        /**
-         * Constructs a Hand object.
-         *
-         * <p>An uninitialized hand is considered invalid.
-         *
-         * Get valid Hand objects from a Frame object.</p>
-         *
-         */
+    /**
+     * Constructs a Hand object.
+     *
+     * <p>An uninitialized hand is considered invalid.
+     *
+     * Get valid Hand objects from a Frame object.</p>
+     *
+     */
         constructor()
+    {
+    }
+
+    /**
+     * Reports whether this is a valid Hand object.
+     * @return True, if this Hand object contains valid tracking data.
+     *
+     */
+    public isValid():boolean
+    {
+        if ( ( this.direction && this.direction.isValid()) && ( this.palmNormal && this.palmNormal.isValid()) && ( this.palmPosition && this.palmPosition.isValid()) && ( this.palmVelocity && this.palmVelocity.isValid()) && ( this.sphereCenter && this.sphereCenter.isValid()) )
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Compare Hand object equality/inequality.
+     *
+     * <p>Two Hand objects are equal if and only if both Hand objects
+     * represent the exact same physical hand in the same frame
+     * and both Hand objects are valid.</p>
+     *
+     * @param other The Hand object to compare with.
+     * @return True; if equal. False otherwise.
+     *
+     */
+    public isEqualTo( other:Hand ):boolean
+    {
+        if( this.id === other.id && this.frame === other.frame && this.isValid() && other.isValid() )
+            return true;
+
+        return false;
+    }
+
+    /**
+     * The Finger object with the specified ID attached to this hand.
+     *
+     * <p>Use the <code>Hand.finger()</code> to retrieve a Finger object attached
+     * to this hand using an ID value obtained from a previous frame.
+     * This always returns a Finger object, but if no finger
+     * with the specified ID is present, an invalid Finger object is returned.</p>
+     *
+     * <p>Note that ID values persist across frames, but only until tracking of
+     * a particular object is lost. If tracking of a finger is lost and
+     * subsequently regained, the new Finger object representing that
+     * finger may have a different ID than that representing the finger in an earlier frame.</p>
+     *
+     * @param id The ID value of a Finger object from a previous frame.
+     * @return The Finger object with the matching ID if one exists for
+     * this hand in this frame; otherwise, an invalid Finger object is returned.
+     * @see Finger
+     *
+     */
+    public finger( id:number ):Finger
+    {
+        var returnValue:Finger = Finger.invalid();
+        var length:number = this.fingers.length;
+
+        for ( var i:number = 0; i < length; ++i )
         {
-        }
-
-        /**
-         * Reports whether this is a valid Hand object.
-         * @return True, if this Hand object contains valid tracking data.
-         *
-         */
-        public isValid():bool
-        {
-            var returnValue:bool = false;
-
-            if ( ( this.direction && this.direction.isValid()) && ( this.palmNormal && this.palmNormal.isValid()) && ( this.palmPosition && this.palmPosition.isValid()) && ( this.palmVelocity && this.palmVelocity.isValid()) && ( this.sphereCenter && this.sphereCenter.isValid()) )
-                returnValue = true;
-
-            return returnValue;
-        }
-
-        /**
-         * Compare Hand object equality/inequality.
-         *
-         * <p>Two Hand objects are equal if and only if both Hand objects
-         * represent the exact same physical hand in the same frame
-         * and both Hand objects are valid.</p>
-         *
-         * @param other The Hand object to compare with.
-         * @return True; if equal. False otherwise.
-         *
-         */
-        public isEqualTo( other:Hand ):bool
-        {
-            var returnValue:bool = false;
-
-            if( this.id == other.id && this.frame == other.frame && this.isValid() && other.isValid() )
-                returnValue = true;
-
-            return returnValue;
-        }
-
-        /**
-         * The Finger object with the specified ID attached to this hand.
-         *
-         * <p>Use the <code>Hand.finger()</code> to retrieve a Finger object attached
-         * to this hand using an ID value obtained from a previous frame.
-         * This always returns a Finger object, but if no finger
-         * with the specified ID is present, an invalid Finger object is returned.</p>
-         *
-         * <p>Note that ID values persist across frames, but only until tracking of
-         * a particular object is lost. If tracking of a finger is lost and
-         * subsequently regained, the new Finger object representing that
-         * finger may have a different ID than that representing the finger in an earlier frame.</p>
-         *
-         * @param id The ID value of a Finger object from a previous frame.
-         * @return The Finger object with the matching ID if one exists for
-         * this hand in this frame; otherwise, an invalid Finger object is returned.
-         * @see Finger
-         *
-         */
-        public finger( id:number ):Leap.Finger
-        {
-            var returnValue:Leap.Finger = Leap.Finger.invalid();
-            var i:number = 0;
-            var length:number = this.fingers.length;
-
-            for ( i; i < length; ++i )
+            if ( this.fingers[ i ].id === id )
             {
-                if ( this.fingers[ i ].id == id )
-                {
-                    returnValue = this.fingers[ i ];
-                    break;
-                }
+                returnValue = this.fingers[ i ];
+                break;
             }
-
-            return returnValue;
         }
 
-        /**
-         * The Tool object with the specified ID held by this hand.
-         *
-         * <p>Use the <code>Hand.tool()</code> to retrieve a Tool object held
-         * by this hand using an ID value obtained from a previous frame.
-         * This always returns a Tool object, but if no tool
-         * with the specified ID is present, an invalid Tool object is returned.</p>
-         *
-         * <p>Note that ID values persist across frames, but only until
-         * tracking of a particular object is lost. If tracking of a tool
-         * is lost and subsequently regained, the new Tool object
-         * representing that tool may have a different ID than that
-         * representing the tool in an earlier frame.</p>
-         *
-         * @param id The ID value of a Tool object from a previous frame.
-         * @return The Tool object with the matching ID if one exists for
-         * this hand in this frame; otherwise, an invalid Tool object is returned.
-         * @see Tool
-         *
-         */
-        public tool( id:number ):Leap.Tool
-        {
-            var returnValue:Leap.Tool = Leap.Tool.invalid();
-            var i:number = 0;
-            var length:number = this.fingers.length;
+        return returnValue;
+    }
 
-            for ( i; i < length; ++i )
+    /**
+     * The Tool object with the specified ID held by this hand.
+     *
+     * <p>Use the <code>Hand.tool()</code> to retrieve a Tool object held
+     * by this hand using an ID value obtained from a previous frame.
+     * This always returns a Tool object, but if no tool
+     * with the specified ID is present, an invalid Tool object is returned.</p>
+     *
+     * <p>Note that ID values persist across frames, but only until
+     * tracking of a particular object is lost. If tracking of a tool
+     * is lost and subsequently regained, the new Tool object
+     * representing that tool may have a different ID than that
+     * representing the tool in an earlier frame.</p>
+     *
+     * @param id The ID value of a Tool object from a previous frame.
+     * @return The Tool object with the matching ID if one exists for
+     * this hand in this frame; otherwise, an invalid Tool object is returned.
+     * @see Tool
+     *
+     */
+    public tool( id:number ):Tool
+    {
+        var returnValue:Tool = Tool.invalid();
+        var length:number = this.fingers.length;
+
+        for ( var i:number = 0; i < length; ++i )
+        {
+            if ( this.tools[ i ].id === id )
             {
-                if ( this.tools[ i ].id == id )
-                {
-                    returnValue = this.tools[ i ];
-                    break;
-                }
+                returnValue = this.tools[ i ];
+                break;
             }
-
-            return returnValue;
         }
 
-        /**
-         * The Pointable object with the specified ID associated with this hand.
-         *
-         * <p>Use the <code>Hand.pointable()</code> to retrieve a Pointable object
-         * associated with this hand using an ID value obtained from a previous frame.
-         * This always returns a Pointable object, but if no finger or
-         * tool with the specified ID is present, an invalid Pointable object is returned.</p>
-         *
-         * <p>Note that ID values persist across frames, but only until tracking
-         * of a particular object is lost. If tracking of a finger or tool is
-         * lost and subsequently regained, the new Pointable object representing
-         * that finger or tool may have a different ID than that representing
-         * the finger or tool in an earlier frame.</p>
-         *
-         * @param id
-         * @return
-         * @see Pointable
-         *
-         */
-        public pointable( id:number ):Leap.Pointable
-        {
-            var returnValue:Leap.Pointable = Leap.Pointable.invalid();
-            var i:number = 0;
-            var length:number = this.pointables.length;
+        return returnValue;
+    }
 
-            for ( i; i < length; ++i )
+    /**
+     * The Pointable object with the specified ID associated with this hand.
+     *
+     * <p>Use the <code>Hand.pointable()</code> to retrieve a Pointable object
+     * associated with this hand using an ID value obtained from a previous frame.
+     * This always returns a Pointable object, but if no finger or
+     * tool with the specified ID is present, an invalid Pointable object is returned.</p>
+     *
+     * <p>Note that ID values persist across frames, but only until tracking
+     * of a particular object is lost. If tracking of a finger or tool is
+     * lost and subsequently regained, the new Pointable object representing
+     * that finger or tool may have a different ID than that representing
+     * the finger or tool in an earlier frame.</p>
+     *
+     * @param id
+     * @return
+     * @see Pointable
+     *
+     */
+    public pointable( id:number ):Pointable
+    {
+        var returnValue:Pointable = Pointable.invalid();
+        var length:number = this.pointables.length;
+
+        for ( var i:number = 0; i < length; ++i )
+        {
+            if ( this.pointables[ i ].id === id )
             {
-                if ( this.pointables[ i ].id == id )
-                {
-                    returnValue = this.pointables[ i ];
-                    break;
-                }
+                returnValue = this.pointables[ i ];
+                break;
             }
-
-            return returnValue;
         }
 
-        /**
-         * The axis of rotation derived from the change in orientation
-         * of this hand, and any associated fingers and tools,
-         * between the current frame and the specified frame.
-         *
-         * <p>The returned direction vector is normalized.</p>
-         *
-         * <p>If a corresponding Hand object is not found in sinceFrame,
-         * or if either this frame or sinceFrame are invalid Frame objects,
-         * then this method returns a zero vector.</p>
-         *
-         * @param sinceFrame The starting frame for computing the relative rotation.
-         * @return A normalized direction Vector representing the heuristically
-         * determined axis of rotational change of the hand between the current
-         * frame and that specified in the sinceFrame parameter.
-         * @see Vector3
-         *
-         */
-        public rotationAxis( sinceFrame:Leap.Frame ):Leap.Vector3
-        {
-            var returnValue:Leap.Vector3;
+        return returnValue;
+    }
 
-            if ( sinceFrame.hand( this.id ) )
+    /**
+     * The axis of rotation derived from the change in orientation
+     * of this hand, and any associated fingers and tools,
+     * between the current frame and the specified frame.
+     *
+     * <p>The returned direction vector is normalized.</p>
+     *
+     * <p>If a corresponding Hand object is not found in sinceFrame,
+     * or if either this frame or sinceFrame are invalid Frame objects,
+     * then this method returns a zero vector.</p>
+     *
+     * @param sinceFrame The starting frame for computing the relative rotation.
+     * @return A normalized direction Vector representing the heuristically
+     * determined axis of rotational change of the hand between the current
+     * frame and that specified in the sinceFrame parameter.
+     * @see Vector3
+     *
+     */
+    public rotationAxis( sinceFrame:Frame ):Vector3
+    {
+        var returnValue:Vector3;
+
+        if ( sinceFrame.hand( this.id ) )
+        {
+            var vector:Vector3 = new Vector3( this.rotation.zBasis.y - sinceFrame.hand( this.id ).rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.hand( this.id ).rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.hand( this.id ).rotation.xBasis.y );
+            returnValue = vector.normalized();
+        }
+        else
+        {
+            returnValue = new Vector3( 0, 0, 0 );
+        }
+
+        return returnValue;
+    }
+
+    /**
+     * The angle of rotation around the rotation axis derived from the
+     * overall rotational motion between the current frame and the specified frame.
+     *
+     * <p>The returned angle is expressed in radians measured clockwise around
+     * the rotation axis (using the right-hand rule) between the
+     * start and end frames. The value is always between 0 and pi radians (0 and 180 degrees).</p>
+     *
+     * <p>The Leap derives frame rotation from the relative change in position
+     * and orientation of all objects detected in the field of view.</p>
+     *
+     * <p>If either this frame or sinceFrame is an invalid Frame object,
+     * then the angle of rotation is zero.</p>
+     *
+     * @param sinceFrame The starting frame for computing the relative rotation.
+     * @param axis Optional. The axis to measure rotation around.
+     * @return A positive value containing the heuristically determined rotational
+     * change between the current frame and that specified in the sinceFrame parameter.
+     *
+     */
+    public rotationAngle( sinceFrame:Frame, axis:Vector3 = null ):number
+    {
+        var returnValue:number = 0;
+        if( !axis )
+        {
+            if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).frame )
             {
-                var vector:Leap.Vector3 = new Vector3( this.rotation.zBasis.y - sinceFrame.hand( this.id ).rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.hand( this.id ).rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.hand( this.id ).rotation.xBasis.y );
-                returnValue = vector.normalized();
+                var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame.hand( this.id ).frame );
+                var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z ) * 0.5;
+                var angle:number = Math.acos( cs );
+                returnValue = isNaN( angle ) ? 0 : angle;
             }
-            else
+        }
+        else
+        {
+            if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).frame )
             {
-                returnValue = new Vector3( 0, 0, 0 );
+                var rotAxis:Vector3 = this.rotationAxis( sinceFrame.hand( this.id ).frame );
+                var rotAngle:number = this.rotationAngle( sinceFrame.hand( this.id ).frame );
+                returnValue = rotAngle * rotAxis.dot( axis.normalized() );
             }
-
-            return returnValue;
         }
+        return returnValue;
+    }
 
-        /**
-         * The angle of rotation around the rotation axis derived from the
-         * overall rotational motion between the current frame and the specified frame.
-         *
-         * <p>The returned angle is expressed in radians measured clockwise around
-         * the rotation axis (using the right-hand rule) between the
-         * start and end frames. The value is always between 0 and pi radians (0 and 180 degrees).</p>
-         *
-         * <p>The Leap derives frame rotation from the relative change in position
-         * and orientation of all objects detected in the field of view.</p>
-         *
-         * <p>If either this frame or sinceFrame is an invalid Frame object,
-         * then the angle of rotation is zero.</p>
-         *
-         * @param sinceFrame The starting frame for computing the relative rotation.
-         * @param axis Optional. The axis to measure rotation around.
-         * @return A positive value containing the heuristically determined rotational
-         * change between the current frame and that specified in the sinceFrame parameter.
-         *
-         */
-        public rotationAngle( sinceFrame:Leap.Frame, axis:Leap.Vector3 = null ):number
-        {
-            var returnValue:number = 0;
-            if( !axis )
-            {
-                if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).frame )
-                {
-                    var rotationSinceFrameMatrix:Leap.Matrix = this.rotationMatrix( sinceFrame.hand( this.id ).frame );
-                    var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z ) * 0.5;
-                    var angle:number = Math.acos( cs );
-                    returnValue = isNaN( angle ) ? 0 : angle;
-                }
-            }
-            else
-            {
-                if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).frame )
-                {
-                    var rotAxis:Leap.Vector3 = this.rotationAxis( sinceFrame.hand( this.id ).frame );
-                    var rotAngle:number = this.rotationAngle( sinceFrame.hand( this.id ).frame );
-                    returnValue = rotAngle * rotAxis.dot( axis.normalized() );
-                }
-            }
-            return returnValue;
-        }
+    /**
+     * The transform matrix expressing the rotation derived from
+     * the change in orientation of this hand, and any associated
+     * fingers and tools, between the current frame and the specified frame.
+     *
+     * <p>If a corresponding Hand object is not found in sinceFrame,
+     * or if either this frame or sinceFrame are invalid Frame objects,
+     * then this method returns an identity matrix.</p>
+     *
+     * @param sinceFrame
+     * @return A transformation Matrix representing the heuristically
+     * determined rotational change of the hand between the current
+     * frame and that specified in the sinceFrame parameter.
+     * @see Matrix
+     * @see Frame
+     *
+     */
+    public rotationMatrix( sinceFrame:Frame ):Matrix
+    {
+        var returnValue:Matrix;
 
-        /**
-         * The transform matrix expressing the rotation derived from
-         * the change in orientation of this hand, and any associated
-         * fingers and tools, between the current frame and the specified frame.
-         *
-         * <p>If a corresponding Hand object is not found in sinceFrame,
-         * or if either this frame or sinceFrame are invalid Frame objects,
-         * then this method returns an identity matrix.</p>
-         *
-         * @param sinceFrame
-         * @return A transformation Matrix representing the heuristically
-         * determined rotational change of the hand between the current
-         * frame and that specified in the sinceFrame parameter.
-         * @see Matrix
-         * @see Frame
-         *
-         */
-        public rotationMatrix( sinceFrame:Leap.Frame ):Leap.Matrix
-        {
-            var returnValue:Leap.Matrix;
+        if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).rotation )
+            returnValue = this.rotation.multiply( sinceFrame.hand( this.id ).rotation );
+        else
+            returnValue = Matrix.identity();
 
-            if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).rotation )
-                returnValue = this.rotation.multiply( sinceFrame.hand( this.id ).rotation );
-            else
-                returnValue = Leap.Matrix.identity();
+        return returnValue;
+    }
 
-            return returnValue;
-        }
+    /**
+     * The scale factor derived from this hand's motion between
+     * the current frame and the specified frame.
+     *
+     * <p>The scale factor is always positive. A value of 1.0 indicates no
+     * scaling took place. Values between 0.0 and 1.0 indicate contraction
+     * and values greater than 1.0 indicate expansion.</p>
+     *
+     * <p>The Leap derives scaling from the relative inward or outward motion
+     * of a hand and its associated fingers and tools (independent of
+     * translation and rotation).</p>
+     *
+     * <p>If a corresponding Hand object is not found in sinceFrame,
+     * or if either this frame or sinceFrame are invalid Frame objects,
+     * then this method returns 1.0.</p>
+     *
+     * @param sinceFrame The starting frame for computing the relative scaling.
+     * @return A positive value representing the heuristically determined
+     * scaling change ratio between the current frame and that specified
+     * in the sinceFrame parameter.
+     *
+     */
+    public scaleFactor( sinceFrame:Frame ):number
+    {
+        var returnValue:number;
+        if ( sinceFrame && sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).scaleFactorNumber )
+            returnValue = Math.exp( this.scaleFactorNumber - sinceFrame.hand( this.id ).scaleFactorNumber );
+        else
+            returnValue = 1;
 
-        /**
-         * The scale factor derived from this hand's motion between
-         * the current frame and the specified frame.
-         *
-         * <p>The scale factor is always positive. A value of 1.0 indicates no
-         * scaling took place. Values between 0.0 and 1.0 indicate contraction
-         * and values greater than 1.0 indicate expansion.</p>
-         *
-         * <p>The Leap derives scaling from the relative inward or outward motion
-         * of a hand and its associated fingers and tools (independent of
-         * translation and rotation).</p>
-         *
-         * <p>If a corresponding Hand object is not found in sinceFrame,
-         * or if either this frame or sinceFrame are invalid Frame objects,
-         * then this method returns 1.0.</p>
-         *
-         * @param sinceFrame The starting frame for computing the relative scaling.
-         * @return A positive value representing the heuristically determined
-         * scaling change ratio between the current frame and that specified
-         * in the sinceFrame parameter.
-         *
-         */
-        public scaleFactor( sinceFrame:Leap.Frame ):number
-        {
-            var returnValue:number;
-            if ( sinceFrame && sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).scaleFactorNumber )
-                returnValue = Math.exp( this.scaleFactorNumber - sinceFrame.hand( this.id ).scaleFactorNumber );
-            else
-                returnValue = 1;
+        return returnValue;
+    }
 
-            return returnValue;
-        }
+    /**
+     * The change of position of this hand between the current frame and the specified frame.
+     *
+     * @param sinceFrame The starting frame for computing the translation.
+     * @return A Vector representing the heuristically determined change
+     * in hand position between the current frame and that specified
+     * in the sinceFrame parameter.
+     * @see Vector3
+     *
+     */
+    public translation( sinceFrame:Frame ):Vector3
+    {
+        var returnValue:Vector3;
 
-        /**
-         * The change of position of this hand between the current frame and the specified frame.
-         *
-         * @param sinceFrame The starting frame for computing the translation.
-         * @return A Vector representing the heuristically determined change
-         * in hand position between the current frame and that specified
-         * in the sinceFrame parameter.
-         * @see Vector3
-         *
-         */
-        public translation( sinceFrame:Leap.Frame ):Leap.Vector3
-        {
-            var returnValue:Leap.Vector3;
+        if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).translationVector )
+            returnValue = new Vector3( this.translationVector.x - sinceFrame.hand( this.id ).translationVector.x, this.translationVector.y - sinceFrame.hand( this.id ).translationVector.y, this.translationVector.z - sinceFrame.hand( this.id ).translationVector.z );
+        else
+            returnValue = new Vector3( 0, 0, 0 );
 
-            if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).translationVector )
-                returnValue = new Vector3( this.translationVector.x - sinceFrame.hand( this.id ).translationVector.x, this.translationVector.y - sinceFrame.hand( this.id ).translationVector.y, this.translationVector.z - sinceFrame.hand( this.id ).translationVector.z );
-            else
-                returnValue = new Vector3( 0, 0, 0 );
+        return returnValue;
+    }
 
-            return returnValue;
-        }
-
-        /**
-         * Returns an invalid Hand object.
-         *
-         * <p>You can use the instance returned by this in comparisons
-         * testing whether a given Hand instance is valid or invalid.
-         * (You can also use the <code>Hand.isValid()</code> function.)</p>
-         *
-         * @return The invalid Hand instance.
-         *
-         */
-        static public invalid():Hand
-        {
-            return new Hand();
-        }
+    /**
+     * Returns an invalid Hand object.
+     *
+     * <p>You can use the instance returned by this in comparisons
+     * testing whether a given Hand instance is valid or invalid.
+     * (You can also use the <code>Hand.isValid()</code> function.)</p>
+     *
+     * @return The invalid Hand instance.
+     *
+     */
+    public static invalid():Hand
+    {
+        return new Hand();
     }
 }

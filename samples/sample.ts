@@ -1,4 +1,4 @@
-import Leap = module('LeapMotionTS');
+import Leap = module('../LeapMotionTS');
 var controller:Leap.Controller = new Leap.Controller();
 controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapEvent ) => {
     var frame:Leap.Frame = event.frame;

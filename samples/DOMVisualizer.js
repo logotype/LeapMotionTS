@@ -1,24 +1,19 @@
 define(["require", "exports", '../LeapMotionTS'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
-
     function moveFinger(Finger, posX, posY, posZ, dirX, dirY, dirZ) {
         Finger.style.webkitTransform = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + dirX + "deg) rotateY(0deg) rotateZ(" + dirZ + "deg)";
     }
     function moveSphere(Sphere, posX, posY, posZ, rotX, rotY, rotZ) {
         Sphere.style.webkitTransform = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + rotX + "deg) rotateY(0deg) rotateZ(0deg)";
     }
-    var fingers = {
-    };
-    var spheres = {
-    };
+    var fingers = {};
+    var spheres = {};
     var controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, function (event) {
         var frame = event.frame;
-        var fingerIds = {
-        };
-        var handIds = {
-        };
-        if(frame.hands === undefined) {
+        var fingerIds = {};
+        var handIds = {};
+        if (frame.hands === undefined) {
             var handsLength = 0;
         } else {
             var handsLength = frame.hands.length;
@@ -33,7 +28,7 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
             var rotZ = (hand.rotation.xBasis.x * 90);
             var sphere = spheres[hand.id];
             console.log(hand.rotation.yBasis);
-            if(!sphere) {
+            if (!sphere) {
                 var sphereDiv = document.getElementById("sphere").cloneNode(true);
                 sphereDiv.setAttribute('id', hand.id.toString());
                 sphereDiv.style.backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -41,17 +36,17 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
                 spheres[hand.id] = hand.id;
             } else {
                 var sphereDiv = document.getElementById(hand.id.toString());
-                if(typeof (sphereDiv) != 'undefined' && sphereDiv != null) {
+                if (typeof (sphereDiv) != 'undefined' && sphereDiv != null) {
                     moveSphere(sphereDiv, posX, posY, posZ, rotX, rotY, rotZ);
                 }
             }
             handIds[hand.id] = true;
         }
-        for(var handId in spheres) {
-            if(!handIds[handId]) {
-                var sphereDiv = document.getElementById(spheres[handId]);
+        for(var handIdSphere in spheres) {
+            if (!handIds[handIdSphere]) {
+                var sphereDiv = document.getElementById(spheres[handIdSphere]);
                 sphereDiv.parentNode.removeChild(sphereDiv);
-                delete spheres[handId];
+                delete spheres[handIdSphere];
             }
         }
         for(var pointableId = 0, pointableCount = frame.pointables.length; pointableId != pointableCount; pointableId++) {
@@ -63,7 +58,7 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
             var dirY = -(pointable.direction.z * 90);
             var dirZ = (pointable.direction.x * 90);
             var finger = fingers[pointable.id];
-            if(!finger) {
+            if (!finger) {
                 var fingerDiv = document.getElementById("finger").cloneNode(true);
                 fingerDiv.setAttribute('id', pointable.id.toString());
                 fingerDiv.style.backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -71,14 +66,14 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
                 fingers[pointable.id] = pointable.id;
             } else {
                 var fingerDiv = document.getElementById(pointable.id.toString());
-                if(typeof (fingerDiv) != 'undefined' && fingerDiv != null) {
+                if (typeof (fingerDiv) != 'undefined' && fingerDiv != null) {
                     moveFinger(fingerDiv, posX, posY, posZ, dirX, dirY, dirZ);
                 }
             }
             fingerIds[pointable.id] = true;
         }
         for(var fingerId in fingers) {
-            if(!fingerIds[fingerId]) {
+            if (!fingerIds[fingerId]) {
                 var fingerDiv = document.getElementById(fingers[fingerId]);
                 fingerDiv.parentNode.removeChild(fingerDiv);
                 delete fingers[fingerId];

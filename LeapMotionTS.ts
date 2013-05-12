@@ -1,5 +1,760 @@
+
 /**
- * The Pointable class reports the physical characteristics of a detected finger or tool.
+ * The EventDispatcher export class provides strongly typed events.
+ */
+export class EventDispatcher
+{
+    private _listeners:any[];
+
+    constructor()
+    {
+        this._listeners = [];
+    }
+
+    public hasEventListener( type:string, listener:Function ):boolean
+    {
+        var exists:boolean = false;
+        for( var i:number = 0; i < this._listeners.length; i++ )
+        {
+            if( this._listeners[ i ].type === type && this._listeners[ i ].listener === listener )
+                exists = true;
+        }
+
+        return exists;
+    }
+
+    public addEventListener ( typeStr:string, listenerFunc:Function ):void
+    {
+        if( this.hasEventListener( typeStr, listenerFunc ) )
+            return;
+
+        this._listeners.push( { type: typeStr, listener: listenerFunc } );
+    }
+
+    public removeEventListener ( typeStr:string, listenerFunc:Function ):void
+    {
+        for( var i:number = 0; i < this._listeners.length; i++ )
+        {
+            if( this._listeners[ i ].type === typeStr && this._listeners[ i ].listener === listenerFunc )
+                this._listeners.splice( i, 1 );
+        }
+    }
+
+    public dispatchEvent ( evt:LeapEvent ):void
+    {
+        for( var i:number = 0; i < this._listeners.length; i++ )
+        {
+            if( this._listeners[ i ].type === evt.getType() )
+                this._listeners[ i ].listener.call( this, evt );
+        }
+    }
+}
+export class LeapEvent
+{
+    public static LEAPMOTION_INIT:string = "leapMotionInit";
+    public static LEAPMOTION_CONNECTED:string = "leapMotionConnected";
+    public static LEAPMOTION_DISCONNECTED:string = "leapMotionDisconnected";
+    public static LEAPMOTION_EXIT:string = "leapMotionExit";
+    public static LEAPMOTION_FRAME:string = "leapMotionFrame";
+
+    private _type:string;
+    private _target:any;
+
+    public frame:Frame;
+
+    constructor( type:string, targetObj:any, frame:Frame = null )
+    {
+        this._type = type;
+        this._target = targetObj;
+        this.frame = frame;
+    }
+
+    public getTarget():any
+    {
+        return this._target;
+    }
+
+    public getType():string
+    {
+        return this._type;
+    }
+}
+
+/**
+ * LeapUtil is a collection of static utility functions.
+ *
+ */
+export class LeapUtil
+{
+    /** The constant pi as a single precision floating point number. */
+    public static PI:number = 3.1415926536;
+
+    /**
+     * The constant ratio to convert an angle measure from degrees to radians.
+     * Multiply a value in degrees by this constant to convert to radians.
+     */
+    public static DEG_TO_RAD:number = 0.0174532925;
+
+    /**
+     * The constant ratio to convert an angle measure from radians to degrees.
+     * Multiply a value in radians by this constant to convert to degrees.
+     */
+    public static RAD_TO_DEG:number = 57.295779513;
+
+    /**
+     * Pi &#42; 2.
+     */
+    public static TWO_PI:number = Math.PI + Math.PI;
+
+    /**
+     * Pi &#42; 0.5.
+     */
+    public static HALF_PI:number = Math.PI * 0.5;
+
+    /**
+     * Represents the smallest positive single value greater than zero.
+     */
+    public static EPSILON:number = 0.00001;
+
+    public LeapUtil()
+    {
+    }
+
+    /**
+     * Convert an angle measure from radians to degrees.
+     *
+     * @param radians
+     * @return The value, in degrees.
+     *
+     */
+    public static toDegrees( radians:number ):number
+    {
+        return radians * 180 / Math.PI;
+    }
+
+    /**
+     * Determines if a value is equal to or less than 0.00001.
+     *
+     * @return True, if equal to or less than 0.00001; false otherwise.
+     */
+    public static isNearZero( value:number ):boolean
+    {
+        return Math.abs( value ) <= LeapUtil.EPSILON;
+    }
+
+    /**
+     * Determines if all Vector3 components is equal to or less than 0.00001.
+     *
+     * @return True, if equal to or less than 0.00001; false otherwise.
+     */
+    public static vectorIsNearZero( inVector:Vector3 ):boolean
+    {
+        return this.isNearZero( inVector.x ) && this.isNearZero( inVector.y ) && this.isNearZero( inVector.z );
+    }
+
+    /**
+     * Create a new matrix with just the rotation block from the argument matrix
+     */
+    public static extractRotation( mtxTransform:Matrix ):Matrix
+    {
+        return new Matrix( mtxTransform.xBasis, mtxTransform.yBasis, mtxTransform.zBasis );
+    }
+
+    /**
+     * Returns a matrix representing the inverse rotation by simple transposition of the rotation block.
+     */
+    public static rotationInverse( mtxRot:Matrix ):Matrix
+    {
+        return new Matrix( new Vector3( mtxRot.xBasis.x, mtxRot.yBasis.x, mtxRot.zBasis.x ), new Vector3( mtxRot.xBasis.y, mtxRot.yBasis.y, mtxRot.zBasis.y ), new Vector3( mtxRot.xBasis.z, mtxRot.yBasis.z, mtxRot.zBasis.z ) );
+    }
+
+    /**
+     * Returns a matrix that is the orthonormal inverse of the argument matrix.
+     * This is only valid if the input matrix is orthonormal
+     * (the basis vectors are mutually perpendicular and of length 1)
+     */
+    public static rigidInverse( mtxTransform:Matrix ):Matrix
+    {
+        var rigidInverse:Matrix = this.rotationInverse( mtxTransform );
+        rigidInverse.origin = rigidInverse.transformDirection( mtxTransform.origin.opposite() );
+        return rigidInverse;
+    }
+
+    public static componentWiseMin( vLHS:Vector3, vRHS:Vector3 ):Vector3
+    {
+        return new Vector3( Math.min( vLHS.x, vRHS.x ), Math.min( vLHS.y, vRHS.y ), Math.min( vLHS.z, vRHS.z ) );
+    }
+
+    public static componentWiseMax( vLHS:Vector3, vRHS:Vector3 ):Vector3
+    {
+        return new Vector3( Math.max( vLHS.x, vRHS.x ), Math.max( vLHS.y, vRHS.y ), Math.max( vLHS.z, vRHS.z ) );
+    }
+
+    public static componentWiseScale( vLHS:Vector3, vRHS:Vector3 ):Vector3
+    {
+        return new Vector3( vLHS.x * vRHS.x, vLHS.y * vRHS.y, vLHS.z * vRHS.z );
+    }
+
+    public static componentWiseReciprocal( inVector:Vector3 ):Vector3
+    {
+        return new Vector3( 1.0 / inVector.x, 1.0 / inVector.y, 1.0 / inVector.z );
+    }
+
+    public static minComponent( inVector:Vector3 ):number
+    {
+        return Math.min( inVector.x, Math.min( inVector.y, inVector.z ) );
+    }
+
+    public static maxComponent( inVector:Vector3 ):number
+    {
+        return Math.max( inVector.x, Math.max( inVector.y, inVector.z ) );
+    }
+
+    /**
+     * Compute the polar/spherical heading of a vector direction in z/x plane
+     */
+    public static heading( inVector:Vector3 ):number
+    {
+        return Math.atan2( inVector.z, inVector.x );
+    }
+
+    /**
+     * Compute the spherical elevation of a vector direction in y above the z/x plane
+     */
+    public static elevation( inVector:Vector3 ):number
+    {
+        return Math.atan2( inVector.y, Math.sqrt( inVector.z * inVector.z + inVector.x * inVector.x ) );
+    }
+
+    /**
+     * Set magnitude to 1 and bring heading to [-Pi,Pi], elevation into [-Pi/2, Pi/2]
+     *
+     * @param vSpherical The Vector3 to convert.
+     * @return The normalized spherical Vector3.
+     *
+     */
+    public static normalizeSpherical( vSpherical:Vector3 ):Vector3
+    {
+        var fHeading:number  = vSpherical.y;
+        var fElevation:number = vSpherical.z;
+
+        while ( fElevation <= -Math.PI ) fElevation += LeapUtil.TWO_PI;
+        while ( fElevation > Math.PI ) fElevation -= LeapUtil.TWO_PI;
+
+        if ( Math.abs( fElevation ) > LeapUtil.HALF_PI )
+        {
+            fHeading += Math.PI;
+            fElevation = fElevation > 0 ? ( Math.PI - fElevation ) : -( Math.PI + fElevation );
+        }
+
+        while ( fHeading <= -Math.PI ) fHeading += LeapUtil.TWO_PI;
+        while ( fHeading > Math.PI ) fHeading -= LeapUtil.TWO_PI;
+
+        return new Vector3( 1, fHeading, fElevation );
+    }
+
+    /**
+     * Convert from Cartesian (rectangular) coordinates to spherical coordinates
+     * (magnitude, heading, elevation).
+     *
+     * @param vCartesian The Vector3 to convert.
+     * @return The cartesian Vector3 converted to spherical.
+     *
+     */
+    public static cartesianToSpherical( vCartesian:Vector3 ):Vector3
+    {
+        return new Vector3( vCartesian.magnitude(), this.heading( vCartesian ), this.elevation( vCartesian ) );
+    }
+
+    /**
+     * Convert from spherical coordinates (magnitude, heading, elevation) to
+     * Cartesian (rectangular) coordinates.
+     *
+     * @param vSpherical The Vector3 to convert.
+     * @return The spherical Vector3 converted to cartesian.
+     *
+     */
+    public static sphericalToCartesian( vSpherical:Vector3 ):Vector3
+    {
+        var fMagnitude:number    = vSpherical.x;
+        var fCosHeading:number   = Math.cos( vSpherical.y );
+        var fSinHeading:number   = Math.sin( vSpherical.y );
+        var fCosElevation:number = Math.cos( vSpherical.z );
+        var fSinElevation:number = Math.sin( vSpherical.z );
+
+        return new Vector3(  fCosHeading   * fCosElevation  * fMagnitude,
+            fSinElevation  * fMagnitude,
+            fSinHeading   * fCosElevation  * fMagnitude);
+    }
+
+    /**
+     * Clamps a value between a minimum Number and maximum Number value.
+     *
+     * @param inVal The number to clamp.
+     * @param minVal The minimum value.
+     * @param maxVal The maximum value.
+     * @return The value clamped between minVal and maxVal.
+     *
+     */
+    public static clamp( inVal:number, minVal:number, maxVal:number ):number
+    {
+        return ( inVal < minVal ) ? minVal : (( inVal > maxVal ) ? maxVal : inVal );
+    }
+
+    /**
+     * Linearly interpolates between two Numbers.
+     *
+     * @param a A number.
+     * @param b A number.
+     * @param coefficient The interpolation coefficient [0-1].
+     * @return The interpolated number.
+     *
+     */
+    public static lerp( a:number, b:number, coefficient:number ):number
+    {
+        return a + ( ( b - a ) * coefficient );
+    }
+
+    /**
+     * Linearly interpolates between two Vector3 objects.
+     *
+     * @param vec1 A Vector3 object.
+     * @param vec2 A Vector3 object.
+     * @param coefficient The interpolation coefficient [0-1].
+     * @return A new interpolated Vector3 object.
+     *
+     */
+    public static lerpVector( vec1:Vector3, vec2:Vector3, coefficient:number ):Vector3
+    {
+        return vec1.plus( vec2.minus( vec1 ).multiply( coefficient ) );
+    }
+}
+
+
+
+
+
+
+/**
+ * The Controller export class is your main interface to the Leap Motion Controller.
+ *
+ * <p>Create an instance of this Controller export class to access frames of tracking
+ * data and configuration information. Frame data can be polled at any time using
+ * the <code>Controller::frame()</code> . Call <code>frame()</code> or <code>frame(0)</code>
+ * to get the most recent frame. Set the history parameter to a positive integer
+ * to access previous frames. A controller stores up to 60 frames in its frame history.</p>
+ *
+ * <p>Polling is an appropriate strategy for applications which already have an
+ * intrinsic update loop, such as a game. You can also implement the Leap::Listener
+ * interface to handle events as they occur. The Leap dispatches events to the listener
+ * upon initialization and exiting, on connection changes, and when a new frame
+ * of tracking data is available. When these events occur, the controller object
+ * invokes the appropriate callback defined in the Listener interface.</p>
+ *
+ * <p>To access frames of tracking data as they become available:</p>
+ *
+ * <ul>
+ * <li>Implement the Listener interface and override the <code>Listener::onFrame()</code> .</li>
+ * <li>In your <code>Listener::onFrame()</code> , call the <code>Controller::frame()</code> to access the newest frame of tracking data.</li>
+ * <li>To start receiving frames, create a Controller object and add event listeners to the <code>Controller::addEventListener()</code> .</li>
+ * </ul>
+ *
+ * <p>When an instance of a Controller object has been initialized,
+ * it calls the <code>Listener::onInit()</code> when the listener is ready for use.
+ * When a connection is established between the controller and the Leap,
+ * the controller calls the <code>Listener::onConnect()</code> . At this point,
+ * your application will start receiving frames of data. The controller calls
+ * the <code>Listener::onFrame()</code> each time a new frame is available.
+ * If the controller loses its connection with the Leap software or
+ * device for any reason, it calls the <code>Listener::onDisconnect()</code> .
+ * If the listener is removed from the controller or the controller is destroyed,
+ * it calls the <code>Listener::onExit()</code> . At that point, unless the listener
+ * is added to another controller again, it will no longer receive frames of tracking data.</p>
+ *
+ * @author logotype
+ *
+ */
+export class Controller extends EventDispatcher
+{
+    /**
+     * The default policy.
+     *
+     * <p>Currently, the only supported policy is the background frames policy,
+     * which determines whether your application receives frames of tracking
+     * data when it is not the focused, foreground application.</p>
+     */
+    public static POLICY_DEFAULT:number = 0;
+
+    /**
+     * Receive background frames.
+     *
+     * <p>Currently, the only supported policy is the background frames policy,
+     * which determines whether your application receives frames of tracking
+     * data when it is not the focused, foreground application.</p>
+     */
+    public static POLICY_BACKGROUND_FRAMES:number = (1 << 0);
+
+    /**
+     * History of frame of tracking data from the Leap.
+     */
+    public frameHistory:Frame[] = [];
+
+    /**
+     * Most recent received Frame.
+     */
+    private latestFrame:Frame;
+
+    /**
+     * Socket connection.
+     */
+    public connection:WebSocket;
+
+    /**
+     * Finds a Hand object by ID.
+     *
+     * @param frame The Frame object in which the Hand contains
+     * @param id The ID of the Hand object
+     * @return The Hand object if found, otherwise null
+     *
+     */
+    private static getHandByID( frame:Frame, id:number ):Hand
+    {
+        var returnValue:Hand = null;
+        var i:number = 0;
+
+        for( i = 0; i < frame.hands.length; ++i )
+        {
+            if ( (<Hand>frame.hands[ i ]).id === id )
+            {
+                returnValue = (<Hand>frame.hands[ i ]);
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    /**
+     * Constructs a Controller object.
+     * @param host IP or hostname of the computer running the Leap software.
+     * (currently only supported for socket connections).
+     *
+     */
+        constructor( host:string = null )
+    {
+        super();
+
+        if( !host )
+        {
+            this.connection = new WebSocket("ws://localhost:6437");
+        }
+        else
+        {
+            this.connection = new WebSocket("ws://" + host + ":6437");
+        }
+
+        this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
+
+        this.connection.onopen = ( event:Event ) =>
+        {
+            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
+        };
+
+        this.connection.onclose = ( data:Object ) =>
+        {
+            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, this));
+        };
+
+        this.connection.onmessage = ( data:Object ) =>
+        {
+            var i:number;
+            var json:Object;
+            var currentFrame:Frame;
+            var hand:Hand;
+            var pointable:Pointable;
+            var gesture:Gesture;
+            var isTool:boolean;
+            var length:number;
+            var type:number;
+
+            json = JSON.parse( data["data"] );
+
+            // Ignore all other data than Frames
+            if( (typeof json["timestamp"] === "undefined") )
+            {
+                return;
+            }
+
+            currentFrame = new Frame();
+            currentFrame.controller = this;
+
+            // Hands
+            if ( !(typeof json["hands"] === "undefined") )
+            {
+                i = 0;
+                length = json["hands"].length;
+                for ( i = 0; i < length; ++i )
+                {
+                    hand = new Hand();
+                    hand.frame = currentFrame;
+                    hand.direction = new Vector3( json["hands"][ i ].direction[ 0 ], json["hands"][ i ].direction[ 1 ], json["hands"][ i ].direction[ 2 ] );
+                    hand.id = json["hands"][ i ].id;
+                    hand.palmNormal = new Vector3( json["hands"][ i ].palmNormal[ 0 ], json["hands"][ i ].palmNormal[ 1 ], json["hands"][ i ].palmNormal[ 2 ] );
+                    hand.palmPosition = new Vector3( json["hands"][ i ].palmPosition[ 0 ], json["hands"][ i ].palmPosition[ 1 ], json["hands"][ i ].palmPosition[ 2 ] );
+                    hand.palmVelocity = new Vector3( json["hands"][ i ].palmPosition[ 0 ], json["hands"][ i ].palmPosition[ 1 ], json["hands"][ i ].palmPosition[ 2 ] );
+                    hand.rotation = new Matrix( new Vector3( json["hands"][ i ]["r"][ 0 ][ 0 ], json["hands"][ i ]["r"][ 0 ][ 1 ], json["hands"][ i ]["r"][ 0 ][ 2 ] ), new Vector3( json["hands"][ i ]["r"][ 1 ][ 0 ], json["hands"][ i ]["r"][ 1 ][ 1 ], json["hands"][ i ]["r"][ 1 ][ 2 ] ), new Vector3( json["hands"][ i ]["r"][ 2 ][ 0 ], json["hands"][ i ]["r"][ 2 ][ 1 ], json["hands"][ i ]["r"][ 2 ][ 2 ] ) );
+                    hand.scaleFactorNumber = json["hands"][ i ]["s"];
+                    hand.sphereCenter = new Vector3( json["hands"][ i ].sphereCenter[ 0 ], json["hands"][ i ].sphereCenter[ 1 ], json["hands"][ i ].sphereCenter[ 2 ] );
+                    hand.sphereRadius = json["hands"][ i ].sphereRadius;
+                    hand.translationVector = new Vector3( json["hands"][ i ]["t"][ 0 ], json["hands"][ i ]["t"][ 1 ], json["hands"][ i ]["t"][ 2 ] );
+                    currentFrame.hands.push( hand );
+                }
+            }
+
+            // ID
+            currentFrame.id = json["id"];
+
+            // Pointables
+            if ( !(typeof json["pointables"] === "undefined") )
+            {
+                i = 0;
+                length = json["pointables"].length;
+                for ( i = 0; i < length; ++i )
+                {
+                    isTool = json["pointables"][ i ].tool;
+                    if ( isTool )
+                        pointable = new Tool();
+                    else
+                        pointable = new Finger();
+
+                    pointable.frame = currentFrame;
+                    pointable.id = json["pointables"][ i ].id;
+                    pointable.hand = Controller.getHandByID( currentFrame, json["pointables"][ i ]["handId"] );
+                    pointable.length = json["pointables"][ i ].length;
+                    pointable.direction = new Vector3( json["pointables"][ i ].direction[ 0 ], json["pointables"][ i ].direction[ 1 ], json["pointables"][ i ].direction[ 2 ] );
+                    pointable.tipPosition = new Vector3( json["pointables"][ i ].tipPosition[ 0 ], json["pointables"][ i ].tipPosition[ 1 ], json["pointables"][ i ].tipPosition[ 2 ] );
+                    pointable.tipVelocity = new Vector3( json["pointables"][ i ].tipVelocity[ 0 ], json["pointables"][ i ].tipVelocity[ 1 ], json["pointables"][ i ].tipVelocity[ 2 ] );
+                    currentFrame.pointables.push( pointable );
+
+                    if ( pointable.hand )
+                        pointable.hand.pointables.push( pointable );
+
+                    if ( isTool )
+                    {
+                        pointable.isTool = true;
+                        pointable.isFinger = false;
+                        pointable.width = json["pointables"][ i ].width;
+                        currentFrame.tools.push( <Tool>pointable );
+                        if ( pointable.hand )
+                            pointable.hand.tools.push( <Tool>pointable );
+                    }
+                    else
+                    {
+                        pointable.isTool = false;
+                        pointable.isFinger = true;
+                        currentFrame.fingers.push( <Finger>pointable );
+                        if ( pointable.hand )
+                            pointable.hand.fingers.push( <Finger>pointable );
+                    }
+                }
+            }
+
+            // Gestures
+            if ( !(typeof json["gestures"] === "undefined") )
+            {
+                i = 0;
+                length = json["gestures"].length;
+                for ( i = 0; i < length; ++i )
+                {
+                    switch( json["gestures"][ i ].type )
+                    {
+                        case "circle":
+                            gesture = new CircleGesture();
+                            type = Gesture.TYPE_CIRCLE;
+                            var circle:CircleGesture = <CircleGesture>gesture;
+
+                            circle.center = new Vector3( json["gestures"][ i ].center[ 0 ], json["gestures"][ i ].center[ 1 ], json["gestures"][ i ].center[ 2 ] );
+                            circle.normal = new Vector3( json["gestures"][ i ].normal[ 0 ], json["gestures"][ i ].normal[ 1 ], json["gestures"][ i ].normal[ 2 ] );
+                            circle.progress = json["gestures"][ i ].progress;
+                            circle.radius = json["gestures"][ i ].radius;
+                            break;
+
+                        case "swipe":
+                            gesture = new SwipeGesture();
+                            type = Gesture.TYPE_SWIPE;
+
+                            var swipe:SwipeGesture = <SwipeGesture>gesture;
+
+                            swipe.startPosition = new Vector3( json["gestures"][ i ].startPosition[ 0 ], json["gestures"][ i ].startPosition[ 1 ], json["gestures"][ i ].startPosition[ 2 ] );
+                            swipe.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
+                            swipe.direction = new Vector3( json["gestures"][ i ].direction[ 0 ], json["gestures"][ i ].direction[ 1 ], json["gestures"][ i ].direction[ 2 ] );
+                            swipe.speed = json["gestures"][ i ].speed;
+                            break;
+
+                        case "screenTap":
+                            gesture = new ScreenTapGesture();
+                            type = Gesture.TYPE_SCREEN_TAP;
+
+                            var screenTap:ScreenTapGesture = <ScreenTapGesture>gesture;
+                            screenTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
+                            screenTap.direction = new Vector3( json["gestures"][ i ].direction[ 0 ], json["gestures"][ i ].direction[ 1 ], json["gestures"][ i ].direction[ 2 ] );
+                            screenTap.progress = json["gestures"][ i ].progress;
+                            break;
+
+                        case "keyTap":
+                            gesture = new KeyTapGesture();
+                            type = Gesture.TYPE_KEY_TAP;
+
+                            var keyTap:KeyTapGesture = <KeyTapGesture>gesture;
+                            keyTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
+                            keyTap.direction = new Vector3( json["gestures"][ i ].direction[ 0 ], json["gestures"][ i ].direction[ 1 ], json["gestures"][ i ].direction[ 2 ] );
+                            keyTap.progress = json["gestures"][ i ].progress;
+                            break;
+
+                        default:
+                            throw new Error( "unkown gesture type" );
+                    }
+
+                    var j:number = 0;
+                    var lengthInner:number = 0;
+
+                    if( !(typeof json["gestures"][ i ]["handIds"] === "undefined") )
+                    {
+                        j = 0;
+                        lengthInner = json["gestures"][ i ]["handIds"].length;
+                        for( j = 0; j < lengthInner; ++j )
+                        {
+                            var gestureHand:Hand = Controller.getHandByID( currentFrame, json["gestures"][ i ]["handIds"][ j ] );
+                            gesture.hands.push( gestureHand );
+                        }
+                    }
+
+                    if( !(typeof json["gestures"][ i ]["pointableIds"] === "undefined") )
+                    {
+                        j = 0;
+                        lengthInner = json["gestures"][ i ]["pointableIds"].length;
+                        for( j = 0; j < lengthInner; ++j )
+                        {
+                            var gesturePointable:Pointable = Controller.getPointableByID( currentFrame, json["gestures"][ i ]["pointableIds"][ j ] );
+                            if( gesturePointable )
+                            {
+                                gesture.pointables.push( gesturePointable );
+                            }
+                        }
+                        if( gesture instanceof CircleGesture && gesture.pointables.length > 0 )
+                        {
+                            (<CircleGesture>gesture).pointable = gesture.pointables[ 0 ];
+                        }
+                    }
+
+                    gesture.frame = currentFrame;
+                    gesture.id = json["gestures"][ i ].id;
+                    gesture.duration = json["gestures"][ i ].duration;
+                    gesture.durationSeconds = gesture.duration / 1000000;
+
+                    switch( json["gestures"][ i ].state )
+                    {
+                        case "start":
+                            gesture.state = Gesture.STATE_START;
+                            break;
+                        case "update":
+                            gesture.state = Gesture.STATE_UPDATE;
+                            break;
+                        case "stop":
+                            gesture.state = Gesture.STATE_STOP;
+                            break;
+                        default:
+                            gesture.state = Gesture.STATE_INVALID;
+                    }
+
+                    gesture.type = type;
+
+                    currentFrame._gestures.push( gesture );
+                }
+            }
+
+            // Rotation (since last frame), interpolate for smoother motion
+            if ( json["r"] )
+                currentFrame.rotation = new Matrix( new Vector3( json["r"][ 0 ][ 0 ], json["r"][ 0 ][ 1 ], json["r"][ 0 ][ 2 ] ), new Vector3( json["r"][ 1 ][ 0 ], json["r"][ 1 ][ 1 ], json["r"][ 1 ][ 2 ] ), new Vector3( json["r"][ 2 ][ 0 ], json["r"][ 2 ][ 1 ], json["r"][ 2 ][ 2 ] ) );
+
+            // Scale factor (since last frame), interpolate for smoother motion
+            currentFrame.scaleFactorNumber = json["s"];
+
+            // Translation (since last frame), interpolate for smoother motion
+            if ( json["t"] )
+                currentFrame.translationVector = new Vector3( json["t"][ 0 ], json["t"][ 1 ], json["t"][ 2 ] );
+
+            // Timestamp
+            currentFrame.timestamp = json["timestamp"];
+
+            // Add frame to history
+            if ( this.frameHistory.length > 59 )
+                this.frameHistory.splice( 59, 1 );
+
+            this.frameHistory.unshift( this.latestFrame );
+            this.latestFrame = currentFrame;
+
+            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this.latestFrame.controller, this.latestFrame));
+            //controller.leapmotion::listener.onFrame( controller, latestFrame );
+        };
+    }
+
+    /**
+     * Finds a Pointable object by ID.
+     *
+     * @param frame The Frame object in which the Pointable contains
+     * @param id The ID of the Pointable object
+     * @return The Pointable object if found, otherwise null
+     *
+     */
+    private static getPointableByID( frame:Frame, id:number ):Pointable
+    {
+        var returnValue:Pointable = null;
+        var i:number = 0;
+
+        for( i = 0; i < frame.pointables.length; ++i )
+        {
+            if ( (<Pointable>frame.pointables[ i ]).id === id )
+            {
+                returnValue = (<Pointable>frame.pointables[ i ]);
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    /**
+     * Returns a frame of tracking data from the Leap.
+     *
+     * <p>Use the optional history parameter to specify which frame to retrieve.
+     * Call <code>frame()</code> or <code>frame(0)</code> to access the most recent frame;
+     * call <code>frame(1)</code> to access the previous frame, and so on. If you use a history value
+     * greater than the number of stored frames, then the controller returns
+     * an invalid frame.</p>
+     *
+     * @param history The age of the frame to return, counting backwards from
+     * the most recent frame (0) into the past and up to the maximum age (59).
+     *
+     * @return The specified frame; or, if no history parameter is specified,
+     * the newest frame. If a frame is not available at the specified
+     * history position, an invalid Frame is returned.
+     *
+     */
+    public frame( history:number = 0 ):Frame
+    {
+        var returnValue:Frame;
+
+        if ( history >= this.frameHistory.length )
+            returnValue = Frame.invalid();
+        else
+            returnValue = this.frameHistory[ history ];
+
+        return returnValue;
+    }
+}
+
+
+/**
+ * The Pointable export class reports the physical characteristics of a detected finger or tool.
  * Both fingers and tools are classified as Pointable objects. Use the Pointable.isFinger
  * property to determine whether a Pointable object represents a finger. Use the
  * Pointable.isTool property to determine whether a Pointable object represents a tool.
@@ -88,12 +843,12 @@ export class Pointable
     /**
      * Whether or not the Pointable is believed to be a finger.
      */
-    public isFinger:bool;
+    public isFinger:boolean;
 
     /**
      * Whether or not the Pointable is believed to be a tool.
      */
-    public isTool:bool;
+    public isTool:boolean;
 
     constructor()
     {
@@ -106,9 +861,9 @@ export class Pointable
      * Reports whether this is a valid Pointable object.
      * @return True if <code>direction</code>, <code>tipPosition</code> and <code>tipVelocity</code> are true.
      */
-    public isValid():bool
+    public isValid():boolean
     {
-        var returnValue:bool = false;
+        var returnValue:boolean = false;
 
         if ( ( this.direction && this.direction.isValid()) && ( this.tipPosition && this.tipPosition.isValid()) && ( this.tipVelocity && this.tipVelocity.isValid()) )
             returnValue = true;
@@ -127,41 +882,39 @@ export class Pointable
      * @return True; if equal, False otherwise.
      *
      */
-    public isEqualTo( other:Pointable ):bool
+    public isEqualTo( other:Pointable ):boolean
     {
-        var returnValue:bool = true;
-
         if ( !this.isValid() || !other.isValid() )
-            returnValue = false;
+            return false;
 
-        if ( returnValue && this.frame != other.frame )
-            returnValue = false;
+        if ( this.frame != other.frame )
+            return false;
 
-        if ( returnValue && this.hand != other.hand )
-            returnValue = false;
+        if ( this.hand != other.hand )
+            return false;
 
-        if ( returnValue && !this.direction.isEqualTo( other.direction ) )
-            returnValue = false;
+        if ( !this.direction.isEqualTo( other.direction ) )
+            return false;
 
-        if ( returnValue && this.length != other.length )
-            returnValue = false;
+        if ( this.length != other.length )
+            return false;
 
-        if ( returnValue && this.width != other.width )
-            returnValue = false;
+        if ( this.width != other.width )
+            return false;
 
-        if ( returnValue && this.id != other.id )
-            returnValue = false;
+        if ( this.id != other.id )
+            return false;
 
-        if ( returnValue && !this.tipPosition.isEqualTo( other.tipPosition ) )
-            returnValue = false;
+        if ( !this.tipPosition.isEqualTo( other.tipPosition ) )
+            return false;
 
-        if ( returnValue && !this.tipVelocity.isEqualTo( other.tipVelocity ) )
-            returnValue = false;
+        if ( !this.tipVelocity.isEqualTo( other.tipVelocity ) )
+            return false;
 
         if ( this.isFinger != other.isFinger || this.isTool != other.isTool )
-            returnValue = false;
+            return false;
 
-        return returnValue;
+        return true;
     }
 
     /**
@@ -175,7 +928,7 @@ export class Pointable
      * @return The invalid Pointable instance.
      *
      */
-    static public invalid():Pointable
+    public static invalid():Pointable
     {
         return new Pointable();
     }
@@ -189,8 +942,314 @@ export class Pointable
     }
 }
 
+
 /**
- * The Finger class represents a tracked finger.
+ * The Gesture export class represents a recognized movement by the user.
+ *
+ * <p>The Leap watches the activity within its field of view for certain movement
+ * patterns typical of a user gesture or command. For example, a movement from
+ * side to side with the hand can indicate a swipe gesture, while a finger poking
+ * forward can indicate a screen tap gesture.</p>
+ *
+ * <p>When the Leap recognizes a gesture, it assigns an ID and adds a Gesture object
+ * to the frame gesture list. For continuous gestures, which occur over many frames,
+ * the Leap updates the gesture by adding a Gesture object having the same ID and
+ * updated properties in each subsequent frame.</p>
+ *
+ * <p><strong>Important: Recognition for each type of gesture must be enabled using the
+ * <code>Controller.enableGesture()</code> function; otherwise no gestures are recognized
+ * or reported.</strong></p>
+ *
+ * <p>Subclasses of Gesture define the properties for the specific movement
+ * patterns recognized by the Leap.</p>
+ *
+ * <p>The Gesture subclasses for include:
+ * <pre>
+ * CircleGesture – A circular movement by a finger.
+ * SwipeGesture – A straight line movement by the hand with fingers extended.
+ * ScreenTapGesture – A forward tapping movement by a finger.
+ * KeyTapGesture – A downward tapping movement by a finger.
+ * </pre>
+ * </p>
+ *
+ * <p>Circle and swipe gestures are continuous and these objects can have a state
+ * of start, update, and stop.</p>
+ *
+ * <p>The screen tap gesture is a discrete gesture. The Leap only creates a single
+ * ScreenTapGesture object appears for each tap and it always has a stop state.</p>
+ *
+ * <p>Get valid Gesture instances from a Frame object. You can get a list of gestures
+ * with the <code>Frame.gestures()</code> method. You can get a list of gestures since a specified
+ * frame with the <code>Frame.gestures(frame)</code> methods. You can also use the <code>Frame.gesture()</code>
+ * method to find a gesture in the current frame using an ID value obtained
+ * in a previous frame.</p>
+ *
+ * <p>Gesture objects can be invalid. For example, when you get a gesture by ID using
+ * <code>Frame.gesture()</code>, and there is no gesture with that ID in the current frame, then
+ * <code>gesture()</code> returns an Invalid Gesture object (rather than a null value).
+ * Always check object validity in situations where a gesture might be invalid.</p>
+ *
+ * <p>The following keys can be used with the Config export class to configure the gesture recognizer:</p>
+ *
+ * <table class="innertable">
+ *   <tr>
+ *    <th>Key string</th>
+ *    <th>Value type</th>
+ *    <th>Default value</th>
+ *    <th>Units</th>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.Circle.MinRadius</td>
+ *    <td>float</td>
+ *    <td>5.0</td>
+ *    <td>mm</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.Circle.MinArc</td>
+ *    <td>float</td>
+ *    <td>1.5&#42;pi</td>
+ *    <td>radians</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.Swipe.MinLength</td>
+ *    <td>float</td>
+ *    <td>150</td>
+ *    <td>mm</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.Swipe.MinVelocity</td>
+ *    <td>float</td>
+ *    <td>1000</td>
+ *    <td>mm/s</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.KeyTap.MinDownVelocity</td>
+ *    <td>float</td>
+ *    <td>50</td>
+ *    <td>mm/s</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.KeyTap.HistorySeconds</td>
+ *    <td>float</td>
+ *    <td>0.1</td>
+ *    <td>s</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.KeyTap.MinDistance</td>
+ *    <td>float</td>
+ *    <td>5.0</td>
+ *    <td>mm</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.ScreenTap.MinForwardVelocity</td>
+ *    <td>float</td>
+ *    <td>50</td>
+ *    <td>mm/s</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.ScreenTap.HistorySeconds</td>
+ *    <td>float</td>
+ *    <td>0.1</td>
+ *    <td>s</td>
+ *  </tr>
+ *   <tr>
+ *    <td>Gesture.ScreenTap.MinDistance</td>
+ *    <td>float</td>
+ *    <td>3.0</td>
+ *    <td>mm</td>
+ *  </tr>
+ * </table>
+ *
+ * @author logotype
+ * @see CircleGesture
+ * @see SwipeGesture
+ * @see ScreenTapGesture
+ * @see KeyTapGesture
+ * @see Config
+ *
+ */
+export class Gesture
+{
+    /**
+     * An invalid state.
+     */
+    public static STATE_INVALID:number = 0;
+
+    /**
+     * The gesture is starting.<br/>
+     * Just enough has happened to recognize it.
+     */
+    public static STATE_START:number = 1;
+
+    /**
+     * The gesture is in progress.<br/>
+     * (Note: not all gestures have updates).
+     */
+    public static STATE_UPDATE:number = 2;
+
+    /**
+     * The gesture has completed or stopped.
+     */
+    public static STATE_STOP:number = 3;
+
+    /**
+     * An invalid type.
+     */
+    public static TYPE_INVALID:number = 4;
+
+    /**
+     * A straight line movement by the hand with fingers extended.
+     */
+    public static TYPE_SWIPE:number = 5;
+
+    /**
+     * A circular movement by a finger.
+     */
+    public static TYPE_CIRCLE:number = 6;
+
+    /**
+     * A forward tapping movement by a finger.
+     */
+    public static TYPE_SCREEN_TAP:number = 7;
+
+    /**
+     * A downward tapping movement by a finger.
+     */
+    public static TYPE_KEY_TAP:number = 8;
+
+    /**
+     * The elapsed duration of the recognized movement up to the frame
+     * containing this Gesture object, in microseconds.
+     *
+     * <p>The duration reported for the first Gesture in the sequence (with
+     * the <code>STATE_START</code> state) will typically be a small positive number
+     * since the movement must progress far enough for the Leap to recognize
+     * it as an intentional gesture.</p>
+     */
+    public duration:number;
+
+    /**
+     * The elapsed duration in seconds.
+     */
+    public durationSeconds:Number;
+
+    /**
+     * The Frame containing this Gesture instance.
+     */
+    public frame:Frame;
+
+    /**
+     * The list of hands associated with this Gesture, if any.
+     *
+     * <p>If no hands are related to this gesture, the list is empty.</p>
+     */
+    public hands:Hand[] = [];
+
+    /**
+     * The gesture ID.
+     *
+     * <p>All Gesture objects belonging to the same recognized movement share
+     * the same ID value. Use the ID value with the Frame.gesture() method
+     * to find updates related to this Gesture object in subsequent frames.</p>
+     */
+    public id:number;
+
+    /**
+     * The list of fingers and tools associated with this Gesture, if any.
+     *
+     * <p>If no Pointable objects are related to this gesture, the list is empty.</p>
+     */
+    public pointables:Pointable[] = [];
+
+    /**
+     * The gesture state.
+     *
+     * <p>Recognized movements occur over time and have a beginning, a middle,
+     * and an end. The <code>state</code> attribute reports where in that sequence
+     * this Gesture object falls.</p>
+     */
+    public state:number;
+
+    /**
+     * The gesture type.
+     */
+    public type:number;
+
+    /**
+     * Constructs a new Gesture object.
+     *
+     * <p>An uninitialized Gesture object is considered invalid. Get valid
+     * instances of the Gesture class, which will be one of the Gesture
+     * subclasses, from a Frame object.</p>
+     *
+     */
+        constructor()
+    {
+    }
+
+    /**
+     * Compare Gesture object equality/inequality.
+     *
+     * <p>Two Gestures are equal if they represent the same snapshot of
+     * the same recognized movement.</p>
+     *
+     * @param other The Gesture to compare with.
+     * @return True; if equal, False otherwise.
+     *
+     */
+    public isEqualTo( other:Gesture ):boolean
+    {
+        return (this.id == other.id);
+    }
+
+    /**
+     * Reports whether this Gesture instance represents a valid Gesture.
+     *
+     * <p>An invalid Gesture object does not represent a snapshot of a recognized
+     * movement. Invalid Gesture objects are returned when a valid object
+     * cannot be provided. For example, when you get an gesture by ID using
+     * Frame.gesture(), and there is no gesture with that ID in the current
+     * frame, then gesture() returns an Invalid Gesture object (rather than
+     * a null value). Always check object validity in situations where an
+     * gesture might be invalid.</p>
+     *
+     * @return True, if this is a valid Gesture instance; false, otherwise.
+     *
+     */
+    public isValid():boolean
+    {
+        if( !this.durationSeconds )
+            return false;
+
+        return true;
+    }
+
+    /**
+     * Returns an invalid Gesture object.
+     *
+     * <p>You can use the instance returned by this in comparisons
+     * testing whether a given Gesture instance is valid or invalid.
+     * (You can also use the <code>Gesture.isValid()</code> function.)</p>
+     *
+     * @return The invalid Gesture instance.
+     *
+     */
+    public static invalid():Gesture
+    {
+        return new Gesture();
+    }
+
+    /**
+     * A string containing a brief, human-readable description of this Gesture.
+     *
+     */
+    public toString():string
+    {
+        return "[Gesture id:" + this.id + " duration:" + this.duration + " type:" + this.type + "]";
+    }
+}
+/**
+ * The Finger export class represents a tracked finger.
  *
  * <p>Fingers are Pointable objects that the Leap has classified as a finger.
  * Get valid Finger objects from a Frame or a Hand object.</p>
@@ -233,14 +1292,13 @@ export class Finger extends Pointable
      * @return The invalid Finger instance.
      *
      */
-    static public invalid():Finger
+    public static invalid():Finger
     {
         return new Finger();
     }
 }
-
 /**
- * The Tool class represents a tracked tool.
+ * The Tool export class represents a tracked tool.
  *
  * <p>Tools are Pointable objects that the Leap has classified as a tool.
  * Tools are longer, thinner, and straighter than a typical finger.
@@ -277,14 +1335,18 @@ export class Tool extends Pointable
      * @return The invalid Tool instance.
      *
      */
-    static public invalid():Tool
+    public static invalid():Tool
     {
         return new Tool();
     }
 }
 
+
+
+
+
 /**
- * The Hand class reports the physical characteristics of a detected hand.
+ * The Hand export class reports the physical characteristics of a detected hand.
  *
  * <p>Hand tracking data includes a palm position and velocity; vectors for
  * the palm normal and direction to the fingers; properties of a sphere fit
@@ -414,14 +1476,12 @@ export class Hand
      * @return True, if this Hand object contains valid tracking data.
      *
      */
-    public isValid():bool
+    public isValid():boolean
     {
-        var returnValue:bool = false;
-
         if ( ( this.direction && this.direction.isValid()) && ( this.palmNormal && this.palmNormal.isValid()) && ( this.palmPosition && this.palmPosition.isValid()) && ( this.palmVelocity && this.palmVelocity.isValid()) && ( this.sphereCenter && this.sphereCenter.isValid()) )
-            returnValue = true;
+            return true;
 
-        return returnValue;
+        return false;
     }
 
     /**
@@ -435,14 +1495,12 @@ export class Hand
      * @return True; if equal. False otherwise.
      *
      */
-    public isEqualTo( other:Hand ):bool
+    public isEqualTo( other:Hand ):boolean
     {
-        var returnValue:bool = false;
+        if( this.id === other.id && this.frame === other.frame && this.isValid() && other.isValid() )
+            return true;
 
-        if( this.id == other.id && this.frame == other.frame && this.isValid() && other.isValid() )
-            returnValue = true;
-
-        return returnValue;
+        return false;
     }
 
     /**
@@ -467,12 +1525,11 @@ export class Hand
     public finger( id:number ):Finger
     {
         var returnValue:Finger = Finger.invalid();
-        var i:number = 0;
         var length:number = this.fingers.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.fingers[ i ].id == id )
+            if ( this.fingers[ i ].id === id )
             {
                 returnValue = this.fingers[ i ];
                 break;
@@ -505,12 +1562,11 @@ export class Hand
     public tool( id:number ):Tool
     {
         var returnValue:Tool = Tool.invalid();
-        var i:number = 0;
         var length:number = this.fingers.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.tools[ i ].id == id )
+            if ( this.tools[ i ].id === id )
             {
                 returnValue = this.tools[ i ];
                 break;
@@ -542,12 +1598,11 @@ export class Hand
     public pointable( id:number ):Pointable
     {
         var returnValue:Pointable = Pointable.invalid();
-        var i:number = 0;
         var length:number = this.pointables.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.pointables[ i ].id == id )
+            if ( this.pointables[ i ].id === id )
             {
                 returnValue = this.pointables[ i ];
                 break;
@@ -731,14 +1786,20 @@ export class Hand
      * @return The invalid Hand instance.
      *
      */
-    static public invalid():Hand
+    public static invalid():Hand
     {
         return new Hand();
     }
 }
 
+
+
+
+
+
+
 /**
- * The Frame class represents a set of hand and finger tracking
+ * The Frame export class represents a set of hand and finger tracking
  * data detected in a single frame.
  *
  * <p>The Leap detects hands, fingers and tools within the tracking area,
@@ -862,13 +1923,11 @@ export class Frame
     public hand( id:number ):Hand
     {
         var returnValue:Hand = Hand.invalid();
-
-        var i:number = 0;
         var length:number = this.hands.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.hands[ i ].id == id )
+            if ( this.hands[ i ].id === id )
             {
                 returnValue = this.hands[ i ];
                 break;
@@ -902,12 +1961,11 @@ export class Frame
     public finger( id:number ):Finger
     {
         var returnValue:Finger = Finger.invalid();
-        var i:number = 0;
         var length:number = this.fingers.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.fingers[ i ].id == id )
+            if ( this.fingers[ i ].id === id )
             {
                 returnValue = this.fingers[ i ];
                 break;
@@ -941,12 +1999,11 @@ export class Frame
     public tool( id:number ):Tool
     {
         var returnValue:Tool = Tool.invalid();
-        var i:number = 0;
         var length:number = this.fingers.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.tools[ i ].id == id )
+            if ( this.tools[ i ].id === id )
             {
                 returnValue = this.tools[ i ];
                 break;
@@ -979,12 +2036,11 @@ export class Frame
     public pointable( id:number ):Pointable
     {
         var returnValue:Pointable = Pointable.invalid();
-        var i:number = 0;
         var length:number = this.pointables.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this.pointables[ i ].id == id )
+            if ( this.pointables[ i ].id === id )
             {
                 returnValue = this.pointables[ i ];
                 break;
@@ -1012,12 +2068,11 @@ export class Frame
     public gesture( id:number ):Gesture
     {
         var returnValue:Gesture = Gesture.invalid();
-        var i:number = 0;
         var length:number = this._gestures.length;
 
-        for ( i; i < length; ++i )
+        for ( var i:number = 0; i < length; ++i )
         {
-            if ( this._gestures[ i ].id == id )
+            if ( this._gestures[ i ].id === id )
             {
                 returnValue = this._gestures[ i ];
                 break;
@@ -1050,15 +2105,13 @@ export class Frame
         {
             // Returns a Gesture vector containing all gestures that have occured since the specified frame.
             var gesturesSinceFrame:Gesture[] = [];
-            var i:number = 0;
-            var j:number = 0;
 
-            for( i; i < this.controller.frameHistory.length; ++i )
+            for ( var i:number = 0; i < this.controller.frameHistory.length; ++i )
             {
-                for( j; j < this.controller.frameHistory[ i ]._gestures.length; ++j )
+                for ( var j:number = 0; j < this.controller.frameHistory[ i ]._gestures.length; ++j )
                     gesturesSinceFrame.push( this.controller.frameHistory[ i ]._gestures[ j ] );
 
-                if( sinceFrame == this.controller.frameHistory[ i ] )
+                if( sinceFrame === this.controller.frameHistory[ i ] )
                     break;
             }
 
@@ -1241,9 +2294,9 @@ export class Frame
      * @return True; if equal. False otherwise.
      *
      */
-    public isEqualTo( other:Frame ):bool
+    public isEqualTo( other:Frame ):boolean
     {
-        var returnValue:bool = true;
+        var returnValue:boolean = true;
 
         if( this.id != other.id || !this.isValid() || other.isValid() )
             returnValue = false;
@@ -1268,14 +2321,12 @@ export class Frame
      * @return True, if this is a valid Frame object; false otherwise.
      *
      */
-    public isValid():bool
+    public isValid():boolean
     {
-        var returnValue:bool = true;
+        if( !this.id )
+            return false;
 
-        if(!this.id)
-            returnValue = false;
-
-        return returnValue;
+        return true;
     }
 
     /**
@@ -1288,12 +2339,11 @@ export class Frame
      * @return The invalid Frame instance.
      *
      */
-    static public invalid():Frame
+    public static invalid():Frame
     {
         return new Frame();
     }
 }
-
 /**
  * The Matrix struct represents a transformation matrix.
  *
@@ -1438,23 +2488,21 @@ export class Matrix
      * @return True; if equal, False otherwise.
      *
      */
-    public isEqualTo( other:Matrix ):bool
+    public isEqualTo( other:Matrix ):boolean
     {
-        var returnValue:bool = true;
-
         if ( !this.xBasis.isEqualTo( other.xBasis ) )
-            returnValue = false;
+            return false;
 
         if ( !this.yBasis.isEqualTo( other.yBasis ) )
-            returnValue = false;
+            return false;
 
         if ( !this.zBasis.isEqualTo( other.zBasis ) )
-            returnValue = false;
+            return false;
 
         if ( !this.origin.isEqualTo( other.origin ) )
-            returnValue = false;
+            return false;
 
-        return returnValue;
+        return true;
     }
 
     /**
@@ -1462,7 +2510,7 @@ export class Matrix
      * @return The identity matrix.
      *
      */
-    static public identity():Matrix
+    public static identity():Matrix
     {
         var xBasis:Vector3 = new Vector3( 1, 0, 0 );
         var yBasis:Vector3 = new Vector3( 0, 1, 0 );
@@ -1482,313 +2530,6 @@ export class Matrix
     }
 }
 
-/**
- * The Gesture class represents a recognized movement by the user.
- *
- * <p>The Leap watches the activity within its field of view for certain movement
- * patterns typical of a user gesture or command. For example, a movement from
- * side to side with the hand can indicate a swipe gesture, while a finger poking
- * forward can indicate a screen tap gesture.</p>
- *
- * <p>When the Leap recognizes a gesture, it assigns an ID and adds a Gesture object
- * to the frame gesture list. For continuous gestures, which occur over many frames,
- * the Leap updates the gesture by adding a Gesture object having the same ID and
- * updated properties in each subsequent frame.</p>
- *
- * <p><strong>Important: Recognition for each type of gesture must be enabled using the
- * <code>Controller.enableGesture()</code> function; otherwise no gestures are recognized
- * or reported.</strong></p>
- *
- * <p>Subclasses of Gesture define the properties for the specific movement
- * patterns recognized by the Leap.</p>
- *
- * <p>The Gesture subclasses for include:
- * <pre>
- * CircleGesture – A circular movement by a finger.
- * SwipeGesture – A straight line movement by the hand with fingers extended.
- * ScreenTapGesture – A forward tapping movement by a finger.
- * KeyTapGesture – A downward tapping movement by a finger.
- * </pre>
- * </p>
- *
- * <p>Circle and swipe gestures are continuous and these objects can have a state
- * of start, update, and stop.</p>
- *
- * <p>The screen tap gesture is a discrete gesture. The Leap only creates a single
- * ScreenTapGesture object appears for each tap and it always has a stop state.</p>
- *
- * <p>Get valid Gesture instances from a Frame object. You can get a list of gestures
- * with the <code>Frame.gestures()</code> method. You can get a list of gestures since a specified
- * frame with the <code>Frame.gestures(frame)</code> methods. You can also use the <code>Frame.gesture()</code>
- * method to find a gesture in the current frame using an ID value obtained
- * in a previous frame.</p>
- *
- * <p>Gesture objects can be invalid. For example, when you get a gesture by ID using
- * <code>Frame.gesture()</code>, and there is no gesture with that ID in the current frame, then
- * <code>gesture()</code> returns an Invalid Gesture object (rather than a null value).
- * Always check object validity in situations where a gesture might be invalid.</p>
- *
- * <p>The following keys can be used with the Config class to configure the gesture recognizer:</p>
- *
- * <table class="innertable">
- *   <tr>
- *    <th>Key string</th>
- *    <th>Value type</th>
- *    <th>Default value</th>
- *    <th>Units</th>
- *  </tr>
- *   <tr>
- *    <td>Gesture.Circle.MinRadius</td>
- *    <td>float</td>
- *    <td>5.0</td>
- *    <td>mm</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.Circle.MinArc</td>
- *    <td>float</td>
- *    <td>1.5&#42;pi</td>
- *    <td>radians</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.Swipe.MinLength</td>
- *    <td>float</td>
- *    <td>150</td>
- *    <td>mm</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.Swipe.MinVelocity</td>
- *    <td>float</td>
- *    <td>1000</td>
- *    <td>mm/s</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.KeyTap.MinDownVelocity</td>
- *    <td>float</td>
- *    <td>50</td>
- *    <td>mm/s</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.KeyTap.HistorySeconds</td>
- *    <td>float</td>
- *    <td>0.1</td>
- *    <td>s</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.KeyTap.MinDistance</td>
- *    <td>float</td>
- *    <td>5.0</td>
- *    <td>mm</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.ScreenTap.MinForwardVelocity</td>
- *    <td>float</td>
- *    <td>50</td>
- *    <td>mm/s</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.ScreenTap.HistorySeconds</td>
- *    <td>float</td>
- *    <td>0.1</td>
- *    <td>s</td>
- *  </tr>
- *   <tr>
- *    <td>Gesture.ScreenTap.MinDistance</td>
- *    <td>float</td>
- *    <td>3.0</td>
- *    <td>mm</td>
- *  </tr>
- * </table>
- *
- * @author logotype
- * @see CircleGesture
- * @see SwipeGesture
- * @see ScreenTapGesture
- * @see KeyTapGesture
- * @see Config
- *
- */
-export class Gesture
-{
-    /**
-     * An invalid state.
-     */
-    static public STATE_INVALID:number = 0;
-
-    /**
-     * The gesture is starting.<br/>
-     * Just enough has happened to recognize it.
-     */
-    static public STATE_START:number = 1;
-
-    /**
-     * The gesture is in progress.<br/>
-     * (Note: not all gestures have updates).
-     */
-    static public STATE_UPDATE:number = 2;
-
-    /**
-     * The gesture has completed or stopped.
-     */
-    static public STATE_STOP:number = 3;
-
-    /**
-     * An invalid type.
-     */
-    static public TYPE_INVALID:number = 4;
-
-    /**
-     * A straight line movement by the hand with fingers extended.
-     */
-    static public TYPE_SWIPE:number = 5;
-
-    /**
-     * A circular movement by a finger.
-     */
-    static public TYPE_CIRCLE:number = 6;
-
-    /**
-     * A forward tapping movement by a finger.
-     */
-    static public TYPE_SCREEN_TAP:number = 7;
-
-    /**
-     * A downward tapping movement by a finger.
-     */
-    static public TYPE_KEY_TAP:number = 8;
-
-    /**
-     * The elapsed duration of the recognized movement up to the frame
-     * containing this Gesture object, in microseconds.
-     *
-     * <p>The duration reported for the first Gesture in the sequence (with
-     * the <code>STATE_START</code> state) will typically be a small positive number
-     * since the movement must progress far enough for the Leap to recognize
-     * it as an intentional gesture.</p>
-     */
-    public duration:number;
-
-    /**
-     * The elapsed duration in seconds.
-     */
-    public durationSeconds:Number;
-
-    /**
-     * The Frame containing this Gesture instance.
-     */
-    public frame:Frame;
-
-    /**
-     * The list of hands associated with this Gesture, if any.
-     *
-     * <p>If no hands are related to this gesture, the list is empty.</p>
-     */
-    public hands:Hand[] = [];
-
-    /**
-     * The gesture ID.
-     *
-     * <p>All Gesture objects belonging to the same recognized movement share
-     * the same ID value. Use the ID value with the Frame.gesture() method
-     * to find updates related to this Gesture object in subsequent frames.</p>
-     */
-    public id:number;
-
-    /**
-     * The list of fingers and tools associated with this Gesture, if any.
-     *
-     * <p>If no Pointable objects are related to this gesture, the list is empty.</p>
-     */
-    public pointables:Pointable[] = [];
-
-    /**
-     * The gesture state.
-     *
-     * <p>Recognized movements occur over time and have a beginning, a middle,
-     * and an end. The <code>state</code> attribute reports where in that sequence
-     * this Gesture object falls.</p>
-     */
-    public state:number;
-
-    /**
-     * The gesture type.
-     */
-    public type:number;
-
-    /**
-     * Constructs a new Gesture object.
-     *
-     * <p>An uninitialized Gesture object is considered invalid. Get valid
-     * instances of the Gesture class, which will be one of the Gesture
-     * subclasses, from a Frame object.</p>
-     *
-     */
-        constructor()
-    {
-    }
-
-    /**
-     * Compare Gesture object equality/inequality.
-     *
-     * <p>Two Gestures are equal if they represent the same snapshot of
-     * the same recognized movement.</p>
-     *
-     * @param other The Gesture to compare with.
-     * @return True; if equal, False otherwise.
-     *
-     */
-    public isEqualTo( other:Gesture ):bool
-    {
-        return (this.id == other.id) ? true : false;
-    }
-
-    /**
-     * Reports whether this Gesture instance represents a valid Gesture.
-     *
-     * <p>An invalid Gesture object does not represent a snapshot of a recognized
-     * movement. Invalid Gesture objects are returned when a valid object
-     * cannot be provided. For example, when you get an gesture by ID using
-     * Frame.gesture(), and there is no gesture with that ID in the current
-     * frame, then gesture() returns an Invalid Gesture object (rather than
-     * a null value). Always check object validity in situations where an
-     * gesture might be invalid.</p>
-     *
-     * @return True, if this is a valid Gesture instance; false, otherwise.
-     *
-     */
-    public isValid():bool
-    {
-        var returnValue:bool = true;
-
-        if( !this.durationSeconds )
-            returnValue = false;
-
-        return returnValue;
-    }
-
-    /**
-     * Returns an invalid Gesture object.
-     *
-     * <p>You can use the instance returned by this in comparisons
-     * testing whether a given Gesture instance is valid or invalid.
-     * (You can also use the <code>Gesture.isValid()</code> function.)</p>
-     *
-     * @return The invalid Gesture instance.
-     *
-     */
-    static public invalid():Gesture
-    {
-        return new Gesture();
-    }
-
-    /**
-     * A string containing a brief, human-readable description of this Gesture.
-     *
-     */
-    public toString():string
-    {
-        return "[Gesture id:" + this.id + " duration:" + this.duration + " type:" + this.type + "]";
-    }
-}
 
 /**
  * The CircleGesture classes represents a circular finger movement.
@@ -1853,7 +2594,7 @@ export class CircleGesture extends Gesture
      * The circle gesture type.<br/>
      * The type value designating a circle gesture.
      */
-    static public classType:number = Gesture.TYPE_CIRCLE;
+    public static classType:number = Gesture.TYPE_CIRCLE;
 
     /**
      * The center point of the circle within the Leap frame of reference.<br/>
@@ -1901,7 +2642,7 @@ export class CircleGesture extends Gesture
      * Constructs a new CircleGesture object.
      *
      * <p>An uninitialized CircleGesture object is considered invalid.
-     * Get valid instances of the CircleGesture class from a Frame object.</p>
+     * Get valid instances of the CircleGesture export class from a Frame object.</p>
      *
      */
         constructor()
@@ -1911,8 +2652,10 @@ export class CircleGesture extends Gesture
     }
 }
 
+
+
 /**
- * The KeyTapGesture class represents a tapping gesture by a finger or tool.
+ * The KeyTapGesture export class represents a tapping gesture by a finger or tool.
  *
  * <p>A key tap gesture is recognized when the tip of a finger rotates down
  * toward the palm and then springs back to approximately the original
@@ -1975,7 +2718,7 @@ export class KeyTapGesture extends Gesture
     /**
      * The type value designating a key tap gesture.
      */
-    static public classType:number = Gesture.TYPE_KEY_TAP;
+    public static classType:number = Gesture.TYPE_KEY_TAP;
 
     /**
      * The current direction of finger tip motion.
@@ -2007,7 +2750,7 @@ export class KeyTapGesture extends Gesture
      * Constructs a new KeyTapGesture object.
      *
      * <p>An uninitialized KeyTapGesture object is considered invalid.
-     * Get valid instances of the KeyTapGesture class from a Frame object.</p>
+     * Get valid instances of the KeyTapGesture export class from a Frame object.</p>
      *
      */
         constructor()
@@ -2016,8 +2759,9 @@ export class KeyTapGesture extends Gesture
     }
 }
 
+
 /**
- * The ScreenTapGesture class represents a tapping gesture by a finger or tool.
+ * The ScreenTapGesture export class represents a tapping gesture by a finger or tool.
  *
  * <p>A screen tap gesture is recognized when the tip of a finger pokes forward
  * and then springs back to approximately the original postion, as if tapping
@@ -2079,7 +2823,7 @@ export class ScreenTapGesture extends Gesture
     /**
      * The type value designating a screen tap gesture.
      */
-    static public classType:number = Gesture.TYPE_SCREEN_TAP;
+    public static classType:number = Gesture.TYPE_SCREEN_TAP;
 
     /**
      * The direction of finger tip motion.
@@ -2105,7 +2849,7 @@ export class ScreenTapGesture extends Gesture
      * Constructs a new ScreenTapGesture object.
      *
      * <p>An uninitialized ScreenTapGesture object is considered invalid.
-     * Get valid instances of the ScreenTapGesture class from a Frame object.</p>
+     * Get valid instances of the ScreenTapGesture export class from a Frame object.</p>
      *
      */
         constructor()
@@ -2114,8 +2858,9 @@ export class ScreenTapGesture extends Gesture
     }
 }
 
+
 /**
- * The SwipeGesture class represents a swiping motion of a finger or tool.
+ * The SwipeGesture export class represents a swiping motion of a finger or tool.
  *
  * <p><strong>Important: To use swipe gestures in your application, you must enable
  * recognition of the swipe gesture.</strong><br/>You can enable recognition with:</p>
@@ -2163,7 +2908,7 @@ export class SwipeGesture extends Gesture
     /**
      * The type value designating a swipe gesture.
      */
-    static public classType:number = Gesture.TYPE_SWIPE;
+    public static classType:number = Gesture.TYPE_SWIPE;
 
     /**
      * The unit direction vector parallel to the swipe motion.
@@ -2203,9 +2948,7 @@ export class SwipeGesture extends Gesture
     {
         super();
     }
-}
-
-/**
+}/**
  * The Vector struct represents a three-component mathematical vector
  * or point such as a direction or position in three-dimensional space.
  *
@@ -2240,9 +2983,10 @@ export class Vector3
 
     /**
      * Creates a new Vector with the specified component values.
-     * @param this.x The horizontal component.
-     * @param this.y The vertical component.
-     * @param this.z The depth component.
+     * @constructor
+     * @param x The horizontal component.
+     * @param y The vertical component.
+     * @param z The depth component.
      *
      */
         constructor( x:number, y:number, z:number )
@@ -2368,16 +3112,9 @@ export class Vector3
      * @return True; if equal, False otherwise.
      *
      */
-    public isEqualTo( other:Vector3 ):bool
+    public isEqualTo( other:Vector3 ):boolean
     {
-        var returnValue:bool;
-
-        if ( this.x != other.x || this.y != other.y || this.z != other.z )
-            returnValue = false;
-        else
-            returnValue = true;
-
-        return returnValue;
+        return ( this.x != other.x || this.y != other.y || this.z != other.z );
     }
 
     /**
@@ -2385,7 +3122,7 @@ export class Vector3
      *
      * <p>The angle is measured in the plane formed by the two vectors.
      * The angle returned is always the smaller of the two conjugate angles.
-     * Thus <code>A.angleTo(B) == B.angleTo(A)</code> and is always a positive value less
+     * Thus <code>A.angleTo(B) === B.angleTo(A)</code> and is always a positive value less
      * than or equal to pi radians (180 degrees).</p>
      *
      * <p>If either vector has zero length, then this returns zero.</p>
@@ -2409,7 +3146,7 @@ export class Vector3
      * The cross product is a vector orthogonal to both original vectors.
      * It has a magnitude equal to the area of a parallelogram having the
      * two vectors as sides. The direction of the returned vector is
-     * determined by the right-hand rule. Thus <code>A.cross(B) == -B.cross(A)</code>.
+     * determined by the right-hand rule. Thus <code>A.cross(B) === -B.cross(A)</code>.
      *
      * @param other A Vector object.
      * @return The cross product of this vector and the specified vector.
@@ -2452,7 +3189,7 @@ export class Vector3
      * @return If any component is NaN or infinite, then this returns false.
      *
      */
-    public isValid():bool
+    public isValid():boolean
     {
         return ( this.x <= Number.MAX_VALUE && this.x >= -Number.MAX_VALUE ) && ( this.y <= Number.MAX_VALUE && this.y >= -Number.MAX_VALUE ) && ( this.z <= Number.MAX_VALUE && this.z >= -Number.MAX_VALUE );
     }
@@ -2468,7 +3205,7 @@ export class Vector3
      * @return The invalid Vector3 instance.
      *
      */
-    static public invalid():Vector3
+    public static invalid():Vector3
     {
         return new Vector3(NaN, NaN, NaN);
     }
@@ -2573,7 +3310,7 @@ export class Vector3
      * @return
      *
      */
-    static public zero():Vector3
+    public static zero():Vector3
     {
         return new Vector3( 0, 0, 0 );
     }
@@ -2583,7 +3320,7 @@ export class Vector3
      * @return
      *
      */
-    static public xAxis():Vector3
+    public static xAxis():Vector3
     {
         return new Vector3( 1, 0, 0 );
     }
@@ -2593,7 +3330,7 @@ export class Vector3
      * @return
      *
      */
-    static public yAxis():Vector3
+    public static yAxis():Vector3
     {
         return new Vector3( 0, 1, 0 );
     }
@@ -2603,7 +3340,7 @@ export class Vector3
      * @return
      *
      */
-    static public zAxis():Vector3
+    public static zAxis():Vector3
     {
         return new Vector3( 0, 0, 1 );
     }
@@ -2613,7 +3350,7 @@ export class Vector3
      * @return
      *
      */
-    static public left():Vector3
+    public static left():Vector3
     {
         return new Vector3( -1, 0, 0 );
     }
@@ -2623,9 +3360,9 @@ export class Vector3
      * @return
      *
      */
-    static public right():Vector3
+    public static right():Vector3
     {
-        return xAxis();
+        return this.xAxis();
     }
 
     /**
@@ -2633,7 +3370,7 @@ export class Vector3
      * @return
      *
      */
-    static public down():Vector3
+    public static down():Vector3
     {
         return new Vector3( 0, -1, 0 );
     }
@@ -2643,9 +3380,9 @@ export class Vector3
      * @return
      *
      */
-    static public up():Vector3
+    public static up():Vector3
     {
-        return yAxis();
+        return this.yAxis();
     }
 
     /**
@@ -2653,7 +3390,7 @@ export class Vector3
      * @return
      *
      */
-    static public forward():Vector3
+    public static forward():Vector3
     {
         return new Vector3( 0, 0, -1 );
     }
@@ -2663,9 +3400,9 @@ export class Vector3
      * @return
      *
      */
-    static public backward():Vector3
+    public static backward():Vector3
     {
-        return zAxis();
+        return this.zAxis();
     }
 
     /**
@@ -2676,741 +3413,5 @@ export class Vector3
     public toString():string
     {
         return "[Vector3 x:" + this.x + " y:" + this.y + " z:" + this.z + "]";
-    }
-}
-
-export class LeapEvent {
-    static public LEAPMOTION_INIT:string = "leapMotionInit";
-    static public LEAPMOTION_CONNECTED:string = "leapMotionConnected";
-    static public LEAPMOTION_DISCONNECTED:string = "leapMotionDisconnected";
-    static public LEAPMOTION_EXIT:string = "leapMotionExit";
-    static public LEAPMOTION_FRAME:string = "leapMotionFrame";
-
-    private _type:string;
-    private _target:any;
-
-    public frame:Frame;
-
-    constructor(type:string, targetObj:any, frame:Frame = null) {
-        this._type = type;
-        this._target = targetObj;
-        this.frame = frame;
-    }
-
-    public getTarget():any {
-        return this._target;
-    }
-
-    public getType():string {
-        return this._type;
-    }
-}
-
-export class EventDispatcher {
-    private _listeners:any[];
-    constructor() {
-        this._listeners = [];
-    }
-
-    public hasEventListener(type:string, listener:Function):Boolean {
-        var exists:Boolean = false;
-        for (var i = 0; i < this._listeners.length; i++) {
-            if (this._listeners[i].type === type && this._listeners[i].listener === listener) {
-                exists = true;
-            }
-        }
-
-        return exists;
-    }
-
-    public addEventListener (typeStr:string, listenerFunc:Function):void {
-        if (this.hasEventListener(typeStr, listenerFunc)) {
-            return;
-        }
-
-        this._listeners.push({type: typeStr, listener: listenerFunc});
-    }
-
-    public removeEventListener (typeStr:string, listenerFunc:Function):void {
-        for (var i = 0; i < this._listeners.length; i++) {
-            if (this._listeners[i].type === typeStr && this._listeners[i].listener === listenerFunc) {
-                this._listeners.splice(i, 1);
-            }
-        }
-    }
-
-    public dispatchEvent (evt:LeapEvent) {
-        for (var i = 0; i < this._listeners.length; i++) {
-            if (this._listeners[i].type === evt.getType()) {
-                this._listeners[i].listener.call(this, evt);
-            }
-        }
-    }
-}
-
-/**
- * The Controller class is your main interface to the Leap Motion Controller.
- *
- * <p>Create an instance of this Controller class to access frames of tracking
- * data and configuration information. Frame data can be polled at any time using
- * the <code>Controller::frame()</code> . Call <code>frame()</code> or <code>frame(0)</code>
- * to get the most recent frame. Set the history parameter to a positive integer
- * to access previous frames. A controller stores up to 60 frames in its frame history.</p>
- *
- * <p>Polling is an appropriate strategy for applications which already have an
- * intrinsic update loop, such as a game. You can also implement the Leap::Listener
- * interface to handle events as they occur. The Leap dispatches events to the listener
- * upon initialization and exiting, on connection changes, and when a new frame
- * of tracking data is available. When these events occur, the controller object
- * invokes the appropriate callback defined in the Listener interface.</p>
- *
- * <p>To access frames of tracking data as they become available:</p>
- *
- * <ul>
- * <li>Implement the Listener interface and override the <code>Listener::onFrame()</code> .</li>
- * <li>In your <code>Listener::onFrame()</code> , call the <code>Controller::frame()</code> to access the newest frame of tracking data.</li>
- * <li>To start receiving frames, create a Controller object and add event listeners to the <code>Controller::addEventListener()</code> .</li>
- * </ul>
- *
- * <p>When an instance of a Controller object has been initialized,
- * it calls the <code>Listener::onInit()</code> when the listener is ready for use.
- * When a connection is established between the controller and the Leap,
- * the controller calls the <code>Listener::onConnect()</code> . At this point,
- * your application will start receiving frames of data. The controller calls
- * the <code>Listener::onFrame()</code> each time a new frame is available.
- * If the controller loses its connection with the Leap software or
- * device for any reason, it calls the <code>Listener::onDisconnect()</code> .
- * If the listener is removed from the controller or the controller is destroyed,
- * it calls the <code>Listener::onExit()</code> . At that point, unless the listener
- * is added to another controller again, it will no longer receive frames of tracking data.</p>
- *
- * @author logotype
- *
- */
-export class Controller extends EventDispatcher
-{
-    /**
-     * The default policy.
-     *
-     * <p>Currently, the only supported policy is the background frames policy,
-     * which determines whether your application receives frames of tracking
-     * data when it is not the focused, foreground application.</p>
-     */
-    static public POLICY_DEFAULT:number = 0;
-
-    /**
-     * Receive background frames.
-     *
-     * <p>Currently, the only supported policy is the background frames policy,
-     * which determines whether your application receives frames of tracking
-     * data when it is not the focused, foreground application.</p>
-     */
-    static public POLICY_BACKGROUND_FRAMES:number = (1 << 0);
-
-    /**
-     * History of frame of tracking data from the Leap.
-     */
-    public frameHistory:Frame[] = [];
-
-    /**
-     * Most recent received Frame.
-     */
-    private latestFrame:Frame;
-
-    /**
-     * Socket connection.
-     */
-    public connection:WebSocket;
-
-    /**
-     * Finds a Hand object by ID.
-     *
-     * @param frame The Frame object in which the Hand contains
-     * @param id The ID of the Hand object
-     * @return The Hand object if found, otherwise null
-     *
-     */
-    private getHandByID( frame:Frame, id:number ):Hand
-    {
-        var returnValue:Hand = null;
-        var i:number = 0;
-
-        for( i; i < frame.hands.length; ++i )
-        {
-            if ( (<Hand>frame.hands[ i ]).id == id )
-            {
-                returnValue = (<Hand>frame.hands[ i ]);
-                break;
-            }
-        }
-        return returnValue;
-    }
-
-    /**
-     * Constructs a Controller object.
-     * @param host IP or hostname of the computer running the Leap software.
-     * (currently only supported for socket connections).
-     *
-     */
-    constructor( host:string = null )
-    {
-        super();
-
-        if(!host)
-        {
-            this.connection = new WebSocket("ws://localhost:6437");
-        }
-        else
-        {
-            this.connection = new WebSocket("ws://" + host + ":6437");
-        }
-
-        this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_INIT, this));
-
-        this.connection.onopen = ( event:Event ) =>
-        {
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
-        };
-
-        this.connection.onclose = ( data:Object ) =>
-        {
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_DISCONNECTED, this));
-        };
-
-        this.connection.onmessage = ( data:Object ) =>
-        {
-            var i:number;
-            var json:Object;
-            var currentFrame:Frame;
-            var hand:Hand;
-            var pointable:Pointable;
-            var gesture:Gesture;
-            var isTool:Boolean;
-            var length:number;
-            var type:number;
-
-            json = JSON.parse( data["data"] );
-
-            // Ignore all other data than Frames
-            if( (typeof json["timestamp"] === "undefined") )
-            {
-                return;
-            }
-
-            currentFrame = new Frame();
-            currentFrame.controller = this;
-
-            // Hands
-            if ( !(typeof json["hands"] === "undefined") )
-            {
-                i = 0;
-                length = json["hands"].length;
-                for ( i; i < length; ++i )
-                {
-                    hand = new Hand();
-                    hand.frame = currentFrame;
-                    hand.direction = new Vector3( json["hands"][ i ].direction[ 0 ], json["hands"][ i ].direction[ 1 ], json["hands"][ i ].direction[ 2 ] );
-                    hand.id = json["hands"][ i ].id;
-                    hand.palmNormal = new Vector3( json["hands"][ i ].palmNormal[ 0 ], json["hands"][ i ].palmNormal[ 1 ], json["hands"][ i ].palmNormal[ 2 ] );
-                    hand.palmPosition = new Vector3( json["hands"][ i ].palmPosition[ 0 ], json["hands"][ i ].palmPosition[ 1 ], json["hands"][ i ].palmPosition[ 2 ] );
-                    hand.palmVelocity = new Vector3( json["hands"][ i ].palmPosition[ 0 ], json["hands"][ i ].palmPosition[ 1 ], json["hands"][ i ].palmPosition[ 2 ] );
-                    hand.rotation = new Matrix( new Vector3( json["hands"][ i ].r[ 0 ][ 0 ], json["hands"][ i ].r[ 0 ][ 1 ], json["hands"][ i ].r[ 0 ][ 2 ] ), new Vector3( json["hands"][ i ].r[ 1 ][ 0 ], json["hands"][ i ].r[ 1 ][ 1 ], json["hands"][ i ].r[ 1 ][ 2 ] ), new Vector3( json["hands"][ i ].r[ 2 ][ 0 ], json["hands"][ i ].r[ 2 ][ 1 ], json["hands"][ i ].r[ 2 ][ 2 ] ) );
-                    hand.scaleFactorNumber = json["hands"][ i ].s;
-                    hand.sphereCenter = new Vector3( json["hands"][ i ].sphereCenter[ 0 ], json["hands"][ i ].sphereCenter[ 1 ], json["hands"][ i ].sphereCenter[ 2 ] );
-                    hand.sphereRadius = json["hands"][ i ].sphereRadius;
-                    hand.translationVector = new Vector3( json["hands"][ i ].t[ 0 ], json["hands"][ i ].t[ 1 ], json["hands"][ i ].t[ 2 ] );
-                    currentFrame.hands.push( hand );
-                }
-            }
-
-            // ID
-            currentFrame.id = json["id"];
-
-            // Pointables
-            if ( !(typeof json["pointables"] === "undefined") )
-            {
-                i = 0;
-                length = json["pointables"].length;
-                for ( i; i < length; ++i )
-                {
-                    isTool = json["pointables"][ i ].tool;
-                    if ( isTool )
-                        pointable = new Tool();
-                    else
-                        pointable = new Finger();
-
-                    pointable.frame = currentFrame;
-                    pointable.id = json["pointables"][ i ].id;
-                    pointable.hand = this.getHandByID( currentFrame, json["pointables"][ i ].handId );
-                    pointable.length = json["pointables"][ i ].length;
-                    pointable.direction = new Vector3( json["pointables"][ i ].direction[ 0 ], json["pointables"][ i ].direction[ 1 ], json["pointables"][ i ].direction[ 2 ] );
-                    pointable.tipPosition = new Vector3( json["pointables"][ i ].tipPosition[ 0 ], json["pointables"][ i ].tipPosition[ 1 ], json["pointables"][ i ].tipPosition[ 2 ] );
-                    pointable.tipVelocity = new Vector3( json["pointables"][ i ].tipVelocity[ 0 ], json["pointables"][ i ].tipVelocity[ 1 ], json["pointables"][ i ].tipVelocity[ 2 ] );
-                    currentFrame.pointables.push( pointable );
-
-                    if ( pointable.hand )
-                        pointable.hand.pointables.push( pointable );
-
-                    if ( isTool )
-                    {
-                        pointable.isTool = true;
-                        pointable.isFinger = false;
-                        pointable.width = json["pointables"][ i ].width;
-                        currentFrame.tools.push( <Tool>pointable );
-                        if ( pointable.hand )
-                            pointable.hand.tools.push( <Tool>pointable );
-                    }
-                    else
-                    {
-                        pointable.isTool = false;
-                        pointable.isFinger = true;
-                        currentFrame.fingers.push( <Finger>pointable );
-                        if ( pointable.hand )
-                            pointable.hand.fingers.push( <Finger>pointable );
-                    }
-                }
-            }
-
-            // Gestures
-            if ( !(typeof json["gestures"] === "undefined") )
-            {
-                i = 0;
-                length = json["gestures"].length;
-                for ( i; i < length; ++i )
-                {
-                    switch( json["gestures"][ i ].type )
-                    {
-                        case "circle":
-                            gesture = new CircleGesture();
-                            type = Gesture.TYPE_CIRCLE;
-                            var circle:CircleGesture = <CircleGesture>gesture;
-
-                            circle.center = new Vector3( json["gestures"][ i ].center[ 0 ], json["gestures"][ i ].center[ 1 ], json["gestures"][ i ].center[ 2 ] );
-                            circle.normal = new Vector3( json["gestures"][ i ].normal[ 0 ], json["gestures"][ i ].normal[ 1 ], json["gestures"][ i ].normal[ 2 ] );
-                            circle.progress = json["gestures"][ i ].progress;
-                            circle.radius = json["gestures"][ i ].radius;
-                            break;
-
-                        case "swipe":
-                            gesture = new SwipeGesture();
-                            type = Gesture.TYPE_SWIPE;
-
-                            var swipe:SwipeGesture = <SwipeGesture>gesture;
-
-                            swipe.startPosition = new Vector3( json["gestures"][ i ].startPosition[ 0 ], json["gestures"][ i ].startPosition[ 1 ], json["gestures"][ i ].startPosition[ 2 ] );
-                            swipe.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
-                            swipe.direction = new Vector3( json["gestures"][ i ].direction[ 0 ], json["gestures"][ i ].direction[ 1 ], json["gestures"][ i ].direction[ 2 ] );
-                            swipe.speed = json["gestures"][ i ].speed;
-                            break;
-
-                        case "screenTap":
-                            gesture = new ScreenTapGesture();
-                            type = Gesture.TYPE_SCREEN_TAP;
-
-                            var screenTap:ScreenTapGesture = <ScreenTapGesture>gesture;
-                            screenTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
-                            screenTap.direction = new Vector3( json["gestures"][ i ].direction[ 0 ], json["gestures"][ i ].direction[ 1 ], json["gestures"][ i ].direction[ 2 ] );
-                            screenTap.progress = json["gestures"][ i ].progress;
-                            break;
-
-                        case "keyTap":
-                            gesture = new KeyTapGesture();
-                            type = Gesture.TYPE_KEY_TAP;
-
-                            var keyTap:KeyTapGesture = <KeyTapGesture>gesture;
-                            keyTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
-                            keyTap.direction = new Vector3( json["gestures"][ i ].direction[ 0 ], json["gestures"][ i ].direction[ 1 ], json["gestures"][ i ].direction[ 2 ] );
-                            keyTap.progress = json["gestures"][ i ].progress;
-                            break;
-
-                        default:
-                            throw new Error( "unkown gesture type" );
-                    }
-
-                    var j:number = 0;
-                    var lengthInner:number = 0;
-
-                    if( !(typeof json["gestures"][ i ].handIds === "undefined") )
-                    {
-                        j = 0;
-                        lengthInner = json["gestures"][ i ].handIds.length;
-                        for( j; j < lengthInner; ++j )
-                        {
-                            var gestureHand:Hand = this.getHandByID( currentFrame, json["gestures"][ i ].handIds[ j ] );
-                            gesture.hands.push( gestureHand );
-                        }
-                    }
-
-                    if( !(typeof json["gestures"][ i ].pointableIds === "undefined") )
-                    {
-                        j = 0;
-                        lengthInner = json["gestures"][ i ].pointableIds.length;
-                        for( j; j < lengthInner; ++j )
-                        {
-                            var gesturePointable:Pointable = this.getPointableByID( currentFrame, json["gestures"][ i ].pointableIds[ j ] );
-                            if( gesturePointable )
-                            {
-                                gesture.pointables.push( gesturePointable );
-                            }
-                        }
-                        if( gesture instanceof CircleGesture && gesture.pointables.length > 0 )
-                        {
-                            (<CircleGesture>gesture).pointable = gesture.pointables[ 0 ];
-                        }
-                    }
-
-                    gesture.frame = currentFrame;
-                    gesture.id = json["gestures"][ i ].id;
-                    gesture.duration = json["gestures"][ i ].duration;
-                    gesture.durationSeconds = gesture.duration / 1000000;
-
-                    switch( json["gestures"][ i ].state )
-                    {
-                        case "start":
-                            gesture.state = Gesture.STATE_START;
-                            break;
-                        case "update":
-                            gesture.state = Gesture.STATE_UPDATE;
-                            break;
-                        case "stop":
-                            gesture.state = Gesture.STATE_STOP;
-                            break;
-                        default:
-                            gesture.state = Gesture.STATE_INVALID;
-                    }
-
-                    gesture.type = type;
-
-                    currentFrame._gestures.push( gesture );
-                }
-            }
-
-            // Rotation (since last frame), interpolate for smoother motion
-            if ( json["r"] )
-                currentFrame.rotation = new Matrix( new Vector3( json["r"][ 0 ][ 0 ], json["r"][ 0 ][ 1 ], json["r"][ 0 ][ 2 ] ), new Vector3( json["r"][ 1 ][ 0 ], json["r"][ 1 ][ 1 ], json["r"][ 1 ][ 2 ] ), new Vector3( json["r"][ 2 ][ 0 ], json["r"][ 2 ][ 1 ], json["r"][ 2 ][ 2 ] ) );
-
-            // Scale factor (since last frame), interpolate for smoother motion
-            currentFrame.scaleFactorNumber = json["s"];
-
-            // Translation (since last frame), interpolate for smoother motion
-            if ( json["t"] )
-                currentFrame.translationVector = new Vector3( json["t"][ 0 ], json["t"][ 1 ], json["t"][ 2 ] );
-
-            // Timestamp
-            currentFrame.timestamp = json["timestamp"];
-
-            // Add frame to history
-            if ( this.frameHistory.length > 59 )
-                this.frameHistory.splice( 59, 1 );
-
-            this.frameHistory.unshift( this.latestFrame );
-            this.latestFrame = currentFrame;
-
-            this.dispatchEvent( new LeapEvent(LeapEvent.LEAPMOTION_FRAME, this.latestFrame.controller, this.latestFrame));
-            //controller.leapmotion::listener.onFrame( controller, latestFrame );
-        };
-    }
-
-    /**
-     * Finds a Pointable object by ID.
-     *
-     * @param frame The Frame object in which the Pointable contains
-     * @param id The ID of the Pointable object
-     * @return The Pointable object if found, otherwise null
-     *
-     */
-    private getPointableByID( frame:Frame, id:number ):Pointable
-    {
-        var returnValue:Pointable = null;
-        var i:number = 0;
-
-        for( i; i < frame.pointables.length; ++i )
-        {
-            if ( (<Pointable>frame.pointables[ i ]).id == id )
-            {
-                returnValue = (<Pointable>frame.pointables[ i ]);
-                break;
-            }
-        }
-        return returnValue;
-    }
-
-    /**
-     * Returns a frame of tracking data from the Leap.
-     *
-     * <p>Use the optional history parameter to specify which frame to retrieve.
-     * Call <code>frame()</code> or <code>frame(0)</code> to access the most recent frame;
-     * call <code>frame(1)</code> to access the previous frame, and so on. If you use a history value
-     * greater than the number of stored frames, then the controller returns
-     * an invalid frame.</p>
-     *
-     * @param history The age of the frame to return, counting backwards from
-     * the most recent frame (0) into the past and up to the maximum age (59).
-     *
-     * @return The specified frame; or, if no history parameter is specified,
-     * the newest frame. If a frame is not available at the specified
-     * history position, an invalid Frame is returned.
-     *
-     */
-    public frame( history:number = 0 ):Frame
-    {
-        var returnValue:Frame;
-
-        if ( history >= this.frameHistory.length )
-            returnValue = Frame.invalid();
-        else
-            returnValue = this.frameHistory[ history ];
-
-        return returnValue;
-    }
-}
-
-/**
- * LeapUtil is a collection of static utility functions.
- *
- */
-export class LeapUtil
-{
-    /** The constant pi as a single precision floating point number. */
-    static public PI:number = 3.1415926536;
-
-    /**
-     * The constant ratio to convert an angle measure from degrees to radians.
-     * Multiply a value in degrees by this constant to convert to radians.
-     */
-    static public DEG_TO_RAD:number = 0.0174532925;
-
-    /**
-     * The constant ratio to convert an angle measure from radians to degrees.
-     * Multiply a value in radians by this constant to convert to degrees.
-     */
-    static public RAD_TO_DEG:number = 57.295779513;
-
-    /**
-     * Pi &#42; 2.
-     */
-    static public TWO_PI:number = Math.PI + Math.PI;
-
-    /**
-     * Pi &#42; 0.5.
-     */
-    static public HALF_PI:number = Math.PI * 0.5;
-
-    /**
-     * Represents the smallest positive single value greater than zero.
-     */
-    static public EPSILON:number = 0.00001;
-
-    public LeapUtil()
-    {
-    }
-
-    /**
-     * Convert an angle measure from radians to degrees.
-     *
-     * @param radians
-     * @return The value, in degrees.
-     *
-     */
-    static public toDegrees( radians:number ):number
-    {
-        return radians * 180 / Math.PI;
-    }
-
-    /**
-     * Determines if a value is equal to or less than 0.00001.
-     *
-     * @return True, if equal to or less than 0.00001; false otherwise.
-     */
-    static public isNearZero( value:number ):Boolean
-    {
-        return Math.abs( value ) <= EPSILON;
-    }
-
-    /**
-     * Determines if all Vector3 components is equal to or less than 0.00001.
-     *
-     * @return True, if equal to or less than 0.00001; false otherwise.
-     */
-    static public vectorIsNearZero( inVector:Vector3 ):Boolean
-    {
-        return isNearZero( inVector.x ) && isNearZero( inVector.y ) && isNearZero( inVector.z );
-    }
-
-    /**
-     * Create a new matrix with just the rotation block from the argument matrix
-     */
-    static public extractRotation( mtxTransform:Matrix ):Matrix
-    {
-        return new Matrix( mtxTransform.xBasis, mtxTransform.yBasis, mtxTransform.zBasis );
-    }
-
-    /**
-     * Returns a matrix representing the inverse rotation by simple transposition of the rotation block.
-     */
-    static public rotationInverse( mtxRot:Matrix ):Matrix
-    {
-        return new Matrix( new Vector3( mtxRot.xBasis.x, mtxRot.yBasis.x, mtxRot.zBasis.x ), new Vector3( mtxRot.xBasis.y, mtxRot.yBasis.y, mtxRot.zBasis.y ), new Vector3( mtxRot.xBasis.z, mtxRot.yBasis.z, mtxRot.zBasis.z ) );
-    }
-
-    /**
-     * Returns a matrix that is the orthonormal inverse of the argument matrix.
-     * This is only valid if the input matrix is orthonormal
-     * (the basis vectors are mutually perpendicular and of length 1)
-     */
-    static public rigidInverse( mtxTransform:Matrix ):Matrix
-    {
-        var rigidInverse:Matrix = rotationInverse( mtxTransform );
-        rigidInverse.origin = rigidInverse.transformDirection( mtxTransform.origin.opposite() );
-        return rigidInverse;
-    }
-
-    static public componentWiseMin( vLHS:Vector3, vRHS:Vector3 ):Vector3
-    {
-        return new Vector3( Math.min( vLHS.x, vRHS.x ), Math.min( vLHS.y, vRHS.y ), Math.min( vLHS.z, vRHS.z ) );
-    }
-
-    static public componentWiseMax( vLHS:Vector3, vRHS:Vector3 ):Vector3
-    {
-        return new Vector3( Math.max( vLHS.x, vRHS.x ), Math.max( vLHS.y, vRHS.y ), Math.max( vLHS.z, vRHS.z ) );
-    }
-
-    static public componentWiseScale( vLHS:Vector3, vRHS:Vector3 ):Vector3
-    {
-        return new Vector3( vLHS.x * vRHS.x, vLHS.y * vRHS.y, vLHS.z * vRHS.z );
-    }
-
-    static public componentWiseReciprocal( inVector:Vector3 ):Vector3
-    {
-        return new Vector3( 1.0 / inVector.x, 1.0 / inVector.y, 1.0 / inVector.z );
-    }
-
-    static public minComponent( inVector:Vector3 ):number
-    {
-        return Math.min( inVector.x, Math.min( inVector.y, inVector.z ) );
-    }
-
-    static public maxComponent( inVector:Vector3 ):number
-    {
-        return Math.max( inVector.x, Math.max( inVector.y, inVector.z ) );
-    }
-
-    /**
-     * Compute the polar/spherical heading of a vector direction in z/x plane
-     */
-    static public heading( inVector:Vector3 ):number
-    {
-        return Math.atan2( inVector.z, inVector.x );
-    }
-
-    /**
-     * Compute the spherical elevation of a vector direction in y above the z/x plane
-     */
-    static public elevation( inVector:Vector3 ):number
-    {
-        return Math.atan2( inVector.y, Math.sqrt( inVector.z * inVector.z + inVector.x * inVector.x ) );
-    }
-
-    /**
-     * Set magnitude to 1 and bring heading to [-Pi,Pi], elevation into [-Pi/2, Pi/2]
-     *
-     * @param The Vector3 to convert.
-     * @return The normalized spherical Vector3.
-     *
-     */
-    static public normalizeSpherical( vSpherical:Vector3 ):Vector3
-    {
-        var fHeading:number  = vSpherical.y;
-        var fElevation:number = vSpherical.z;
-
-        while ( fElevation <= -Math.PI ) fElevation += TWO_PI;
-        while ( fElevation > Math.PI ) fElevation -= TWO_PI;
-
-        if ( Math.abs( fElevation ) > HALF_PI )
-        {
-            fHeading += Math.PI;
-            fElevation = fElevation > 0 ? ( Math.PI - fElevation ) : -( Math.PI + fElevation );
-        }
-
-        while ( fHeading <= -Math.PI ) fHeading += TWO_PI;
-        while ( fHeading > Math.PI ) fHeading -= TWO_PI;
-
-        return new Vector3( 1, fHeading, fElevation );
-    }
-
-    /**
-     * Convert from Cartesian (rectangular) coordinates to spherical coordinates
-     * (magnitude, heading, elevation).
-     *
-     * @param The Vector3 to convert.
-     * @return The cartesian Vector3 converted to spherical.
-     *
-     */
-    static public cartesianToSpherical( vCartesian:Vector3 ):Vector3
-    {
-        return new Vector3( vCartesian.magnitude(), heading( vCartesian ), elevation( vCartesian ) );
-    }
-
-    /**
-     * Convert from spherical coordinates (magnitude, heading, elevation) to
-     * Cartesian (rectangular) coordinates.
-     *
-     * @param The Vector3 to convert.
-     * @return The spherical Vector3 converted to cartesian.
-     *
-     */
-    static public sphericalToCartesian( vSpherical:Vector3 ):Vector3
-    {
-        var fMagnitude:number    = vSpherical.x;
-        var fCosHeading:number   = Math.cos( vSpherical.y );
-        var fSinHeading:number   = Math.sin( vSpherical.y );
-        var fCosElevation:number = Math.cos( vSpherical.z );
-        var fSinElevation:number = Math.sin( vSpherical.z );
-
-        return new Vector3(  fCosHeading   * fCosElevation  * fMagnitude,
-            fSinElevation  * fMagnitude,
-            fSinHeading   * fCosElevation  * fMagnitude);
-    }
-
-    /**
-     * Clamps a value between a minimum Number and maximum Number value.
-     *
-     * @param inVal The number to clamp.
-     * @param minVal The minimum value.
-     * @param maxVal The maximum value.
-     * @return The value clamped between minVal and maxVal.
-     *
-     */
-    static public clamp( inVal:number, minVal:number, maxVal:number ):number
-    {
-        return ( inVal < minVal ) ? minVal : (( inVal > maxVal ) ? maxVal : inVal );
-    }
-
-    /**
-     * Linearly interpolates between two Numbers.
-     *
-     * @param a A number.
-     * @param b A number.
-     * @param t The interpolation coefficient [0-1].
-     * @return The interpolated number.
-     *
-     */
-    static public lerp( a:number, b:number, coefficient:number ):number
-    {
-        return a + ( ( b - a ) * coefficient );
-    }
-
-    /**
-     * Linearly interpolates between two Vector3 objects.
-     *
-     * @param a A Vector3 object.
-     * @param b A Vector3 object.
-     * @param t The interpolation coefficient [0-1].
-     * @return A new interpolated Vector3 object.
-     *
-     */
-    static public lerpVector( vec1:Vector3, vec2:Vector3, coefficient:number ):Vector3
-    {
-        return vec1.plus( vec2.minus( vec1 ).multiply( coefficient ) );
     }
 }

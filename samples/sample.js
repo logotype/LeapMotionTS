@@ -1,14 +1,13 @@
-define(["require", "exports", 'LeapMotionTS'], function(require, exports, __Leap__) {
+define(["require", "exports", '../LeapMotionTS'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
-
     var controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, function (event) {
         var frame = event.frame;
         console.log("Frame id: " + frame.id + ", timestamp: " + frame.timestamp + ", hands: " + frame.hands.length + ", fingers: " + frame.fingers.length + ", tools: " + frame.tools.length + ", gestures: " + frame.gestures().length);
-        if(frame.hands.length > 0) {
+        if (frame.hands.length > 0) {
             var hand = frame.hands[0];
             var fingers = hand.fingers;
-            if(fingers.length > 0) {
+            if (fingers.length > 0) {
                 var avgPos = Leap.Vector3.zero();
                 for(var i = 0; i < fingers.length; i++) {
                     avgPos = avgPos.plus((fingers[i]).tipPosition);
@@ -28,15 +27,15 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __Leap
                 case Leap.Gesture.TYPE_CIRCLE:
                     var circle = gesture;
                     var clockwiseness;
-                    if(circle.pointable.direction.angleTo(circle.normal) <= Math.PI / 4) {
+                    if (circle.pointable.direction.angleTo(circle.normal) <= Math.PI / 4) {
                         clockwiseness = "clockwise";
                     } else {
                         clockwiseness = "counterclockwise";
                     }
                     var sweptAngle = 0;
-                    if(circle.state != Leap.Gesture.STATE_START) {
+                    if (circle.state != Leap.Gesture.STATE_START) {
                         var previousGesture = controller.frame(1).gesture(circle.id);
-                        if(previousGesture.isValid()) {
+                        if (previousGesture.isValid()) {
                             var previousUpdate = (controller.frame(1).gesture(circle.id));
                             sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                         }
@@ -62,4 +61,4 @@ define(["require", "exports", 'LeapMotionTS'], function(require, exports, __Leap
         }
     });
 })
-//@ sourceMappingURL=App.js.map
+//@ sourceMappingURL=sample.js.map
