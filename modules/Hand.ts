@@ -1,9 +1,9 @@
-/// <reference path="Vector3.ts"/>
-/// <reference path="Pointable.ts"/>
-/// <reference path="Finger.ts"/>
-/// <reference path="Tool.ts"/>
-/// <reference path="Matrix.ts"/>
-/// <reference path="Frame.ts"/>
+/// <reference path="./Vector3.ts"/>
+/// <reference path="./Pointable.ts"/>
+/// <reference path="./Finger.ts"/>
+/// <reference path="./Tool.ts"/>
+/// <reference path="./Matrix.ts"/>
+/// <reference path="./Frame.ts"/>
 /**
  * The Hand class reports the physical characteristics of a detected hand.
  *

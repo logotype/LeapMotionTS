@@ -1,5 +1,5 @@
-/// <reference path="../Vector3.ts"/>
-/// <reference path="../Matrix.ts"/>
+/// <reference path="./../Vector3.ts"/>
+/// <reference path="./../Matrix.ts"/>
 /**
  * LeapUtil is a collection of static utility functions.
  *

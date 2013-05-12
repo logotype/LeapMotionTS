@@ -1,6 +1,6 @@
-/// <reference path="Gesture.ts"/>
-/// <reference path="Vector3.ts"/>
-/// <reference path="Pointable.ts"/>
+/// <reference path="./Gesture.ts"/>
+/// <reference path="./Vector3.ts"/>
+/// <reference path="./Pointable.ts"/>
 /**
  * The KeyTapGesture class represents a tapping gesture by a finger or tool.
  *

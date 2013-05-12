@@ -1,4 +1,4 @@
-/// <reference path="Vector3.ts"/>
+/// <reference path="./Vector3.ts"/>
 /**
  * The Matrix struct represents a transformation matrix.
  *

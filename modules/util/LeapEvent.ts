@@ -1,4 +1,4 @@
-/// <reference path="../Frame.ts"/>
+/// <reference path="./../Frame.ts"/>
 class LeapEvent
 {
     public static LEAPMOTION_INIT:string = "leapMotionInit";

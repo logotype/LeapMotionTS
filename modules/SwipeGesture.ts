@@ -1,6 +1,6 @@
-/// <reference path="Gesture.ts"/>
-/// <reference path="Vector3.ts"/>
-/// <reference path="Pointable.ts"/>
+/// <reference path="./Gesture.ts"/>
+/// <reference path="./Vector3.ts"/>
+/// <reference path="./Pointable.ts"/>
 /**
  * The SwipeGesture class represents a swiping motion of a finger or tool.
  *

@@ -1,4 +1,4 @@
-/// <reference path="LeapEvent.ts"/>
+/// <reference path="./LeapEvent.ts"/>
 /**
  * The EventDispatcher class provides strongly typed events.
  */

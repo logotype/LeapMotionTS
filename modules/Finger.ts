@@ -1,4 +1,4 @@
-/// <reference path="Pointable.ts"/>
+/// <reference path="./Pointable.ts"/>
 /**
  * The Finger class represents a tracked finger.
  *

@@ -1,11 +1,11 @@
 /// <reference path="./Vector3.ts"/>
-/// <reference path="Hand.ts"/>
-/// <reference path="Pointable.ts"/>
-/// <reference path="Finger.ts"/>
-/// <reference path="Tool.ts"/>
-/// <reference path="Matrix.ts"/>
-/// <reference path="Gesture.ts"/>
-/// <reference path="Controller.ts"/>
+/// <reference path="./Hand.ts"/>
+/// <reference path="./Pointable.ts"/>
+/// <reference path="./Finger.ts"/>
+/// <reference path="./Tool.ts"/>
+/// <reference path="./Matrix.ts"/>
+/// <reference path="./Gesture.ts"/>
+/// <reference path="./Controller.ts"/>
 /**
  * The Frame class represents a set of hand and finger tracking
  * data detected in a single frame.

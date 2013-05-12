@@ -1,6 +1,6 @@
-/// <reference path="Vector3.ts"/>
-/// <reference path="Frame.ts"/>
-/// <reference path="Hand.ts"/>
+/// <reference path="./Vector3.ts"/>
+/// <reference path="./Frame.ts"/>
+/// <reference path="./Hand.ts"/>
 /**
  * The Pointable class reports the physical characteristics of a detected finger or tool.
  * Both fingers and tools are classified as Pointable objects. Use the Pointable.isFinger

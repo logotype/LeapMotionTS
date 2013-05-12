@@ -1,10 +1,10 @@
-/// <reference path="util/EventDispatcher.ts"/>
-/// <reference path="util/LeapEvent.ts"/>
-/// <reference path="Frame.ts"/>
-/// <reference path="CircleGesture.ts"/>
-/// <reference path="KeyTapGesture.ts"/>
-/// <reference path="ScreenTapGesture.ts"/>
-/// <reference path="SwipeGesture.ts"/>
+/// <reference path="./util/EventDispatcher.ts"/>
+/// <reference path="./util/LeapEvent.ts"/>
+/// <reference path="./Frame.ts"/>
+/// <reference path="./CircleGesture.ts"/>
+/// <reference path="./KeyTapGesture.ts"/>
+/// <reference path="./ScreenTapGesture.ts"/>
+/// <reference path="./SwipeGesture.ts"/>
 /**
  * The Controller class is your main interface to the Leap Motion Controller.
  *

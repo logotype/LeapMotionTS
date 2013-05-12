@@ -1,6 +1,6 @@
-/// <reference path="Frame.ts"/>
-/// <reference path="Hand.ts"/>
-/// <reference path="Pointable.ts"/>
+/// <reference path="./Frame.ts"/>
+/// <reference path="./Hand.ts"/>
+/// <reference path="./Pointable.ts"/>
 /**
  * The Gesture class represents a recognized movement by the user.
  *
