@@ -43,13 +43,13 @@ class Matrix
      * @param _origin A Vector specifying translation factors on all three axes.
      *
      */
-        constructor( x:Vector3, y:Vector3, z:Vector3, _origin:Vector3 = null )
+    constructor( x:Vector3, y:Vector3, z:Vector3, _origin:Vector3 = null )
     {
         this.xBasis = x;
         this.yBasis = y;
         this.zBasis = z;
-
-        if ( _origin )
+    
+        if( _origin )
             this.origin = _origin;
     }
 
@@ -95,7 +95,10 @@ class Matrix
      */
     public transformDirection( inVector:Vector3 ):Vector3
     {
-        return new Vector3( this.xBasis.multiply( inVector.x ).x, this.yBasis.multiply( inVector.y ).y, this.zBasis.multiply( inVector.z ).z );
+        var x:Vector3 = this.xBasis.multiply( inVector.x );
+        var y:Vector3 = this.yBasis.multiply( inVector.y );
+        var z:Vector3 = this.zBasis.multiply( inVector.z );
+        return x.plus( y ).plus( z );
     }
 
     /**
@@ -106,7 +109,7 @@ class Matrix
     public rigidInverse():Matrix
     {
         var rotInverse:Matrix = new Matrix( new Vector3( this.xBasis.x, this.yBasis.x, this.zBasis.x ), new Vector3( this.xBasis.y, this.yBasis.y, this.zBasis.y ), new Vector3( this.xBasis.z, this.yBasis.z, this.zBasis.z ) );
-        if ( this.origin )
+        if( this.origin )
             rotInverse.origin = rotInverse.transformDirection( this.origin.opposite() );
         return rotInverse;
     }
@@ -119,7 +122,15 @@ class Matrix
      */
     public multiply( other:Matrix ):Matrix
     {
-        return new Matrix( this.transformDirection( other.xBasis ), this.transformDirection( other.yBasis ), this.transformDirection( other.zBasis ), this.transformPoint( other.origin ) );
+        var x:Vector3 = this.transformDirection( other.xBasis );
+        var y:Vector3 = this.transformDirection( other.yBasis );
+        var z:Vector3 = this.transformDirection( other.zBasis );
+        var o:Vector3 = this.origin;
+
+        if( this.origin && other.origin )
+            o = this.transformPoint( other.origin );
+
+        return new Matrix( x, y, z, o );
     }
 
     /**
@@ -143,18 +154,18 @@ class Matrix
      * @return True; if equal, False otherwise.
      *
      */
-    public isEqualTo( other:Matrix ):boolean
+    public isEqualTo( other:Matrix ):Boolean
     {
-        if ( !this.xBasis.isEqualTo( other.xBasis ) )
+        if( !this.xBasis.isEqualTo( other.xBasis ) )
             return false;
 
-        if ( !this.yBasis.isEqualTo( other.yBasis ) )
+        if( !this.yBasis.isEqualTo( other.yBasis ) )
             return false;
 
-        if ( !this.zBasis.isEqualTo( other.zBasis ) )
+        if( !this.zBasis.isEqualTo( other.zBasis ) )
             return false;
 
-        if ( !this.origin.isEqualTo( other.origin ) )
+        if( !this.origin.isEqualTo( other.origin ) )
             return false;
 
         return true;
@@ -179,7 +190,7 @@ class Matrix
      * @return
      *
      */
-    public toString():string
+    public toString():String
     {
         return "[Matrix xBasis:" + this.xBasis.toString() + " yBasis:" + this.yBasis.toString() + " zBasis:" + this.zBasis.toString() + " origin:" + this.origin.toString() + "]";
     }

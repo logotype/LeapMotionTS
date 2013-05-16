@@ -349,19 +349,15 @@ class Frame
      */
     public rotationAxis( sinceFrame:Frame ):Vector3
     {
-        var returnValue:Vector3;
-
-        if ( sinceFrame && sinceFrame.rotation )
+        if( sinceFrame && sinceFrame.rotation )
         {
             var vector:Vector3 = new Vector3( this.rotation.zBasis.y - sinceFrame.rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.rotation.xBasis.y );
-            returnValue = vector.normalized();
+            return vector.normalized();
         }
         else
         {
-            returnValue = new Vector3( 0, 0, 0 );
+            return new Vector3( 0, 0, 0 );
         }
-
-        return returnValue;
     }
 
     /**
@@ -386,20 +382,21 @@ class Frame
      */
     public rotationAngle( sinceFrame:Frame, axis:Vector3 = null ):number
     {
-        var returnValue:number = 0;
-        if ( !axis )
-        {
-            var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame );
-            var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1.0 ) * 0.5;
-            var angle:number = Math.acos( cs );
-            returnValue = isNaN( angle ) ? 0 : angle;
-        }
-        else
+        if( !this.isValid() || !sinceFrame.isValid() )
+            return 0.0;
+
+        var returnValue:number = 0.0;
+        var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame );
+        var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1 ) * 0.5;
+        var angle:number = Math.acos( cs );
+        returnValue = isNaN( angle ) ? 0.0 : angle;
+
+        if( axis )
         {
             var rotAxis:Vector3 = this.rotationAxis( sinceFrame );
-            var rotAngle:number = this.rotationAngle( sinceFrame );
-            returnValue = rotAngle * rotAxis.dot( axis.normalized() );
+            returnValue *= rotAxis.dot( axis.normalized() );
         }
+
         return returnValue;
     }
 
@@ -418,14 +415,14 @@ class Frame
      */
     public rotationMatrix( sinceFrame:Frame ):Matrix
     {
-        var returnValue:Matrix;
-
-        if ( sinceFrame && sinceFrame.rotation )
-            returnValue = this.rotation.multiply( sinceFrame.rotation );
+        if( sinceFrame && sinceFrame.rotation )
+        {
+            return sinceFrame.rotation.multiply( new Matrix( new Vector3( this.rotation.xBasis.x, this.rotation.yBasis.x, this.rotation.zBasis.x ), new Vector3( this.rotation.xBasis.y, this.rotation.yBasis.y, this.rotation.zBasis.y ), new Vector3( this.rotation.xBasis.z, this.rotation.yBasis.z, this.rotation.zBasis.z ) ) );
+        }
         else
-            returnValue = Matrix.identity();
-
-        return returnValue;
+        {
+            return Matrix.identity();
+        }
     }
 
     /**

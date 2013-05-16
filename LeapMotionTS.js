@@ -592,42 +592,34 @@ define(["require", "exports"], function(require, exports) {
             return returnValue;
         };
         Hand.prototype.rotationAxis = function (sinceFrame) {
-            var returnValue;
             if (sinceFrame.hand(this.id)) {
-                var vector = new Vector3(this.rotation.zBasis.y - sinceFrame.hand(this.id).rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.hand(this.id).rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.hand(this.id).rotation.xBasis.y);
-                returnValue = vector.normalized();
+                return new Vector3(this.rotation.zBasis.y - sinceFrame.hand(this.id).rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.hand(this.id).rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.hand(this.id).rotation.xBasis.y).normalized();
             } else {
-                returnValue = new Vector3(0, 0, 0);
+                return new Vector3(0, 0, 0);
             }
-            return returnValue;
         };
         Hand.prototype.rotationAngle = function (sinceFrame, axis) {
             if (typeof axis === "undefined") { axis = null; }
-            var returnValue = 0;
-            if (!axis) {
-                if (sinceFrame.hand(this.id) && sinceFrame.hand(this.id).frame) {
-                    var rotationSinceFrameMatrix = this.rotationMatrix(sinceFrame.hand(this.id).frame);
-                    var cs = (rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z) * 0.5;
-                    var angle = Math.acos(cs);
-                    returnValue = isNaN(angle) ? 0 : angle;
-                }
-            } else {
-                if (sinceFrame.hand(this.id) && sinceFrame.hand(this.id).frame) {
-                    var rotAxis = this.rotationAxis(sinceFrame.hand(this.id).frame);
-                    var rotAngle = this.rotationAngle(sinceFrame.hand(this.id).frame);
-                    returnValue = rotAngle * rotAxis.dot(axis.normalized());
-                }
+            if (!this.isValid() || !sinceFrame.hand(this.id).isValid()) {
+                return 0.0;
+            }
+            var returnValue = 0.0;
+            var rotationSinceFrameMatrix = this.rotationMatrix(sinceFrame);
+            var cs = (rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1) * 0.5;
+            var angle = Math.acos(cs);
+            returnValue = isNaN(angle) ? 0.0 : angle;
+            if (axis) {
+                var rotAxis = this.rotationAxis(sinceFrame.hand(this.id).frame);
+                returnValue *= rotAxis.dot(axis.normalized());
             }
             return returnValue;
         };
         Hand.prototype.rotationMatrix = function (sinceFrame) {
-            var returnValue;
-            if (sinceFrame.hand(this.id) && sinceFrame.hand(this.id).rotation) {
-                returnValue = this.rotation.multiply(sinceFrame.hand(this.id).rotation);
+            if (sinceFrame.hand(this.id).isValid()) {
+                return sinceFrame.hand(this.id).rotation.multiply(new Matrix(new Vector3(this.rotation.xBasis.x, this.rotation.yBasis.x, this.rotation.zBasis.x), new Vector3(this.rotation.xBasis.y, this.rotation.yBasis.y, this.rotation.zBasis.y), new Vector3(this.rotation.xBasis.z, this.rotation.yBasis.z, this.rotation.zBasis.z)));
             } else {
-                returnValue = Matrix.identity();
+                return Matrix.identity();
             }
-            return returnValue;
         };
         Hand.prototype.scaleFactor = function (sinceFrame) {
             var returnValue;
@@ -734,38 +726,35 @@ define(["require", "exports"], function(require, exports) {
             }
         };
         Frame.prototype.rotationAxis = function (sinceFrame) {
-            var returnValue;
             if (sinceFrame && sinceFrame.rotation) {
                 var vector = new Vector3(this.rotation.zBasis.y - sinceFrame.rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.rotation.xBasis.y);
-                returnValue = vector.normalized();
+                return vector.normalized();
             } else {
-                returnValue = new Vector3(0, 0, 0);
+                return new Vector3(0, 0, 0);
             }
-            return returnValue;
         };
         Frame.prototype.rotationAngle = function (sinceFrame, axis) {
             if (typeof axis === "undefined") { axis = null; }
-            var returnValue = 0;
-            if (!axis) {
-                var rotationSinceFrameMatrix = this.rotationMatrix(sinceFrame);
-                var cs = (rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1.0) * 0.5;
-                var angle = Math.acos(cs);
-                returnValue = isNaN(angle) ? 0 : angle;
-            } else {
+            if (!this.isValid() || !sinceFrame.isValid()) {
+                return 0.0;
+            }
+            var returnValue = 0.0;
+            var rotationSinceFrameMatrix = this.rotationMatrix(sinceFrame);
+            var cs = (rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1) * 0.5;
+            var angle = Math.acos(cs);
+            returnValue = isNaN(angle) ? 0.0 : angle;
+            if (axis) {
                 var rotAxis = this.rotationAxis(sinceFrame);
-                var rotAngle = this.rotationAngle(sinceFrame);
-                returnValue = rotAngle * rotAxis.dot(axis.normalized());
+                returnValue *= rotAxis.dot(axis.normalized());
             }
             return returnValue;
         };
         Frame.prototype.rotationMatrix = function (sinceFrame) {
-            var returnValue;
             if (sinceFrame && sinceFrame.rotation) {
-                returnValue = this.rotation.multiply(sinceFrame.rotation);
+                return sinceFrame.rotation.multiply(new Matrix(new Vector3(this.rotation.xBasis.x, this.rotation.yBasis.x, this.rotation.zBasis.x), new Vector3(this.rotation.xBasis.y, this.rotation.yBasis.y, this.rotation.zBasis.y), new Vector3(this.rotation.xBasis.z, this.rotation.yBasis.z, this.rotation.zBasis.z)));
             } else {
-                returnValue = Matrix.identity();
+                return Matrix.identity();
             }
-            return returnValue;
         };
         Frame.prototype.scaleFactor = function (sinceFrame) {
             var returnValue;
@@ -831,7 +820,10 @@ define(["require", "exports"], function(require, exports) {
             return new Vector3(this.xBasis.multiply(inVector.x).x, this.yBasis.multiply(inVector.y).y, this.zBasis.multiply(inVector.z).z + this.origin.z);
         };
         Matrix.prototype.transformDirection = function (inVector) {
-            return new Vector3(this.xBasis.multiply(inVector.x).x, this.yBasis.multiply(inVector.y).y, this.zBasis.multiply(inVector.z).z);
+            var x = this.xBasis.multiply(inVector.x);
+            var y = this.yBasis.multiply(inVector.y);
+            var z = this.zBasis.multiply(inVector.z);
+            return x.plus(y).plus(z);
         };
         Matrix.prototype.rigidInverse = function () {
             var rotInverse = new Matrix(new Vector3(this.xBasis.x, this.yBasis.x, this.zBasis.x), new Vector3(this.xBasis.y, this.yBasis.y, this.zBasis.y), new Vector3(this.xBasis.z, this.yBasis.z, this.zBasis.z));
@@ -841,7 +833,14 @@ define(["require", "exports"], function(require, exports) {
             return rotInverse;
         };
         Matrix.prototype.multiply = function (other) {
-            return new Matrix(this.transformDirection(other.xBasis), this.transformDirection(other.yBasis), this.transformDirection(other.zBasis), this.transformPoint(other.origin));
+            var x = this.transformDirection(other.xBasis);
+            var y = this.transformDirection(other.yBasis);
+            var z = this.transformDirection(other.zBasis);
+            var o = this.origin;
+            if (this.origin && other.origin) {
+                o = this.transformPoint(other.origin);
+            }
+            return new Matrix(x, y, z, o);
         };
         Matrix.prototype.multiplyAssign = function (other) {
             this.xBasis = this.transformDirection(other.xBasis);
@@ -1058,4 +1057,3 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Vector3 = Vector3;    
 })
-//@ sourceMappingURL=LeapMotionTS.js.map

@@ -291,19 +291,14 @@ class Hand
      */
     public rotationAxis( sinceFrame:Frame ):Vector3
     {
-        var returnValue:Vector3;
-
-        if ( sinceFrame.hand( this.id ) )
+        if( sinceFrame.hand( this.id ) )
         {
-            var vector:Vector3 = new Vector3( this.rotation.zBasis.y - sinceFrame.hand( this.id ).rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.hand( this.id ).rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.hand( this.id ).rotation.xBasis.y );
-            returnValue = vector.normalized();
+            return new Vector3( this.rotation.zBasis.y - sinceFrame.hand( this.id ).rotation.yBasis.z, this.rotation.xBasis.z - sinceFrame.hand( this.id ).rotation.zBasis.x, this.rotation.yBasis.x - sinceFrame.hand( this.id ).rotation.xBasis.y ).normalized();
         }
         else
         {
-            returnValue = new Vector3( 0, 0, 0 );
+            return new Vector3( 0, 0, 0 );
         }
-
-        return returnValue;
     }
 
     /**
@@ -328,26 +323,21 @@ class Hand
      */
     public rotationAngle( sinceFrame:Frame, axis:Vector3 = null ):number
     {
-        var returnValue:number = 0;
-        if( !axis )
+        if( !this.isValid() || !sinceFrame.hand( this.id ).isValid() )
+            return 0.0;
+
+        var returnValue:number = 0.0;
+        var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame );
+        var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1 ) * 0.5;
+        var angle:number = Math.acos( cs );
+        returnValue = isNaN( angle ) ? 0.0 : angle;
+
+        if( axis )
         {
-            if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).frame )
-            {
-                var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame.hand( this.id ).frame );
-                var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z ) * 0.5;
-                var angle:number = Math.acos( cs );
-                returnValue = isNaN( angle ) ? 0 : angle;
-            }
+            var rotAxis:Vector3 = this.rotationAxis( sinceFrame.hand( this.id ).frame );
+            returnValue *= rotAxis.dot( axis.normalized() );
         }
-        else
-        {
-            if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).frame )
-            {
-                var rotAxis:Vector3 = this.rotationAxis( sinceFrame.hand( this.id ).frame );
-                var rotAngle:number = this.rotationAngle( sinceFrame.hand( this.id ).frame );
-                returnValue = rotAngle * rotAxis.dot( axis.normalized() );
-            }
-        }
+
         return returnValue;
     }
 
@@ -370,14 +360,14 @@ class Hand
      */
     public rotationMatrix( sinceFrame:Frame ):Matrix
     {
-        var returnValue:Matrix;
-
-        if ( sinceFrame.hand( this.id ) && sinceFrame.hand( this.id ).rotation )
-            returnValue = this.rotation.multiply( sinceFrame.hand( this.id ).rotation );
+        if( sinceFrame.hand( this.id ).isValid() )
+        {
+            return sinceFrame.hand( this.id ).rotation.multiply( new Matrix( new Vector3( this.rotation.xBasis.x, this.rotation.yBasis.x, this.rotation.zBasis.x ), new Vector3( this.rotation.xBasis.y, this.rotation.yBasis.y, this.rotation.zBasis.y ), new Vector3( this.rotation.xBasis.z, this.rotation.yBasis.z, this.rotation.zBasis.z ) ) );
+        }
         else
-            returnValue = Matrix.identity();
-
-        return returnValue;
+        {
+            return Matrix.identity();
+        }
     }
 
     /**
