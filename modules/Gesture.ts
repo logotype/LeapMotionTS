@@ -189,7 +189,7 @@ class Gesture
     /**
      * The elapsed duration in seconds.
      */
-    public durationSeconds:Number;
+    public durationSeconds:number;
 
     /**
      * The Frame containing this Gesture instance.

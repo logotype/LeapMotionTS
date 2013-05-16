@@ -1294,7 +1294,7 @@ export class Gesture
     /**
      * The elapsed duration in seconds.
      */
-    public durationSeconds:Number;
+    public durationSeconds:number;
 
     /**
      * The Frame containing this Gesture instance.
@@ -2649,7 +2649,7 @@ export class Matrix
      * @return True; if equal, False otherwise.
      *
      */
-    public isEqualTo( other:Matrix ):Boolean
+    public isEqualTo( other:Matrix ):boolean
     {
         if( !this.xBasis.isEqualTo( other.xBasis ) )
             return false;
@@ -2685,7 +2685,7 @@ export class Matrix
      * @return
      *
      */
-    public toString():String
+    public toString():string
     {
         return "[Matrix xBasis:" + this.xBasis.toString() + " yBasis:" + this.yBasis.toString() + " zBasis:" + this.zBasis.toString() + " origin:" + this.origin.toString() + "]";
     }
