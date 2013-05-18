@@ -2,7 +2,7 @@
 /// <reference path="./Vector3.ts"/>
 /// <reference path="./Pointable.ts"/>
 /**
- * The CircleGesture classes represents a circular finger movement.
+ * The CircleGesture class represents a circular finger movement.
  *
  * <p>A circle movement is recognized when the tip of a finger draws
  * a circle within the Leap field of view.</p>
@@ -115,7 +115,7 @@ class CircleGesture extends Gesture
      * Get valid instances of the CircleGesture class from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
         this.pointable = Pointable.invalid();

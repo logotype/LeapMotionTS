@@ -195,6 +195,8 @@ define(["require", "exports"], function(require, exports) {
             var _this = this;
             _super.call(this);
             this.frameHistory = [];
+            this._isConnected = false;
+            this._isGesturesEnabled = false;
             this.listener = new DefaultListener();
             if (!host) {
                 this.connection = new WebSocket("ws://localhost:6437");
@@ -203,9 +205,11 @@ define(["require", "exports"], function(require, exports) {
             }
             this.listener.onInit(this);
             this.connection.onopen = function (event) {
+                _this._isConnected = true;
                 _this.listener.onConnect(_this);
             };
             this.connection.onclose = function (data) {
+                _this._isConnected = false;
                 _this.listener.onDisconnect(_this);
             };
             this.connection.onmessage = function (data) {
@@ -385,8 +389,6 @@ define(["require", "exports"], function(require, exports) {
                 _this.listener.onFrame(_this, _this.latestFrame);
             };
         }
-        Controller.POLICY_DEFAULT = 0;
-        Controller.POLICY_BACKGROUND_FRAMES = (1 << 0);
         Controller.getHandByID = function getHandByID(frame, id) {
             var returnValue = null;
             var i = 0;
@@ -411,16 +413,32 @@ define(["require", "exports"], function(require, exports) {
         };
         Controller.prototype.frame = function (history) {
             if (typeof history === "undefined") { history = 0; }
-            var returnValue;
             if (history >= this.frameHistory.length) {
-                returnValue = Frame.invalid();
+                return Frame.invalid();
             } else {
-                returnValue = this.frameHistory[history];
+                return this.frameHistory[history];
             }
-            return returnValue;
         };
         Controller.prototype.setListener = function (listener) {
             this.listener = listener;
+        };
+        Controller.prototype.enableGesture = function (type, enable) {
+            if (typeof enable === "undefined") { enable = true; }
+            var enableObject = {};
+            if (enable) {
+                this._isGesturesEnabled = true;
+                enableObject["enableGestures"] = true;
+            } else {
+                this._isGesturesEnabled = false;
+                enableObject["enableGestures"] = false;
+            }
+            this.connection.send(JSON.stringify(enableObject));
+        };
+        Controller.prototype.isGestureEnabled = function (type) {
+            return this._isGesturesEnabled;
+        };
+        Controller.prototype.isConnected = function () {
+            return this._isConnected;
         };
         return Controller;
     })(EventDispatcher);

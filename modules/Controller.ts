@@ -48,24 +48,13 @@
 class Controller extends EventDispatcher
 {
     /**
-     * The default policy.
-     *
-     * <p>Currently, the only supported policy is the background frames policy,
-     * which determines whether your application receives frames of tracking
-     * data when it is not the focused, foreground application.</p>
+     * @private
+     * The Listener subclass instance.
      */
-    public static POLICY_DEFAULT:number = 0;
+    private listener:Listener;
 
     /**
-     * Receive background frames.
-     *
-     * <p>Currently, the only supported policy is the background frames policy,
-     * which determines whether your application receives frames of tracking
-     * data when it is not the focused, foreground application.</p>
-     */
-    public static POLICY_BACKGROUND_FRAMES:number = (1 << 0);
-
-    /**
+     * @private
      * History of frame of tracking data from the Leap.
      */
     public frameHistory:Frame[] = [];
@@ -81,33 +70,16 @@ class Controller extends EventDispatcher
     public connection:WebSocket;
 
     /**
-     * Listener connection.
+     * @private
+     * Reports whether this Controller is connected to the Leap Motion Controller.
      */
-    public listener:Listener;
+    public _isConnected:boolean = false;
 
     /**
-     * Finds a Hand object by ID.
-     *
-     * @param frame The Frame object in which the Hand contains
-     * @param id The ID of the Hand object
-     * @return The Hand object if found, otherwise null
-     *
+     * @private
+     * Reports whether gestures is enabled.
      */
-    private static getHandByID( frame:Frame, id:number ):Hand
-    {
-        var returnValue:Hand = null;
-        var i:number = 0;
-
-        for( i = 0; i < frame.hands.length; ++i )
-        {
-            if ( (<Hand>frame.hands[ i ]).id === id )
-            {
-                returnValue = (<Hand>frame.hands[ i ]);
-                break;
-            }
-        }
-        return returnValue;
-    }
+    public _isGesturesEnabled:boolean = false;
 
     /**
      * Constructs a Controller object.
@@ -134,11 +106,13 @@ class Controller extends EventDispatcher
 
         this.connection.onopen = ( event:Event ) =>
         {
+            this._isConnected = true;
             this.listener.onConnect( this );
         };
 
         this.connection.onclose = ( data:Object ) =>
         {
+            this._isConnected = false;
             this.listener.onDisconnect( this );
         };
 
@@ -375,6 +349,30 @@ class Controller extends EventDispatcher
     }
 
     /**
+     * Finds a Hand object by ID.
+     *
+     * @param frame The Frame object in which the Hand contains
+     * @param id The ID of the Hand object
+     * @return The Hand object if found, otherwise null
+     *
+     */
+    private static getHandByID( frame:Frame, id:number ):Hand
+    {
+        var returnValue:Hand = null;
+        var i:number = 0;
+
+        for( i = 0; i < frame.hands.length; ++i )
+        {
+            if ( (<Hand>frame.hands[ i ]).id === id )
+            {
+                returnValue = (<Hand>frame.hands[ i ]);
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    /**
      * Finds a Pointable object by ID.
      *
      * @param frame The Frame object in which the Pointable contains
@@ -417,14 +415,10 @@ class Controller extends EventDispatcher
      */
     public frame( history:number = 0 ):Frame
     {
-        var returnValue:Frame;
-
-        if ( history >= this.frameHistory.length )
-            returnValue = Frame.invalid();
+        if( history >= this.frameHistory.length )
+            return Frame.invalid();
         else
-            returnValue = this.frameHistory[ history ];
-
-        return returnValue;
+            return this.frameHistory[ history ];
     }
 
     /**
@@ -442,4 +436,67 @@ class Controller extends EventDispatcher
         this.listener = listener;
     }
 
+    /**
+     * Enables or disables reporting of a specified gesture type.
+     *
+     * <p>By default, all gesture types are disabled. When disabled, gestures of
+     * the disabled type are never reported and will not appear in the frame
+     * gesture list.</p>
+     *
+     * <p>As a performance optimization, only enable recognition for the types
+     * of movements that you use in your application.</p>
+     *
+     * @param type The type of gesture to enable or disable. Must be a member of the Gesture::Type enumeration.
+     * @param enable True, to enable the specified gesture type; False, to disable.
+     *
+     */
+    public enableGesture( type:number, enable:boolean = true ):void
+    {
+        var enableObject:Object = {};
+
+        if( enable )
+        {
+            this._isGesturesEnabled = true;
+            enableObject["enableGestures"] = true;
+        }
+        else
+        {
+            this._isGesturesEnabled = false;
+            enableObject["enableGestures"] = false;
+        }
+
+        this.connection.send( JSON.stringify( enableObject ) );
+    }
+
+    /**
+     * Reports whether the specified gesture type is enabled.
+     *
+     * @param type The Gesture.TYPE parameter.
+     * @return True, if the specified type is enabled; false, otherwise.
+     *
+     */
+    public isGestureEnabled( type:number ):boolean
+    {
+        return this._isGesturesEnabled;
+    }
+
+    /**
+     * Reports whether this Controller is connected to the Leap Motion Controller.
+     *
+     * <p>When you first create a Controller object, <code>isConnected()</code> returns false.
+     * After the controller finishes initializing and connects to
+     * the Leap, <code>isConnected()</code> will return true.</p>
+     *
+     * <p>You can either handle the onConnect event using a event listener
+     * or poll the <code>isConnected()</code> if you need to wait for your
+     * application to be connected to the Leap before performing
+     * some other operation.</p>
+     *
+     * @return True, if connected; false otherwise.
+     *
+     */
+    public isConnected():boolean
+    {
+        return this._isConnected;
+    }
 }
