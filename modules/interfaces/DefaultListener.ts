@@ -5,8 +5,9 @@
 class DefaultListener extends EventDispatcher implements Listener
 {
 
-    public DefaultListener()
+    constructor()
     {
+        super();
     }
 
     public onConnect( controller:Controller ):void

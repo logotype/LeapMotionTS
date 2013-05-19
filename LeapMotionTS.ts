@@ -17,7 +17,10 @@ export class EventDispatcher
         for( var i:number = 0; i < this._listeners.length; i++ )
         {
             if( this._listeners[ i ].type === type && this._listeners[ i ].listener === listener )
+            {
                 exists = true;
+                break;
+            }
         }
 
         return exists;
@@ -159,8 +162,9 @@ export interface Listener
 export class DefaultListener extends EventDispatcher implements Listener
 {
 
-    public DefaultListener()
+    constructor()
     {
+        super();
     }
 
     public onConnect( controller:Controller ):void
@@ -199,14 +203,14 @@ export class LeapEvent
     public static LEAPMOTION_FRAME:string = "leapMotionFrame";
 
     private _type:string;
-    private _target:any;
+    private _target:Listener;
 
     public frame:Frame;
 
-    constructor( type:string, targetObj:Listener, frame:Frame = null )
+    constructor( type:string, targetListener:Listener, frame:Frame = null )
     {
         this._type = type;
-        this._target = targetObj;
+        this._target = targetListener;
         this.frame = frame;
     }
 
@@ -257,7 +261,7 @@ export class LeapUtil
      */
     public static EPSILON:number = 0.00001;
 
-    public LeapUtil()
+    constructor()
     {
     }
 
@@ -615,7 +619,7 @@ export class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json["hands"].length;
-                for ( i = 0; i < length; ++i )
+                for ( i = 0; i < length; i++ )
                 {
                     hand = new Hand();
                     hand.frame = currentFrame;
@@ -641,7 +645,7 @@ export class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json["pointables"].length;
-                for ( i = 0; i < length; ++i )
+                for ( i = 0; i < length; i++ )
                 {
                     isTool = json["pointables"][ i ].tool;
                     if ( isTool )
@@ -686,7 +690,7 @@ export class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json["gestures"].length;
-                for ( i = 0; i < length; ++i )
+                for ( i = 0; i < length; i++ )
                 {
                     switch( json["gestures"][ i ].type )
                     {
@@ -832,7 +836,7 @@ export class Controller extends EventDispatcher
         var returnValue:Hand = null;
         var i:number = 0;
 
-        for( i = 0; i < frame.hands.length; ++i )
+        for( i = 0; i < frame.hands.length; i++ )
         {
             if ( (<Hand>frame.hands[ i ]).id === id )
             {
@@ -856,7 +860,7 @@ export class Controller extends EventDispatcher
         var returnValue:Pointable = null;
         var i:number = 0;
 
-        for( i = 0; i < frame.pointables.length; ++i )
+        for( i = 0; i < frame.pointables.length; i++ )
         {
             if ( (<Pointable>frame.pointables[ i ]).id === id )
             {
@@ -1403,7 +1407,7 @@ export class Gesture
      * subclasses, from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
     }
 
@@ -1494,7 +1498,7 @@ export class Finger extends Pointable
      * Get valid Finger objects from a Frame or a Hand object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
         this.isFinger = true;
@@ -1687,7 +1691,7 @@ export class Hand
      * Get valid Hand objects from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
     }
 
@@ -1747,7 +1751,7 @@ export class Hand
         var returnValue:Finger = Finger.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.fingers[ i ].id === id )
             {
@@ -1784,7 +1788,7 @@ export class Hand
         var returnValue:Tool = Tool.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.tools[ i ].id === id )
             {
@@ -1820,7 +1824,7 @@ export class Hand
         var returnValue:Pointable = Pointable.invalid();
         var length:number = this.pointables.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.pointables[ i ].id === id )
             {
@@ -2106,7 +2110,7 @@ export class Frame
      * Get valid Frame objects by calling the <code>LeapMotion.frame()</code> function.</p>
      *
      */
-        constructor()
+    constructor()
     {
     }
 
@@ -2135,7 +2139,7 @@ export class Frame
         var returnValue:Hand = Hand.invalid();
         var length:number = this.hands.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.hands[ i ].id === id )
             {
@@ -2173,7 +2177,7 @@ export class Frame
         var returnValue:Finger = Finger.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.fingers[ i ].id === id )
             {
@@ -2211,7 +2215,7 @@ export class Frame
         var returnValue:Tool = Tool.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.tools[ i ].id === id )
             {
@@ -2248,7 +2252,7 @@ export class Frame
         var returnValue:Pointable = Pointable.invalid();
         var length:number = this.pointables.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.pointables[ i ].id === id )
             {
@@ -2280,7 +2284,7 @@ export class Frame
         var returnValue:Gesture = Gesture.invalid();
         var length:number = this._gestures.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this._gestures[ i ].id === id )
             {
@@ -2316,7 +2320,7 @@ export class Frame
             // Returns a Gesture vector containing all gestures that have occured since the specified frame.
             var gesturesSinceFrame:Gesture[] = [];
 
-            for ( var i:number = 0; i < this.controller.frameHistory.length; ++i )
+            for ( var i:number = 0; i < this.controller.frameHistory.length; i++ )
             {
                 for ( var j:number = 0; j < this.controller.frameHistory[ i ]._gestures.length; ++j )
                     gesturesSinceFrame.push( this.controller.frameHistory[ i ]._gestures[ j ] );
@@ -2970,7 +2974,7 @@ export class KeyTapGesture extends Gesture
      * Get valid instances of the KeyTapGesture export class from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
     }
@@ -3069,7 +3073,7 @@ export class ScreenTapGesture extends Gesture
      * Get valid instances of the ScreenTapGesture export class from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
     }
@@ -3161,7 +3165,7 @@ export class SwipeGesture extends Gesture
      * Constructs a SwipeGesture object from an instance of the Gesture class.
      *
      */
-        constructor()
+    constructor()
     {
         super();
     }
@@ -3206,7 +3210,7 @@ export class Vector3
      * @param z The depth component.
      *
      */
-        constructor( x:number, y:number, z:number )
+    constructor( x:number, y:number, z:number )
     {
         this.x = x;
         this.y = y;

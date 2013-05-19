@@ -9,14 +9,14 @@ class LeapEvent
     public static LEAPMOTION_FRAME:string = "leapMotionFrame";
 
     private _type:string;
-    private _target:any;
+    private _target:Listener;
 
     public frame:Frame;
 
-    constructor( type:string, targetObj:Listener, frame:Frame = null )
+    constructor( type:string, targetListener:Listener, frame:Frame = null )
     {
         this._type = type;
-        this._target = targetObj;
+        this._target = targetListener;
         this.frame = frame;
     }
 

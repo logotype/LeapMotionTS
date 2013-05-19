@@ -241,7 +241,7 @@ class Gesture
      * subclasses, from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
     }
 

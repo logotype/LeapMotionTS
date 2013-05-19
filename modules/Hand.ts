@@ -126,7 +126,7 @@ class Hand
      * Get valid Hand objects from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
     }
 
@@ -186,7 +186,7 @@ class Hand
         var returnValue:Finger = Finger.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.fingers[ i ].id === id )
             {
@@ -223,7 +223,7 @@ class Hand
         var returnValue:Tool = Tool.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.tools[ i ].id === id )
             {
@@ -259,7 +259,7 @@ class Hand
         var returnValue:Pointable = Pointable.invalid();
         var length:number = this.pointables.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.pointables[ i ].id === id )
             {

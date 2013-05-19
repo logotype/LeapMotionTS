@@ -144,7 +144,7 @@ class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json["hands"].length;
-                for ( i = 0; i < length; ++i )
+                for ( i = 0; i < length; i++ )
                 {
                     hand = new Hand();
                     hand.frame = currentFrame;
@@ -170,7 +170,7 @@ class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json["pointables"].length;
-                for ( i = 0; i < length; ++i )
+                for ( i = 0; i < length; i++ )
                 {
                     isTool = json["pointables"][ i ].tool;
                     if ( isTool )
@@ -215,7 +215,7 @@ class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json["gestures"].length;
-                for ( i = 0; i < length; ++i )
+                for ( i = 0; i < length; i++ )
                 {
                     switch( json["gestures"][ i ].type )
                     {
@@ -361,7 +361,7 @@ class Controller extends EventDispatcher
         var returnValue:Hand = null;
         var i:number = 0;
 
-        for( i = 0; i < frame.hands.length; ++i )
+        for( i = 0; i < frame.hands.length; i++ )
         {
             if ( (<Hand>frame.hands[ i ]).id === id )
             {
@@ -385,7 +385,7 @@ class Controller extends EventDispatcher
         var returnValue:Pointable = null;
         var i:number = 0;
 
-        for( i = 0; i < frame.pointables.length; ++i )
+        for( i = 0; i < frame.pointables.length; i++ )
         {
             if ( (<Pointable>frame.pointables[ i ]).id === id )
             {

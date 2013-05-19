@@ -39,7 +39,7 @@ class Vector3
      * @param z The depth component.
      *
      */
-        constructor( x:number, y:number, z:number )
+    constructor( x:number, y:number, z:number )
     {
         this.x = x;
         this.y = y;

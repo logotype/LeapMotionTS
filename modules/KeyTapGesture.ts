@@ -100,7 +100,7 @@ class KeyTapGesture extends Gesture
      * Get valid instances of the KeyTapGesture class from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
     }

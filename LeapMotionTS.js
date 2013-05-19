@@ -13,6 +13,7 @@ define(["require", "exports"], function(require, exports) {
             for(var i = 0; i < this._listeners.length; i++) {
                 if (this._listeners[i].type === type && this._listeners[i].listener === listener) {
                     exists = true;
+                    break;
                 }
             }
             return exists;
@@ -46,11 +47,8 @@ define(["require", "exports"], function(require, exports) {
     var DefaultListener = (function (_super) {
         __extends(DefaultListener, _super);
         function DefaultListener() {
-            _super.apply(this, arguments);
-
+            _super.call(this);
         }
-        DefaultListener.prototype.DefaultListener = function () {
-        };
         DefaultListener.prototype.onConnect = function (controller) {
             controller.dispatchEvent(new LeapEvent(LeapEvent.LEAPMOTION_CONNECTED, this));
         };
@@ -70,10 +68,10 @@ define(["require", "exports"], function(require, exports) {
     })(EventDispatcher);
     exports.DefaultListener = DefaultListener;    
     var LeapEvent = (function () {
-        function LeapEvent(type, targetObj, frame) {
+        function LeapEvent(type, targetListener, frame) {
             if (typeof frame === "undefined") { frame = null; }
             this._type = type;
-            this._target = targetObj;
+            this._target = targetListener;
             this.frame = frame;
         }
         LeapEvent.LEAPMOTION_INIT = "leapMotionInit";
@@ -91,15 +89,14 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.LeapEvent = LeapEvent;    
     var LeapUtil = (function () {
-        function LeapUtil() { }
+        function LeapUtil() {
+        }
         LeapUtil.PI = 3.1415926536;
         LeapUtil.DEG_TO_RAD = 0.0174532925;
         LeapUtil.RAD_TO_DEG = 57.295779513;
         LeapUtil.TWO_PI = Math.PI + Math.PI;
         LeapUtil.HALF_PI = Math.PI * 0.5;
         LeapUtil.EPSILON = 0.00001;
-        LeapUtil.prototype.LeapUtil = function () {
-        };
         LeapUtil.toDegrees = function toDegrees(radians) {
             return radians * 180 / Math.PI;
         };
@@ -231,7 +228,7 @@ define(["require", "exports"], function(require, exports) {
                 if (!(typeof json["hands"] === "undefined")) {
                     i = 0;
                     length = json["hands"].length;
-                    for(i = 0; i < length; ++i) {
+                    for(i = 0; i < length; i++) {
                         hand = new Hand();
                         hand.frame = currentFrame;
                         hand.direction = new Vector3(json["hands"][i].direction[0], json["hands"][i].direction[1], json["hands"][i].direction[2]);
@@ -251,7 +248,7 @@ define(["require", "exports"], function(require, exports) {
                 if (!(typeof json["pointables"] === "undefined")) {
                     i = 0;
                     length = json["pointables"].length;
-                    for(i = 0; i < length; ++i) {
+                    for(i = 0; i < length; i++) {
                         isTool = json["pointables"][i].tool;
                         if (isTool) {
                             pointable = new Tool();
@@ -290,7 +287,7 @@ define(["require", "exports"], function(require, exports) {
                 if (!(typeof json["gestures"] === "undefined")) {
                     i = 0;
                     length = json["gestures"].length;
-                    for(i = 0; i < length; ++i) {
+                    for(i = 0; i < length; i++) {
                         switch(json["gestures"][i].type) {
                             case "circle":
                                 gesture = new CircleGesture();
@@ -392,7 +389,7 @@ define(["require", "exports"], function(require, exports) {
         Controller.getHandByID = function getHandByID(frame, id) {
             var returnValue = null;
             var i = 0;
-            for(i = 0; i < frame.hands.length; ++i) {
+            for(i = 0; i < frame.hands.length; i++) {
                 if ((frame.hands[i]).id === id) {
                     returnValue = (frame.hands[i]);
                     break;
@@ -403,7 +400,7 @@ define(["require", "exports"], function(require, exports) {
         Controller.getPointableByID = function getPointableByID(frame, id) {
             var returnValue = null;
             var i = 0;
-            for(i = 0; i < frame.pointables.length; ++i) {
+            for(i = 0; i < frame.pointables.length; i++) {
                 if ((frame.pointables[i]).id === id) {
                     returnValue = (frame.pointables[i]);
                     break;
@@ -579,7 +576,7 @@ define(["require", "exports"], function(require, exports) {
         Hand.prototype.finger = function (id) {
             var returnValue = Finger.invalid();
             var length = this.fingers.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.fingers[i].id === id) {
                     returnValue = this.fingers[i];
                     break;
@@ -590,7 +587,7 @@ define(["require", "exports"], function(require, exports) {
         Hand.prototype.tool = function (id) {
             var returnValue = Tool.invalid();
             var length = this.fingers.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.tools[i].id === id) {
                     returnValue = this.tools[i];
                     break;
@@ -601,7 +598,7 @@ define(["require", "exports"], function(require, exports) {
         Hand.prototype.pointable = function (id) {
             var returnValue = Pointable.invalid();
             var length = this.pointables.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.pointables[i].id === id) {
                     returnValue = this.pointables[i];
                     break;
@@ -674,7 +671,7 @@ define(["require", "exports"], function(require, exports) {
         Frame.prototype.hand = function (id) {
             var returnValue = Hand.invalid();
             var length = this.hands.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.hands[i].id === id) {
                     returnValue = this.hands[i];
                     break;
@@ -685,7 +682,7 @@ define(["require", "exports"], function(require, exports) {
         Frame.prototype.finger = function (id) {
             var returnValue = Finger.invalid();
             var length = this.fingers.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.fingers[i].id === id) {
                     returnValue = this.fingers[i];
                     break;
@@ -696,7 +693,7 @@ define(["require", "exports"], function(require, exports) {
         Frame.prototype.tool = function (id) {
             var returnValue = Tool.invalid();
             var length = this.fingers.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.tools[i].id === id) {
                     returnValue = this.tools[i];
                     break;
@@ -707,7 +704,7 @@ define(["require", "exports"], function(require, exports) {
         Frame.prototype.pointable = function (id) {
             var returnValue = Pointable.invalid();
             var length = this.pointables.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this.pointables[i].id === id) {
                     returnValue = this.pointables[i];
                     break;
@@ -718,7 +715,7 @@ define(["require", "exports"], function(require, exports) {
         Frame.prototype.gesture = function (id) {
             var returnValue = Gesture.invalid();
             var length = this._gestures.length;
-            for(var i = 0; i < length; ++i) {
+            for(var i = 0; i < length; i++) {
                 if (this._gestures[i].id === id) {
                     returnValue = this._gestures[i];
                     break;
@@ -732,7 +729,7 @@ define(["require", "exports"], function(require, exports) {
                 return this._gestures;
             } else {
                 var gesturesSinceFrame = [];
-                for(var i = 0; i < this.controller.frameHistory.length; ++i) {
+                for(var i = 0; i < this.controller.frameHistory.length; i++) {
                     for(var j = 0; j < this.controller.frameHistory[i]._gestures.length; ++j) {
                         gesturesSinceFrame.push(this.controller.frameHistory[i]._gestures[j]);
                     }
@@ -1075,3 +1072,4 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Vector3 = Vector3;    
 })
+//@ sourceMappingURL=LeapMotionTS.js.map

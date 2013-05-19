@@ -36,7 +36,7 @@ class LeapUtil
      */
     public static EPSILON:number = 0.00001;
 
-    public LeapUtil()
+    constructor()
     {
     }
 

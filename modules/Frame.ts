@@ -104,7 +104,7 @@ class Frame
      * Get valid Frame objects by calling the <code>LeapMotion.frame()</code> function.</p>
      *
      */
-        constructor()
+    constructor()
     {
     }
 
@@ -133,7 +133,7 @@ class Frame
         var returnValue:Hand = Hand.invalid();
         var length:number = this.hands.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.hands[ i ].id === id )
             {
@@ -171,7 +171,7 @@ class Frame
         var returnValue:Finger = Finger.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.fingers[ i ].id === id )
             {
@@ -209,7 +209,7 @@ class Frame
         var returnValue:Tool = Tool.invalid();
         var length:number = this.fingers.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.tools[ i ].id === id )
             {
@@ -246,7 +246,7 @@ class Frame
         var returnValue:Pointable = Pointable.invalid();
         var length:number = this.pointables.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this.pointables[ i ].id === id )
             {
@@ -278,7 +278,7 @@ class Frame
         var returnValue:Gesture = Gesture.invalid();
         var length:number = this._gestures.length;
 
-        for ( var i:number = 0; i < length; ++i )
+        for ( var i:number = 0; i < length; i++ )
         {
             if ( this._gestures[ i ].id === id )
             {
@@ -314,7 +314,7 @@ class Frame
             // Returns a Gesture vector containing all gestures that have occured since the specified frame.
             var gesturesSinceFrame:Gesture[] = [];
 
-            for ( var i:number = 0; i < this.controller.frameHistory.length; ++i )
+            for ( var i:number = 0; i < this.controller.frameHistory.length; i++ )
             {
                 for ( var j:number = 0; j < this.controller.frameHistory[ i ]._gestures.length; ++j )
                     gesturesSinceFrame.push( this.controller.frameHistory[ i ]._gestures[ j ] );

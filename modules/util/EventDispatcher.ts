@@ -17,7 +17,10 @@ class EventDispatcher
         for( var i:number = 0; i < this._listeners.length; i++ )
         {
             if( this._listeners[ i ].type === type && this._listeners[ i ].listener === listener )
+            {
                 exists = true;
+                break;
+            }
         }
 
         return exists;

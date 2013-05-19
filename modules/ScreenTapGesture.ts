@@ -93,7 +93,7 @@ class ScreenTapGesture extends Gesture
      * Get valid instances of the ScreenTapGesture class from a Frame object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
     }

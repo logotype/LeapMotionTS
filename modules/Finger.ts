@@ -25,7 +25,7 @@ class Finger extends Pointable
      * Get valid Finger objects from a Frame or a Hand object.</p>
      *
      */
-        constructor()
+    constructor()
     {
         super();
         this.isFinger = true;
