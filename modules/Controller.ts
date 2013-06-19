@@ -165,6 +165,16 @@ class Controller extends EventDispatcher
             // ID
             currentFrame.id = json["id"];
 
+            // InteractionBox
+            if ( !(typeof json["interactionBox"] === "undefined") )
+            {
+                currentFrame.interactionBox = new InteractionBox();
+                currentFrame.interactionBox.center = new Vector3( json["interactionBox"].center[ 0 ], json["interactionBox"].center[ 1 ], json["interactionBox"].center[ 2 ] );
+                currentFrame.interactionBox.width = json["interactionBox"].size[ 0 ];
+                currentFrame.interactionBox.height = json["interactionBox"].size[ 1 ];
+                currentFrame.interactionBox.depth = json["interactionBox"].size[ 2 ];
+            }
+
             // Pointables
             if ( !(typeof json["pointables"] === "undefined") )
             {
@@ -184,8 +194,23 @@ class Controller extends EventDispatcher
                     pointable.length = json["pointables"][ i ].length;
                     pointable.direction = new Vector3( json["pointables"][ i ].direction[ 0 ], json["pointables"][ i ].direction[ 1 ], json["pointables"][ i ].direction[ 2 ] );
                     pointable.tipPosition = new Vector3( json["pointables"][ i ].tipPosition[ 0 ], json["pointables"][ i ].tipPosition[ 1 ], json["pointables"][ i ].tipPosition[ 2 ] );
+                    pointable.stabilizedTipPosition = new Vector3( json["pointables"][ i ].stabilizedTipPosition[ 0 ], json["pointables"][ i ].stabilizedTipPosition[ 1 ], json["pointables"][ i ].stabilizedTipPosition[ 2 ] );
                     pointable.tipVelocity = new Vector3( json["pointables"][ i ].tipVelocity[ 0 ], json["pointables"][ i ].tipVelocity[ 1 ], json["pointables"][ i ].tipVelocity[ 2 ] );
+                    pointable.touchDistance = json["pointables"][ i ].touchDist;
                     currentFrame.pointables.push( pointable );
+
+                    switch( json["pointables"][ i ].touchZone )
+                    {
+                        case "hovering":
+                            pointable.touchZone = Pointable.ZONE_HOVERING;
+                            break;
+                        case "touching":
+                            pointable.touchZone = Pointable.ZONE_TOUCHING;
+                            break;
+                        default:
+                            pointable.touchZone = Pointable.ZONE_NONE;
+                            break;
+                    }
 
                     if ( pointable.hand )
                         pointable.hand.pointables.push( pointable );

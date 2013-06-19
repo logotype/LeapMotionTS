@@ -27,7 +27,7 @@ interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onConnect( controller:Controller ):void;
+    onConnect( controller:Controller ):void;
 
     /**
      * Called when the Controller object disconnects from the Leap software.
@@ -49,7 +49,7 @@ interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onDisconnect( controller:Controller ):void;
+    onDisconnect( controller:Controller ):void;
 
     /**
      * Called when this Listener object is removed from the Controller or
@@ -63,7 +63,7 @@ interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onExit( controller:Controller ):void;
+    onExit( controller:Controller ):void;
 
     /**
      * Called when a new frame of hand and finger tracking data is available.
@@ -88,7 +88,7 @@ interface Listener
      * @param frame The most recent frame object.
      *
      */
-        onFrame( controller:Controller, frame:Frame ):void;
+    onFrame( controller:Controller, frame:Frame ):void;
 
     /**
      * Called once, when this Listener object is newly added to a Controller.
@@ -101,5 +101,5 @@ interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onInit( controller:Controller ):void;
+    onInit( controller:Controller ):void;
 }

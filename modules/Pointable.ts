@@ -22,6 +22,71 @@
 class Pointable
 {
     /**
+     * The Pointable object is too far from the plane to be considered hovering or touching.
+     *
+     * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
+     */
+    public static ZONE_NONE:number = 0;
+
+    /**
+     * The Pointable object is close to, but not touching the plane.
+     *
+     * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
+     */
+    public static ZONE_HOVERING:number = 1;
+
+    /**
+     * The Pointable has penetrated the plane.
+     *
+     * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
+     */
+    public static ZONE_TOUCHING:number = 2;
+
+    /**
+     * The current touch zone of this Pointable object.
+     *
+     * <p>The Leap Motion software computes the touch zone based on a
+     * floating touch plane that adapts to the user's finger movement
+     * and hand posture. The Leap Motion software interprets purposeful
+     * movements toward this plane as potential touch points.
+     * When a Pointable moves close to the adaptive touch plane,
+     * it enters the "hovering" zone. When a Pointable reaches or
+     * passes through the plane, it enters the "touching" zone.</p>
+     *
+     * <p>The possible states are present in the Zone enum of this class:</p>
+     *
+     * <code>Zone.NONE – The Pointable is outside the hovering zone.
+     * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
+     * Zone.TOUCHING – The Pointable has penetrated the touch plane.</code>
+     *
+     * <p>The touchDistance value provides a normalized indication of the
+     * distance to the touch plane when the Pointable is in the hovering
+     * or touching zones.</p>
+     *
+     */
+    public touchZone:number = Pointable.ZONE_NONE;
+
+    /**
+     * A value proportional to the distance between this Pointable
+     * object and the adaptive touch plane.
+     *
+     * <p>The touch distance is a value in the range [-1, 1].
+     * The value 1.0 indicates the Pointable is at the far edge of
+     * the hovering zone. The value 0 indicates the Pointable is
+     * just entering the touching zone. A value of -1.0 indicates
+     * the Pointable is firmly within the touching zone.
+     * Values in between are proportional to the distance from the plane.
+     * Thus, the touchDistance of 0.5 indicates that the Pointable
+     * is halfway into the hovering zone.</p>
+     *
+     * <p>You can use the touchDistance value to modulate visual
+     * feedback given to the user as their fingers close in on a
+     * touch target, such as a button.</p>
+     *
+     */
+    public touchDistance:number = 0;
+
+    /**
      * The direction in which this finger or tool is pointing.<br/>
      * The direction is expressed as a unit vector pointing in the
      * same direction as the tip.
@@ -82,6 +147,13 @@ class Pointable
      * The tip position in millimeters from the Leap origin.
      */
     public tipPosition:Vector3;
+
+    /**
+     * The stabilized tip position of this Pointable.
+     * <p>Smoothing and stabilization is performed in order to make this value more suitable for interaction with 2D content.</p>
+     * <p>A modified tip position of this Pointable object with some additional smoothing and stabilization applied.</p> 
+     */
+    public stabilizedTipPosition:Vector3;
 
     /**
      * The rate of change of the tip position in millimeters/second.

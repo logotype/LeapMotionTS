@@ -80,7 +80,7 @@ export interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onConnect( controller:Controller ):void;
+    onConnect( controller:Controller ):void;
 
     /**
      * Called when the Controller object disconnects from the Leap software.
@@ -102,7 +102,7 @@ export interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onDisconnect( controller:Controller ):void;
+    onDisconnect( controller:Controller ):void;
 
     /**
      * Called when this Listener object is removed from the Controller or
@@ -116,7 +116,7 @@ export interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onExit( controller:Controller ):void;
+    onExit( controller:Controller ):void;
 
     /**
      * Called when a new frame of hand and finger tracking data is available.
@@ -141,7 +141,7 @@ export interface Listener
      * @param frame The most recent frame object.
      *
      */
-        onFrame( controller:Controller, frame:Frame ):void;
+    onFrame( controller:Controller, frame:Frame ):void;
 
     /**
      * Called once, when this Listener object is newly added to a Controller.
@@ -154,7 +154,7 @@ export interface Listener
      * @param controller The Controller object invoking this callback function.
      *
      */
-        onInit( controller:Controller ):void;
+    onInit( controller:Controller ):void;
 }
 
 
@@ -640,6 +640,16 @@ export class Controller extends EventDispatcher
             // ID
             currentFrame.id = json["id"];
 
+            // InteractionBox
+            if ( !(typeof json["interactionBox"] === "undefined") )
+            {
+                currentFrame.interactionBox = new InteractionBox();
+                currentFrame.interactionBox.center = new Vector3( json["interactionBox"].center[ 0 ], json["interactionBox"].center[ 1 ], json["interactionBox"].center[ 2 ] );
+                currentFrame.interactionBox.width = json["interactionBox"].size[ 0 ];
+                currentFrame.interactionBox.height = json["interactionBox"].size[ 1 ];
+                currentFrame.interactionBox.depth = json["interactionBox"].size[ 2 ];
+            }
+
             // Pointables
             if ( !(typeof json["pointables"] === "undefined") )
             {
@@ -659,8 +669,23 @@ export class Controller extends EventDispatcher
                     pointable.length = json["pointables"][ i ].length;
                     pointable.direction = new Vector3( json["pointables"][ i ].direction[ 0 ], json["pointables"][ i ].direction[ 1 ], json["pointables"][ i ].direction[ 2 ] );
                     pointable.tipPosition = new Vector3( json["pointables"][ i ].tipPosition[ 0 ], json["pointables"][ i ].tipPosition[ 1 ], json["pointables"][ i ].tipPosition[ 2 ] );
+                    pointable.stabilizedTipPosition = new Vector3( json["pointables"][ i ].stabilizedTipPosition[ 0 ], json["pointables"][ i ].stabilizedTipPosition[ 1 ], json["pointables"][ i ].stabilizedTipPosition[ 2 ] );
                     pointable.tipVelocity = new Vector3( json["pointables"][ i ].tipVelocity[ 0 ], json["pointables"][ i ].tipVelocity[ 1 ], json["pointables"][ i ].tipVelocity[ 2 ] );
+                    pointable.touchDistance = json["pointables"][ i ].touchDist;
                     currentFrame.pointables.push( pointable );
+
+                    switch( json["pointables"][ i ].touchZone )
+                    {
+                        case "hovering":
+                            pointable.touchZone = Pointable.ZONE_HOVERING;
+                            break;
+                        case "touching":
+                            pointable.touchZone = Pointable.ZONE_TOUCHING;
+                            break;
+                        default:
+                            pointable.touchZone = Pointable.ZONE_NONE;
+                            break;
+                    }
 
                     if ( pointable.hand )
                         pointable.hand.pointables.push( pointable );
@@ -975,6 +1000,152 @@ export class Controller extends EventDispatcher
         return this._isConnected;
     }
 }
+/**
+ * The InteractionBox export class represents a box-shaped region completely within
+ * the field of view of the Leap Motion controller.
+ *
+ * <p>The interaction box is an axis-aligned rectangular prism and provides
+ * normalized coordinates for hands, fingers, and tools within this box.
+ * The InteractionBox export class can make it easier to map positions in the
+ * Leap Motion coordinate system to 2D or 3D coordinate systems used
+ * for application drawing.</p>
+ *
+ * <p>The InteractionBox region is defined by a center and dimensions along the x, y, and z axes.</p>
+ *
+ * @author logotype
+ *
+ */
+export class InteractionBox
+{
+    /**
+     * The center of the InteractionBox in device coordinates (millimeters).
+     * <p>This point is equidistant from all sides of the box.</p> 
+     */
+    public center:Vector3;
+    
+    /**
+     * The depth of the InteractionBox in millimeters, measured along the z-axis. 
+     * 
+     */
+    public depth:number;
+    
+    /**
+     * The height of the InteractionBox in millimeters, measured along the y-axis. 
+     * 
+     */
+    public height:number;
+    
+    /**
+     * The width of the InteractionBox in millimeters, measured along the x-axis. 
+     * 
+     */
+    public width:number;
+
+    constructor()
+    {
+    }
+
+    /**
+     * Converts a position defined by normalized InteractionBox coordinates
+     * into device coordinates in millimeters.
+     * 
+     * This function performs the inverse of normalizePoint().
+     *  
+     * @param normalizedPosition The input position in InteractionBox coordinates.
+     * @return The corresponding denormalized position in device coordinates.
+     * 
+     */
+    public denormalizePoint( normalizedPosition:Vector3 ):Vector3
+    {
+        // TODO: Implement
+        return Vector3.invalid();
+    }
+    
+    /**
+     * Normalizes the coordinates of a point using the interaction box.
+     * 
+     * <p>Coordinates from the Leap Motion frame of reference (millimeters) are
+     * converted to a range of [0..1] such that the minimum value of the
+     * InteractionBox maps to 0 and the maximum value of the InteractionBox maps to 1.</p>
+     *  
+     * @param position The input position in device coordinates.
+     * @param clamp Whether or not to limit the output value to the range [0,1]
+     * when the input position is outside the InteractionBox. Defaults to true.
+     * @return The normalized position.
+     * 
+     */
+    public normalizePoint( position:Vector3, clamp:boolean = true ):Vector3
+    {
+        // TODO: Implement
+        return Vector3.invalid();
+    }
+    
+    /**
+     * Reports whether this is a valid InteractionBox object. 
+     * @return True, if this InteractionBox object contains valid data.
+     * 
+     */
+    public isValid():boolean
+    {
+        // TODO: Better validity checking
+        return this.center.isValid();
+    }
+    
+    /**
+     * Compare InteractionBox object equality/inequality.
+     * 
+     * <p>Two InteractionBox objects are equal if and only if both InteractionBox
+     * objects represent the exact same InteractionBox and both InteractionBoxes are valid.</p>
+     *  
+     * @param other
+     * @return 
+     * 
+     */
+    public isEqualTo( other:InteractionBox ):boolean
+    {
+        if( !this.isValid() || !other.isValid() )
+            return false;
+
+        if( !this.center.isEqualTo( other.center ) )
+            return false;
+        
+        if( this.depth != other.depth )
+            return false;
+        
+        if( this.height != other.height )
+            return false;
+        
+        if( this.width != other.width )
+            return false;
+        
+        return true;
+    }
+    
+    /**
+     * Returns an invalid InteractionBox object.
+     *
+     * <p>You can use the instance returned by this function in comparisons
+     * testing whether a given InteractionBox instance is valid or invalid.
+     * (You can also use the <code>InteractionBox.isValid()</code> function.)</p>
+     *
+     * @return The invalid InteractionBox instance.
+     *
+     */
+    public static invalid():InteractionBox
+    {
+        return new InteractionBox();
+    }
+
+    /**
+     * Writes a brief, human readable description of the InteractionBox object.
+     * @return A description of the InteractionBox as a string.
+     *
+     */
+    public toString():string
+    {
+        return "[InteractionBox depth:" + this.depth + " height:" + this.height + " width:" + this.width + "]";
+    }
+}
 
 
 /**
@@ -997,6 +1168,71 @@ export class Controller extends EventDispatcher
  */
 export class Pointable
 {
+    /**
+     * The Pointable object is too far from the plane to be considered hovering or touching.
+     *
+     * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
+     */
+    public static ZONE_NONE:number = 0;
+
+    /**
+     * The Pointable object is close to, but not touching the plane.
+     *
+     * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
+     */
+    public static ZONE_HOVERING:number = 1;
+
+    /**
+     * The Pointable has penetrated the plane.
+     *
+     * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
+     */
+    public static ZONE_TOUCHING:number = 2;
+
+    /**
+     * The current touch zone of this Pointable object.
+     *
+     * <p>The Leap Motion software computes the touch zone based on a
+     * floating touch plane that adapts to the user's finger movement
+     * and hand posture. The Leap Motion software interprets purposeful
+     * movements toward this plane as potential touch points.
+     * When a Pointable moves close to the adaptive touch plane,
+     * it enters the "hovering" zone. When a Pointable reaches or
+     * passes through the plane, it enters the "touching" zone.</p>
+     *
+     * <p>The possible states are present in the Zone enum of this class:</p>
+     *
+     * <code>Zone.NONE – The Pointable is outside the hovering zone.
+     * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
+     * Zone.TOUCHING – The Pointable has penetrated the touch plane.</code>
+     *
+     * <p>The touchDistance value provides a normalized indication of the
+     * distance to the touch plane when the Pointable is in the hovering
+     * or touching zones.</p>
+     *
+     */
+    public touchZone:number = Pointable.ZONE_NONE;
+
+    /**
+     * A value proportional to the distance between this Pointable
+     * object and the adaptive touch plane.
+     *
+     * <p>The touch distance is a value in the range [-1, 1].
+     * The value 1.0 indicates the Pointable is at the far edge of
+     * the hovering zone. The value 0 indicates the Pointable is
+     * just entering the touching zone. A value of -1.0 indicates
+     * the Pointable is firmly within the touching zone.
+     * Values in between are proportional to the distance from the plane.
+     * Thus, the touchDistance of 0.5 indicates that the Pointable
+     * is halfway into the hovering zone.</p>
+     *
+     * <p>You can use the touchDistance value to modulate visual
+     * feedback given to the user as their fingers close in on a
+     * touch target, such as a button.</p>
+     *
+     */
+    public touchDistance:number = 0;
+
     /**
      * The direction in which this finger or tool is pointing.<br/>
      * The direction is expressed as a unit vector pointing in the
@@ -1058,6 +1294,13 @@ export class Pointable
      * The tip position in millimeters from the Leap origin.
      */
     public tipPosition:Vector3;
+
+    /**
+     * The stabilized tip position of this Pointable.
+     * <p>Smoothing and stabilization is performed in order to make this value more suitable for interaction with 2D content.</p>
+     * <p>A modified tip position of this Pointable object with some additional smoothing and stabilization applied.</p> 
+     */
+    public stabilizedTipPosition:Vector3;
 
     /**
      * The rate of change of the tip position in millimeters/second.
@@ -2012,6 +2255,7 @@ export class Hand
 
 
 
+
 /**
  * The Frame export class represents a set of hand and finger tracking
  * data detected in a single frame.
@@ -2073,6 +2317,13 @@ export class Frame
      * <p>Consecutive frames processed by the Leap have consecutive increasing values.</p>
      */
     public id:number;
+
+    /**
+     * The current InteractionBox for the frame.
+     * <p>See the InteractionBox export class documentation for more details on how this class should be used.</p>
+     * @see InteractionBox
+     */
+    public interactionBox:InteractionBox;
 
     /**
      * The frame capture time in microseconds elapsed since the Leap started.

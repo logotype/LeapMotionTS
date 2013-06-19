@@ -1,5 +1,6 @@
 /// <reference path="./Vector3.ts"/>
 /// <reference path="./Hand.ts"/>
+/// <reference path="./InteractionBox.ts"/>
 /// <reference path="./Pointable.ts"/>
 /// <reference path="./Finger.ts"/>
 /// <reference path="./Tool.ts"/>
@@ -67,6 +68,13 @@ class Frame
      * <p>Consecutive frames processed by the Leap have consecutive increasing values.</p>
      */
     public id:number;
+
+    /**
+     * The current InteractionBox for the frame.
+     * <p>See the InteractionBox class documentation for more details on how this class should be used.</p>
+     * @see InteractionBox
+     */
+    public interactionBox:InteractionBox;
 
     /**
      * The frame capture time in microseconds elapsed since the Leap started.

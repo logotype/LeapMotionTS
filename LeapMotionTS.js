@@ -291,6 +291,14 @@ define(["require", "exports"], function(require, exports) {
 
                 currentFrame.id = json["id"];
 
+                if (!(typeof json["interactionBox"] === "undefined")) {
+                    currentFrame.interactionBox = new InteractionBox();
+                    currentFrame.interactionBox.center = new Vector3(json["interactionBox"].center[0], json["interactionBox"].center[1], json["interactionBox"].center[2]);
+                    currentFrame.interactionBox.width = json["interactionBox"].size[0];
+                    currentFrame.interactionBox.height = json["interactionBox"].size[1];
+                    currentFrame.interactionBox.depth = json["interactionBox"].size[2];
+                }
+
                 if (!(typeof json["pointables"] === "undefined")) {
                     i = 0;
                     length = json["pointables"].length;
@@ -306,8 +314,22 @@ define(["require", "exports"], function(require, exports) {
                         pointable.length = json["pointables"][i].length;
                         pointable.direction = new Vector3(json["pointables"][i].direction[0], json["pointables"][i].direction[1], json["pointables"][i].direction[2]);
                         pointable.tipPosition = new Vector3(json["pointables"][i].tipPosition[0], json["pointables"][i].tipPosition[1], json["pointables"][i].tipPosition[2]);
+                        pointable.stabilizedTipPosition = new Vector3(json["pointables"][i].stabilizedTipPosition[0], json["pointables"][i].stabilizedTipPosition[1], json["pointables"][i].stabilizedTipPosition[2]);
                         pointable.tipVelocity = new Vector3(json["pointables"][i].tipVelocity[0], json["pointables"][i].tipVelocity[1], json["pointables"][i].tipVelocity[2]);
+                        pointable.touchDistance = json["pointables"][i].touchDist;
                         currentFrame.pointables.push(pointable);
+
+                        switch (json["pointables"][i].touchZone) {
+                            case "hovering":
+                                pointable.touchZone = Pointable.ZONE_HOVERING;
+                                break;
+                            case "touching":
+                                pointable.touchZone = Pointable.ZONE_TOUCHING;
+                                break;
+                            default:
+                                pointable.touchZone = Pointable.ZONE_NONE;
+                                break;
+                        }
 
                         if (pointable.hand)
                             pointable.hand.pointables.push(pointable);
@@ -513,8 +535,56 @@ define(["require", "exports"], function(require, exports) {
     })(EventDispatcher);
     exports.Controller = Controller;
 
+    var InteractionBox = (function () {
+        function InteractionBox() {
+        }
+        InteractionBox.prototype.denormalizePoint = function (normalizedPosition) {
+            return Vector3.invalid();
+        };
+
+        InteractionBox.prototype.normalizePoint = function (position, clamp) {
+            if (typeof clamp === "undefined") { clamp = true; }
+            return Vector3.invalid();
+        };
+
+        InteractionBox.prototype.isValid = function () {
+            return this.center.isValid();
+        };
+
+        InteractionBox.prototype.isEqualTo = function (other) {
+            if (!this.isValid() || !other.isValid())
+                return false;
+
+            if (!this.center.isEqualTo(other.center))
+                return false;
+
+            if (this.depth != other.depth)
+                return false;
+
+            if (this.height != other.height)
+                return false;
+
+            if (this.width != other.width)
+                return false;
+
+            return true;
+        };
+
+        InteractionBox.invalid = function () {
+            return new InteractionBox();
+        };
+
+        InteractionBox.prototype.toString = function () {
+            return "[InteractionBox depth:" + this.depth + " height:" + this.height + " width:" + this.width + "]";
+        };
+        return InteractionBox;
+    })();
+    exports.InteractionBox = InteractionBox;
+
     var Pointable = (function () {
         function Pointable() {
+            this.touchZone = Pointable.ZONE_NONE;
+            this.touchDistance = 0;
             this.length = 0;
             this.width = 0;
             this.direction = Vector3.invalid();
@@ -571,6 +641,11 @@ define(["require", "exports"], function(require, exports) {
         Pointable.prototype.toString = function () {
             return "[Pointable direction: " + this.direction + " tipPosition: " + this.tipPosition + " tipVelocity: " + this.tipVelocity + "]";
         };
+        Pointable.ZONE_NONE = 0;
+
+        Pointable.ZONE_HOVERING = 1;
+
+        Pointable.ZONE_TOUCHING = 2;
         return Pointable;
     })();
     exports.Pointable = Pointable;

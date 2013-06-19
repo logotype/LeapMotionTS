@@ -79,7 +79,25 @@ export declare class Controller extends EventDispatcher {
     public isGestureEnabled(type: number): boolean;
     public isConnected(): boolean;
 }
+export declare class InteractionBox {
+    public center: Vector3;
+    public depth: number;
+    public height: number;
+    public width: number;
+    constructor();
+    public denormalizePoint(normalizedPosition: Vector3): Vector3;
+    public normalizePoint(position: Vector3, clamp?: boolean): Vector3;
+    public isValid(): boolean;
+    public isEqualTo(other: InteractionBox): boolean;
+    static invalid(): InteractionBox;
+    public toString(): string;
+}
 export declare class Pointable {
+    static ZONE_NONE: number;
+    static ZONE_HOVERING: number;
+    static ZONE_TOUCHING: number;
+    public touchZone: number;
+    public touchDistance: number;
     public direction: Vector3;
     public frame: Frame;
     public hand: Hand;
@@ -87,6 +105,7 @@ export declare class Pointable {
     public length: number;
     public width: number;
     public tipPosition: Vector3;
+    public stabilizedTipPosition: Vector3;
     public tipVelocity: Vector3;
     public isFinger: boolean;
     public isTool: boolean;
@@ -162,6 +181,7 @@ export declare class Frame {
     public pointables: Pointable[];
     public _gestures: Gesture[];
     public id: number;
+    public interactionBox: InteractionBox;
     public timestamp: number;
     public tools: Tool[];
     public rotation: Matrix;
