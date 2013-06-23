@@ -539,12 +539,30 @@ define(["require", "exports"], function(require, exports) {
         function InteractionBox() {
         }
         InteractionBox.prototype.denormalizePoint = function (normalizedPosition) {
-            return Vector3.invalid();
+            var vec = Vector3.invalid();
+
+            vec.x = (((normalizedPosition.x + this.center.x) - 0.5) * this.width);
+            vec.y = (((normalizedPosition.y + this.center.y) - 0.5) * this.height);
+            vec.z = (((normalizedPosition.z + this.center.z) - 0.5) * this.depth);
+
+            return vec;
         };
 
         InteractionBox.prototype.normalizePoint = function (position, clamp) {
             if (typeof clamp === "undefined") { clamp = true; }
-            return Vector3.invalid();
+            var vec = Vector3.invalid();
+
+            vec.x = ((position.x - this.center.x) / this.width) + 0.5;
+            vec.y = ((position.y - this.center.y) / this.height) + 0.5;
+            vec.z = ((position.z - this.center.z) / this.depth) + 0.5;
+
+            if (clamp) {
+                vec.x = Math.min(Math.max(vec.x, 0), 1);
+                vec.y = Math.min(Math.max(vec.y, 0), 1);
+                vec.z = Math.min(Math.max(vec.z, 0), 1);
+            }
+
+            return vec;
         };
 
         InteractionBox.prototype.isValid = function () {
