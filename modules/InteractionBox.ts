@@ -103,8 +103,7 @@ class InteractionBox
      */
     public isValid():boolean
     {
-        // TODO: Better validity checking
-        return this.center.isValid();
+        return this.center.isValid() && this.width > 0 && this.height > 0 && this.depth > 0;
     }
     
     /**

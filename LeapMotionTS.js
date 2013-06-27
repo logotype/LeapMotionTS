@@ -7,12 +7,12 @@ var __extends = this.__extends || function (d, b) {
 define(["require", "exports"], function(require, exports) {
     var EventDispatcher = (function () {
         function EventDispatcher() {
-            this._listeners = [];
+            this.listeners = [];
         }
         EventDispatcher.prototype.hasEventListener = function (type, listener) {
             var exists = false;
-            for (var i = 0; i < this._listeners.length; i++) {
-                if (this._listeners[i].type === type && this._listeners[i].listener === listener) {
+            for (var i = 0; i < this.listeners.length; i++) {
+                if (this.listeners[i].type === type && this.listeners[i].listener === listener) {
                     exists = true;
                     break;
                 }
@@ -21,24 +21,24 @@ define(["require", "exports"], function(require, exports) {
             return exists;
         };
 
-        EventDispatcher.prototype.addEventListener = function (typeStr, listenerFunc) {
-            if (this.hasEventListener(typeStr, listenerFunc))
+        EventDispatcher.prototype.addEventListener = function (typeStr, listenerFunction) {
+            if (this.hasEventListener(typeStr, listenerFunction))
                 return;
 
-            this._listeners.push({ type: typeStr, listener: listenerFunc });
+            this.listeners.push({ type: typeStr, listener: listenerFunction });
         };
 
-        EventDispatcher.prototype.removeEventListener = function (typeStr, listenerFunc) {
-            for (var i = 0; i < this._listeners.length; i++) {
-                if (this._listeners[i].type === typeStr && this._listeners[i].listener === listenerFunc)
-                    this._listeners.splice(i, 1);
+        EventDispatcher.prototype.removeEventListener = function (typeStr, listenerFunction) {
+            for (var i = 0; i < this.listeners.length; i++) {
+                if (this.listeners[i].type === typeStr && this.listeners[i].listener === listenerFunction)
+                    this.listeners.splice(i, 1);
             }
         };
 
-        EventDispatcher.prototype.dispatchEvent = function (evt) {
-            for (var i = 0; i < this._listeners.length; i++) {
-                if (this._listeners[i].type === evt.getType())
-                    this._listeners[i].listener.call(this, evt);
+        EventDispatcher.prototype.dispatchEvent = function (event) {
+            for (var i = 0; i < this.listeners.length; i++) {
+                if (this.listeners[i].type === event.getType())
+                    this.listeners[i].listener.call(this, event);
             }
         };
         return EventDispatcher;
@@ -321,13 +321,13 @@ define(["require", "exports"], function(require, exports) {
 
                         switch (json["pointables"][i].touchZone) {
                             case "hovering":
-                                pointable.touchZone = Pointable.ZONE_HOVERING;
+                                pointable.touchZone = Zone.ZONE_HOVERING;
                                 break;
                             case "touching":
-                                pointable.touchZone = Pointable.ZONE_TOUCHING;
+                                pointable.touchZone = Zone.ZONE_TOUCHING;
                                 break;
                             default:
-                                pointable.touchZone = Pointable.ZONE_NONE;
+                                pointable.touchZone = Zone.ZONE_NONE;
                                 break;
                         }
 
@@ -358,7 +358,7 @@ define(["require", "exports"], function(require, exports) {
                         switch (json["gestures"][i].type) {
                             case "circle":
                                 gesture = new CircleGesture();
-                                type = Gesture.TYPE_CIRCLE;
+                                type = Type.TYPE_CIRCLE;
                                 var circle = gesture;
 
                                 circle.center = new Vector3(json["gestures"][i].center[0], json["gestures"][i].center[1], json["gestures"][i].center[2]);
@@ -369,7 +369,7 @@ define(["require", "exports"], function(require, exports) {
 
                             case "swipe":
                                 gesture = new SwipeGesture();
-                                type = Gesture.TYPE_SWIPE;
+                                type = Type.TYPE_SWIPE;
 
                                 var swipe = gesture;
 
@@ -381,7 +381,7 @@ define(["require", "exports"], function(require, exports) {
 
                             case "screenTap":
                                 gesture = new ScreenTapGesture();
-                                type = Gesture.TYPE_SCREEN_TAP;
+                                type = Type.TYPE_SCREEN_TAP;
 
                                 var screenTap = gesture;
                                 screenTap.position = new Vector3(json["gestures"][i].position[0], json["gestures"][i].position[1], json["gestures"][i].position[2]);
@@ -391,7 +391,7 @@ define(["require", "exports"], function(require, exports) {
 
                             case "keyTap":
                                 gesture = new KeyTapGesture();
-                                type = Gesture.TYPE_KEY_TAP;
+                                type = Type.TYPE_KEY_TAP;
 
                                 var keyTap = gesture;
                                 keyTap.position = new Vector3(json["gestures"][i].position[0], json["gestures"][i].position[1], json["gestures"][i].position[2]);
@@ -436,16 +436,16 @@ define(["require", "exports"], function(require, exports) {
 
                         switch (json["gestures"][i].state) {
                             case "start":
-                                gesture.state = Gesture.STATE_START;
+                                gesture.state = State.STATE_START;
                                 break;
                             case "update":
-                                gesture.state = Gesture.STATE_UPDATE;
+                                gesture.state = State.STATE_UPDATE;
                                 break;
                             case "stop":
-                                gesture.state = Gesture.STATE_STOP;
+                                gesture.state = State.STATE_STOP;
                                 break;
                             default:
-                                gesture.state = Gesture.STATE_INVALID;
+                                gesture.state = State.STATE_INVALID;
                         }
 
                         gesture.type = type;
@@ -566,7 +566,7 @@ define(["require", "exports"], function(require, exports) {
         };
 
         InteractionBox.prototype.isValid = function () {
-            return this.center.isValid();
+            return this.center.isValid() && this.width > 0 && this.height > 0 && this.depth > 0;
         };
 
         InteractionBox.prototype.isEqualTo = function (other) {
@@ -599,9 +599,18 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.InteractionBox = InteractionBox;
 
+    var Zone;
+    (function (Zone) {
+        Zone[Zone["ZONE_NONE"] = 0] = "ZONE_NONE";
+
+        Zone[Zone["ZONE_HOVERING"] = 1] = "ZONE_HOVERING";
+
+        Zone[Zone["ZONE_TOUCHING"] = 2] = "ZONE_TOUCHING";
+    })(Zone || (Zone = {}));
+
     var Pointable = (function () {
         function Pointable() {
-            this.touchZone = Pointable.ZONE_NONE;
+            this.touchZone = Zone.ZONE_NONE;
             this.touchDistance = 0;
             this.length = 0;
             this.width = 0;
@@ -659,15 +668,33 @@ define(["require", "exports"], function(require, exports) {
         Pointable.prototype.toString = function () {
             return "[Pointable direction: " + this.direction + " tipPosition: " + this.tipPosition + " tipVelocity: " + this.tipVelocity + "]";
         };
-        Pointable.ZONE_NONE = 0;
-
-        Pointable.ZONE_HOVERING = 1;
-
-        Pointable.ZONE_TOUCHING = 2;
         return Pointable;
     })();
     exports.Pointable = Pointable;
 
+    var State;
+    (function (State) {
+        State[State["STATE_INVALID"] = 0] = "STATE_INVALID";
+
+        State[State["STATE_START"] = 1] = "STATE_START";
+
+        State[State["STATE_UPDATE"] = 2] = "STATE_UPDATE";
+
+        State[State["STATE_STOP"] = 3] = "STATE_STOP";
+    })(State || (State = {}));
+
+    var Type;
+    (function (Type) {
+        Type[Type["TYPE_INVALID"] = 4] = "TYPE_INVALID";
+
+        Type[Type["TYPE_SWIPE"] = 5] = "TYPE_SWIPE";
+
+        Type[Type["TYPE_CIRCLE"] = 6] = "TYPE_CIRCLE";
+
+        Type[Type["TYPE_SCREEN_TAP"] = 7] = "TYPE_SCREEN_TAP";
+
+        Type[Type["TYPE_KEY_TAP"] = 8] = "TYPE_KEY_TAP";
+    })(Type || (Type = {}));
     var Gesture = (function () {
         function Gesture() {
             this.hands = [];
@@ -691,23 +718,6 @@ define(["require", "exports"], function(require, exports) {
         Gesture.prototype.toString = function () {
             return "[Gesture id:" + this.id + " duration:" + this.duration + " type:" + this.type + "]";
         };
-        Gesture.STATE_INVALID = 0;
-
-        Gesture.STATE_START = 1;
-
-        Gesture.STATE_UPDATE = 2;
-
-        Gesture.STATE_STOP = 3;
-
-        Gesture.TYPE_INVALID = 4;
-
-        Gesture.TYPE_SWIPE = 5;
-
-        Gesture.TYPE_CIRCLE = 6;
-
-        Gesture.TYPE_SCREEN_TAP = 7;
-
-        Gesture.TYPE_KEY_TAP = 8;
         return Gesture;
     })();
     exports.Gesture = Gesture;
@@ -1138,7 +1148,7 @@ define(["require", "exports"], function(require, exports) {
             _super.call(this);
             this.pointable = Pointable.invalid();
         }
-        CircleGesture.classType = Gesture.TYPE_CIRCLE;
+        CircleGesture.classType = Type.TYPE_CIRCLE;
         return CircleGesture;
     })(Gesture);
     exports.CircleGesture = CircleGesture;
@@ -1149,7 +1159,7 @@ define(["require", "exports"], function(require, exports) {
             _super.call(this);
             this.progress = 1;
         }
-        KeyTapGesture.classType = Gesture.TYPE_KEY_TAP;
+        KeyTapGesture.classType = Type.TYPE_KEY_TAP;
         return KeyTapGesture;
     })(Gesture);
     exports.KeyTapGesture = KeyTapGesture;
@@ -1160,7 +1170,7 @@ define(["require", "exports"], function(require, exports) {
             _super.call(this);
             this.progress = 1;
         }
-        ScreenTapGesture.classType = Gesture.TYPE_SCREEN_TAP;
+        ScreenTapGesture.classType = Type.TYPE_SCREEN_TAP;
         return ScreenTapGesture;
     })(Gesture);
     exports.ScreenTapGesture = ScreenTapGesture;
@@ -1170,7 +1180,7 @@ define(["require", "exports"], function(require, exports) {
         function SwipeGesture() {
             _super.call(this);
         }
-        SwipeGesture.classType = Gesture.TYPE_SWIPE;
+        SwipeGesture.classType = Type.TYPE_SWIPE;
         return SwipeGesture;
     })(Gesture);
     exports.SwipeGesture = SwipeGesture;

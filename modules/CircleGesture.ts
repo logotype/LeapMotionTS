@@ -64,7 +64,7 @@ class CircleGesture extends Gesture
      * The circle gesture type.<br/>
      * The type value designating a circle gesture.
      */
-    public static classType:number = Gesture.TYPE_CIRCLE;
+    public static classType:number = Type.TYPE_CIRCLE;
 
     /**
      * The center point of the circle within the Leap frame of reference.<br/>

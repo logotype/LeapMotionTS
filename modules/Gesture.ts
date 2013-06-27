@@ -126,55 +126,65 @@
  * @see Config
  *
  */
-class Gesture
-{
+
+/**
+ * The possible gesture states.
+ */
+enum State {
     /**
      * An invalid state.
      */
-    public static STATE_INVALID:number = 0;
+    STATE_INVALID = 0,
 
     /**
      * The gesture is starting.<br/>
      * Just enough has happened to recognize it.
      */
-    public static STATE_START:number = 1;
+    STATE_START = 1,
 
     /**
      * The gesture is in progress.<br/>
      * (Note: not all gestures have updates).
      */
-    public static STATE_UPDATE:number = 2;
+    STATE_UPDATE = 2,
 
     /**
      * The gesture has completed or stopped.
      */
-    public static STATE_STOP:number = 3;
+    STATE_STOP = 3
+}
 
+/**
+ * The supported types of gestures.
+ */
+enum Type {
     /**
      * An invalid type.
      */
-    public static TYPE_INVALID:number = 4;
+    TYPE_INVALID = 4,
 
     /**
      * A straight line movement by the hand with fingers extended.
      */
-    public static TYPE_SWIPE:number = 5;
+    TYPE_SWIPE = 5,
 
     /**
      * A circular movement by a finger.
      */
-    public static TYPE_CIRCLE:number = 6;
+    TYPE_CIRCLE = 6,
 
     /**
      * A forward tapping movement by a finger.
      */
-    public static TYPE_SCREEN_TAP:number = 7;
+    TYPE_SCREEN_TAP = 7,
 
     /**
      * A downward tapping movement by a finger.
      */
-    public static TYPE_KEY_TAP:number = 8;
-
+    TYPE_KEY_TAP = 8
+}
+class Gesture
+{
     /**
      * The elapsed duration of the recognized movement up to the frame
      * containing this Gesture object, in microseconds.

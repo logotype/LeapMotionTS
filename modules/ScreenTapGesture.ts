@@ -64,7 +64,7 @@ class ScreenTapGesture extends Gesture
     /**
      * The type value designating a screen tap gesture.
      */
-    public static classType:number = Gesture.TYPE_SCREEN_TAP;
+    public static classType:number = Type.TYPE_SCREEN_TAP;
 
     /**
      * The direction of finger tip motion.

@@ -4,19 +4,19 @@
  */
 export class EventDispatcher
 {
-    private _listeners:any[];
+    private listeners:any[];
 
     constructor()
     {
-        this._listeners = [];
+        this.listeners = [];
     }
 
     public hasEventListener( type:string, listener:Function ):boolean
     {
         var exists:boolean = false;
-        for( var i:number = 0; i < this._listeners.length; i++ )
+        for( var i:number = 0; i < this.listeners.length; i++ )
         {
-            if( this._listeners[ i ].type === type && this._listeners[ i ].listener === listener )
+            if( this.listeners[ i ].type === type && this.listeners[ i ].listener === listener )
             {
                 exists = true;
                 break;
@@ -26,29 +26,29 @@ export class EventDispatcher
         return exists;
     }
 
-    public addEventListener ( typeStr:string, listenerFunc:Function ):void
+    public addEventListener ( typeStr:string, listenerFunction:Function ):void
     {
-        if( this.hasEventListener( typeStr, listenerFunc ) )
+        if( this.hasEventListener( typeStr, listenerFunction ) )
             return;
 
-        this._listeners.push( { type: typeStr, listener: listenerFunc } );
+        this.listeners.push( { type: typeStr, listener: listenerFunction } );
     }
 
-    public removeEventListener ( typeStr:string, listenerFunc:Function ):void
+    public removeEventListener ( typeStr:string, listenerFunction:Function ):void
     {
-        for( var i:number = 0; i < this._listeners.length; i++ )
+        for( var i:number = 0; i < this.listeners.length; i++ )
         {
-            if( this._listeners[ i ].type === typeStr && this._listeners[ i ].listener === listenerFunc )
-                this._listeners.splice( i, 1 );
+            if( this.listeners[ i ].type === typeStr && this.listeners[ i ].listener === listenerFunction )
+                this.listeners.splice( i, 1 );
         }
     }
 
-    public dispatchEvent ( evt:LeapEvent ):void
+    public dispatchEvent ( event:LeapEvent ):void
     {
-        for( var i:number = 0; i < this._listeners.length; i++ )
+        for( var i:number = 0; i < this.listeners.length; i++ )
         {
-            if( this._listeners[ i ].type === evt.getType() )
-                this._listeners[ i ].listener.call( this, evt );
+            if( this.listeners[ i ].type === event.getType() )
+                this.listeners[ i ].listener.call( this, event );
         }
     }
 }
@@ -677,13 +677,13 @@ export class Controller extends EventDispatcher
                     switch( json["pointables"][ i ].touchZone )
                     {
                         case "hovering":
-                            pointable.touchZone = Pointable.ZONE_HOVERING;
+                            pointable.touchZone = Zone.ZONE_HOVERING;
                             break;
                         case "touching":
-                            pointable.touchZone = Pointable.ZONE_TOUCHING;
+                            pointable.touchZone = Zone.ZONE_TOUCHING;
                             break;
                         default:
-                            pointable.touchZone = Pointable.ZONE_NONE;
+                            pointable.touchZone = Zone.ZONE_NONE;
                             break;
                     }
 
@@ -721,7 +721,7 @@ export class Controller extends EventDispatcher
                     {
                         case "circle":
                             gesture = new CircleGesture();
-                            type = Gesture.TYPE_CIRCLE;
+                            type = Type.TYPE_CIRCLE;
                             var circle:CircleGesture = <CircleGesture>gesture;
 
                             circle.center = new Vector3( json["gestures"][ i ].center[ 0 ], json["gestures"][ i ].center[ 1 ], json["gestures"][ i ].center[ 2 ] );
@@ -732,7 +732,7 @@ export class Controller extends EventDispatcher
 
                         case "swipe":
                             gesture = new SwipeGesture();
-                            type = Gesture.TYPE_SWIPE;
+                            type = Type.TYPE_SWIPE;
 
                             var swipe:SwipeGesture = <SwipeGesture>gesture;
 
@@ -744,7 +744,7 @@ export class Controller extends EventDispatcher
 
                         case "screenTap":
                             gesture = new ScreenTapGesture();
-                            type = Gesture.TYPE_SCREEN_TAP;
+                            type = Type.TYPE_SCREEN_TAP;
 
                             var screenTap:ScreenTapGesture = <ScreenTapGesture>gesture;
                             screenTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
@@ -754,7 +754,7 @@ export class Controller extends EventDispatcher
 
                         case "keyTap":
                             gesture = new KeyTapGesture();
-                            type = Gesture.TYPE_KEY_TAP;
+                            type = Type.TYPE_KEY_TAP;
 
                             var keyTap:KeyTapGesture = <KeyTapGesture>gesture;
                             keyTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
@@ -806,16 +806,16 @@ export class Controller extends EventDispatcher
                     switch( json["gestures"][ i ].state )
                     {
                         case "start":
-                            gesture.state = Gesture.STATE_START;
+                            gesture.state = State.STATE_START;
                             break;
                         case "update":
-                            gesture.state = Gesture.STATE_UPDATE;
+                            gesture.state = State.STATE_UPDATE;
                             break;
                         case "stop":
-                            gesture.state = Gesture.STATE_STOP;
+                            gesture.state = State.STATE_STOP;
                             break;
                         default:
-                            gesture.state = Gesture.STATE_INVALID;
+                            gesture.state = State.STATE_INVALID;
                     }
 
                     gesture.type = type;
@@ -1104,8 +1104,7 @@ export class InteractionBox
      */
     public isValid():boolean
     {
-        // TODO: Better validity checking
-        return this.center.isValid();
+        return this.center.isValid() && this.width > 0 && this.height > 0 && this.depth > 0;
     }
     
     /**
@@ -1183,29 +1182,35 @@ export class InteractionBox
  * @author logotype
  *
  */
-export class Pointable
-{
+
+/**
+ * Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.
+ */
+enum Zone {
     /**
      * The Pointable object is too far from the plane to be considered hovering or touching.
      *
      * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
      */
-    public static ZONE_NONE:number = 0;
+    ZONE_NONE = 0,
 
     /**
      * The Pointable object is close to, but not touching the plane.
      *
      * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
      */
-    public static ZONE_HOVERING:number = 1;
+    ZONE_HOVERING = 1,
 
     /**
      * The Pointable has penetrated the plane.
      *
      * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
      */
-    public static ZONE_TOUCHING:number = 2;
+    ZONE_TOUCHING = 2
+}
 
+export class Pointable
+{
     /**
      * The current touch zone of this Pointable object.
      *
@@ -1228,7 +1233,7 @@ export class Pointable
      * or touching zones.</p>
      *
      */
-    public touchZone:number = Pointable.ZONE_NONE;
+    public touchZone:number = Zone.ZONE_NONE;
 
     /**
      * A value proportional to the distance between this Pointable
@@ -1552,55 +1557,65 @@ export class Pointable
  * @see Config
  *
  */
-export class Gesture
-{
+
+/**
+ * The possible gesture states.
+ */
+enum State {
     /**
      * An invalid state.
      */
-    public static STATE_INVALID:number = 0;
+    STATE_INVALID = 0,
 
     /**
      * The gesture is starting.<br/>
      * Just enough has happened to recognize it.
      */
-    public static STATE_START:number = 1;
+    STATE_START = 1,
 
     /**
      * The gesture is in progress.<br/>
      * (Note: not all gestures have updates).
      */
-    public static STATE_UPDATE:number = 2;
+    STATE_UPDATE = 2,
 
     /**
      * The gesture has completed or stopped.
      */
-    public static STATE_STOP:number = 3;
+    STATE_STOP = 3
+}
 
+/**
+ * The supported types of gestures.
+ */
+enum Type {
     /**
      * An invalid type.
      */
-    public static TYPE_INVALID:number = 4;
+    TYPE_INVALID = 4,
 
     /**
      * A straight line movement by the hand with fingers extended.
      */
-    public static TYPE_SWIPE:number = 5;
+    TYPE_SWIPE = 5,
 
     /**
      * A circular movement by a finger.
      */
-    public static TYPE_CIRCLE:number = 6;
+    TYPE_CIRCLE = 6,
 
     /**
      * A forward tapping movement by a finger.
      */
-    public static TYPE_SCREEN_TAP:number = 7;
+    TYPE_SCREEN_TAP = 7,
 
     /**
      * A downward tapping movement by a finger.
      */
-    public static TYPE_KEY_TAP:number = 8;
-
+    TYPE_KEY_TAP = 8
+}
+export class Gesture
+{
     /**
      * The elapsed duration of the recognized movement up to the frame
      * containing this Gesture object, in microseconds.
@@ -2369,6 +2384,9 @@ export class Frame
      */
     public translationVector:Vector3;
 
+    /**
+     * Reference to the current Controller.
+     */
     public controller:Controller;
 
     /**
@@ -2565,7 +2583,7 @@ export class Frame
     }
 
     /**
-     * Returns a Gesture vector containing all gestures that have occured
+     * Returns a Gesture vector containing all gestures that have occurred
      * since the specified frame.
      *
      * <p>If no frame is specifed, the gestures recognized or continuing in
@@ -2585,7 +2603,7 @@ export class Frame
         }
         else
         {
-            // Returns a Gesture vector containing all gestures that have occured since the specified frame.
+            // Returns a Gesture vector containing all gestures that have occurred since the specified frame.
             var gesturesSinceFrame:Gesture[] = [];
 
             for ( var i:number = 0; i < this.controller.frameHistory.length; i++ )
@@ -3084,7 +3102,7 @@ export class CircleGesture extends Gesture
      * The circle gesture type.<br/>
      * The type value designating a circle gesture.
      */
-    public static classType:number = Gesture.TYPE_CIRCLE;
+    public static classType:number = Type.TYPE_CIRCLE;
 
     /**
      * The center point of the circle within the Leap frame of reference.<br/>
@@ -3207,7 +3225,7 @@ export class KeyTapGesture extends Gesture
     /**
      * The type value designating a key tap gesture.
      */
-    public static classType:number = Gesture.TYPE_KEY_TAP;
+    public static classType:number = Type.TYPE_KEY_TAP;
 
     /**
      * The current direction of finger tip motion.
@@ -3312,7 +3330,7 @@ export class ScreenTapGesture extends Gesture
     /**
      * The type value designating a screen tap gesture.
      */
-    public static classType:number = Gesture.TYPE_SCREEN_TAP;
+    public static classType:number = Type.TYPE_SCREEN_TAP;
 
     /**
      * The direction of finger tip motion.
@@ -3397,7 +3415,7 @@ export class SwipeGesture extends Gesture
     /**
      * The type value designating a swipe gesture.
      */
-    public static classType:number = Gesture.TYPE_SWIPE;
+    public static classType:number = Type.TYPE_SWIPE;
 
     /**
      * The unit direction vector parallel to the swipe motion.

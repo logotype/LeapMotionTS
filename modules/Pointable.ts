@@ -19,29 +19,35 @@
  * @author logotype
  *
  */
-class Pointable
-{
+
+/**
+ * Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.
+ */
+enum Zone {
     /**
      * The Pointable object is too far from the plane to be considered hovering or touching.
      *
      * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
      */
-    public static ZONE_NONE:number = 0;
+    ZONE_NONE = 0,
 
     /**
      * The Pointable object is close to, but not touching the plane.
      *
      * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
      */
-    public static ZONE_HOVERING:number = 1;
+    ZONE_HOVERING = 1,
 
     /**
      * The Pointable has penetrated the plane.
      *
      * <p>Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.</p>
      */
-    public static ZONE_TOUCHING:number = 2;
+    ZONE_TOUCHING = 2
+}
 
+class Pointable
+{
     /**
      * The current touch zone of this Pointable object.
      *
@@ -64,7 +70,7 @@ class Pointable
      * or touching zones.</p>
      *
      */
-    public touchZone:number = Pointable.ZONE_NONE;
+    public touchZone:number = Zone.ZONE_NONE;
 
     /**
      * A value proportional to the distance between this Pointable

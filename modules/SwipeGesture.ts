@@ -50,7 +50,7 @@ class SwipeGesture extends Gesture
     /**
      * The type value designating a swipe gesture.
      */
-    public static classType:number = Gesture.TYPE_SWIPE;
+    public static classType:number = Type.TYPE_SWIPE;
 
     /**
      * The unit direction vector parallel to the swipe motion.

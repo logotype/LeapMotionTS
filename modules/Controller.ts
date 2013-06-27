@@ -202,13 +202,13 @@ class Controller extends EventDispatcher
                     switch( json["pointables"][ i ].touchZone )
                     {
                         case "hovering":
-                            pointable.touchZone = Pointable.ZONE_HOVERING;
+                            pointable.touchZone = Zone.ZONE_HOVERING;
                             break;
                         case "touching":
-                            pointable.touchZone = Pointable.ZONE_TOUCHING;
+                            pointable.touchZone = Zone.ZONE_TOUCHING;
                             break;
                         default:
-                            pointable.touchZone = Pointable.ZONE_NONE;
+                            pointable.touchZone = Zone.ZONE_NONE;
                             break;
                     }
 
@@ -246,7 +246,7 @@ class Controller extends EventDispatcher
                     {
                         case "circle":
                             gesture = new CircleGesture();
-                            type = Gesture.TYPE_CIRCLE;
+                            type = Type.TYPE_CIRCLE;
                             var circle:CircleGesture = <CircleGesture>gesture;
 
                             circle.center = new Vector3( json["gestures"][ i ].center[ 0 ], json["gestures"][ i ].center[ 1 ], json["gestures"][ i ].center[ 2 ] );
@@ -257,7 +257,7 @@ class Controller extends EventDispatcher
 
                         case "swipe":
                             gesture = new SwipeGesture();
-                            type = Gesture.TYPE_SWIPE;
+                            type = Type.TYPE_SWIPE;
 
                             var swipe:SwipeGesture = <SwipeGesture>gesture;
 
@@ -269,7 +269,7 @@ class Controller extends EventDispatcher
 
                         case "screenTap":
                             gesture = new ScreenTapGesture();
-                            type = Gesture.TYPE_SCREEN_TAP;
+                            type = Type.TYPE_SCREEN_TAP;
 
                             var screenTap:ScreenTapGesture = <ScreenTapGesture>gesture;
                             screenTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
@@ -279,7 +279,7 @@ class Controller extends EventDispatcher
 
                         case "keyTap":
                             gesture = new KeyTapGesture();
-                            type = Gesture.TYPE_KEY_TAP;
+                            type = Type.TYPE_KEY_TAP;
 
                             var keyTap:KeyTapGesture = <KeyTapGesture>gesture;
                             keyTap.position = new Vector3( json["gestures"][ i ].position[ 0 ], json["gestures"][ i ].position[ 1 ], json["gestures"][ i ].position[ 2 ] );
@@ -331,16 +331,16 @@ class Controller extends EventDispatcher
                     switch( json["gestures"][ i ].state )
                     {
                         case "start":
-                            gesture.state = Gesture.STATE_START;
+                            gesture.state = State.STATE_START;
                             break;
                         case "update":
-                            gesture.state = Gesture.STATE_UPDATE;
+                            gesture.state = State.STATE_UPDATE;
                             break;
                         case "stop":
-                            gesture.state = Gesture.STATE_STOP;
+                            gesture.state = State.STATE_STOP;
                             break;
                         default:
-                            gesture.state = Gesture.STATE_INVALID;
+                            gesture.state = State.STATE_INVALID;
                     }
 
                     gesture.type = type;

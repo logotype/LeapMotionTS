@@ -4,19 +4,19 @@
  */
 class EventDispatcher
 {
-    private _listeners:any[];
+    private listeners:any[];
 
     constructor()
     {
-        this._listeners = [];
+        this.listeners = [];
     }
 
     public hasEventListener( type:string, listener:Function ):boolean
     {
         var exists:boolean = false;
-        for( var i:number = 0; i < this._listeners.length; i++ )
+        for( var i:number = 0; i < this.listeners.length; i++ )
         {
-            if( this._listeners[ i ].type === type && this._listeners[ i ].listener === listener )
+            if( this.listeners[ i ].type === type && this.listeners[ i ].listener === listener )
             {
                 exists = true;
                 break;
@@ -26,29 +26,29 @@ class EventDispatcher
         return exists;
     }
 
-    public addEventListener ( typeStr:string, listenerFunc:Function ):void
+    public addEventListener ( typeStr:string, listenerFunction:Function ):void
     {
-        if( this.hasEventListener( typeStr, listenerFunc ) )
+        if( this.hasEventListener( typeStr, listenerFunction ) )
             return;
 
-        this._listeners.push( { type: typeStr, listener: listenerFunc } );
+        this.listeners.push( { type: typeStr, listener: listenerFunction } );
     }
 
-    public removeEventListener ( typeStr:string, listenerFunc:Function ):void
+    public removeEventListener ( typeStr:string, listenerFunction:Function ):void
     {
-        for( var i:number = 0; i < this._listeners.length; i++ )
+        for( var i:number = 0; i < this.listeners.length; i++ )
         {
-            if( this._listeners[ i ].type === typeStr && this._listeners[ i ].listener === listenerFunc )
-                this._listeners.splice( i, 1 );
+            if( this.listeners[ i ].type === typeStr && this.listeners[ i ].listener === listenerFunction )
+                this.listeners.splice( i, 1 );
         }
     }
 
-    public dispatchEvent ( evt:LeapEvent ):void
+    public dispatchEvent ( event:LeapEvent ):void
     {
-        for( var i:number = 0; i < this._listeners.length; i++ )
+        for( var i:number = 0; i < this.listeners.length; i++ )
         {
-            if( this._listeners[ i ].type === evt.getType() )
-                this._listeners[ i ].listener.call( this, evt );
+            if( this.listeners[ i ].type === event.getType() )
+                this.listeners[ i ].listener.call( this, event );
         }
     }
 }

@@ -1,10 +1,10 @@
 export declare class EventDispatcher {
-    private _listeners;
+    private listeners;
     constructor();
     public hasEventListener(type: string, listener: Function): boolean;
-    public addEventListener(typeStr: string, listenerFunc: Function): void;
-    public removeEventListener(typeStr: string, listenerFunc: Function): void;
-    public dispatchEvent(evt: LeapEvent): void;
+    public addEventListener(typeStr: string, listenerFunction: Function): void;
+    public removeEventListener(typeStr: string, listenerFunction: Function): void;
+    public dispatchEvent(event: LeapEvent): void;
 }
 export interface Listener {
     onConnect(controller: Controller): void;
@@ -93,9 +93,6 @@ export declare class InteractionBox {
     public toString(): string;
 }
 export declare class Pointable {
-    static ZONE_NONE: number;
-    static ZONE_HOVERING: number;
-    static ZONE_TOUCHING: number;
     public touchZone: number;
     public touchDistance: number;
     public direction: Vector3;
@@ -116,15 +113,6 @@ export declare class Pointable {
     public toString(): string;
 }
 export declare class Gesture {
-    static STATE_INVALID: number;
-    static STATE_START: number;
-    static STATE_UPDATE: number;
-    static STATE_STOP: number;
-    static TYPE_INVALID: number;
-    static TYPE_SWIPE: number;
-    static TYPE_CIRCLE: number;
-    static TYPE_SCREEN_TAP: number;
-    static TYPE_KEY_TAP: number;
     public duration: number;
     public durationSeconds: number;
     public frame: Frame;

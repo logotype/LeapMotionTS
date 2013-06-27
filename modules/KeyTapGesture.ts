@@ -65,7 +65,7 @@ class KeyTapGesture extends Gesture
     /**
      * The type value designating a key tap gesture.
      */
-    public static classType:number = Gesture.TYPE_KEY_TAP;
+    public static classType:number = Type.TYPE_KEY_TAP;
 
     /**
      * The current direction of finger tip motion.

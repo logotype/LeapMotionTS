@@ -103,6 +103,9 @@ class Frame
      */
     public translationVector:Vector3;
 
+    /**
+     * Reference to the current Controller.
+     */
     public controller:Controller;
 
     /**
@@ -299,7 +302,7 @@ class Frame
     }
 
     /**
-     * Returns a Gesture vector containing all gestures that have occured
+     * Returns a Gesture vector containing all gestures that have occurred
      * since the specified frame.
      *
      * <p>If no frame is specifed, the gestures recognized or continuing in
@@ -319,7 +322,7 @@ class Frame
         }
         else
         {
-            // Returns a Gesture vector containing all gestures that have occured since the specified frame.
+            // Returns a Gesture vector containing all gestures that have occurred since the specified frame.
             var gesturesSinceFrame:Gesture[] = [];
 
             for ( var i:number = 0; i < this.controller.frameHistory.length; i++ )
