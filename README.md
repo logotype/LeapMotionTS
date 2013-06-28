@@ -104,6 +104,15 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
         }
     } );
 
+Example output:
+
+    Frame id:1125277, timestamp:14800590398, hands:1, fingers:5, tools:0, gestures:5
+    Hand has 5 fingers, average finger tip position:[Vector3 x:4.767591999999996 y:129.5072 z:-28.39772]
+    Hand sphere radius:136.979 mm, palm position:[Vector3 x:19.067 y:127.976 z:42.0272]
+    Hand pitch:6.500235603666339 degrees, roll:6.0708401144239925 degrees, yaw:-9.621146044782972 degrees
+    Circle id:27, 2, progress:3.92605, radius:43.2705, angle:13.417199999999967, counterclockwise
+    Circle id:25, 2, progress:3.90497, radius:40.3004, angle:13.489199999999961, counterclockwise
+
 Optionally, you can simply call `controller.frame()` e.g. in your main loop, or implement the `Listener` interface for callbacks.
 
 Authors
