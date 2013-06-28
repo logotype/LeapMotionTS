@@ -17,6 +17,12 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
 
     import Leap = require('LeapMotionTS');
     var controller:Leap.Controller = new Leap.Controller();
+    controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, (event:Leap.LeapEvent) => {
+        controller.enableGesture(Leap.Type.TYPE_CIRCLE, true);
+        controller.enableGesture(Leap.Type.TYPE_SWIPE, true);
+        controller.enableGesture(Leap.Type.TYPE_SCREEN_TAP, true);
+        controller.enableGesture(Leap.Type.TYPE_KEY_TAP, true);
+    });
     controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapEvent ) => {
         var frame:Leap.Frame = event.frame;
         console.log( "Frame id: " + frame.id + ", timestamp: " + frame.timestamp + ", hands: " + frame.hands.length + ", fingers: " + frame.fingers.length + ", tools: " + frame.tools.length + ", gestures: " + frame.gestures().length );

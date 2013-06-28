@@ -475,7 +475,7 @@ class Controller extends EventDispatcher
      * @param enable True, to enable the specified gesture type; False, to disable.
      *
      */
-    public enableGesture( type:number, enable:boolean = true ):void
+    public enableGesture( type:Type, enable:boolean = true ):void
     {
         var enableObject:Object = {};
 
@@ -500,7 +500,7 @@ class Controller extends EventDispatcher
      * @return True, if the specified type is enabled; false, otherwise.
      *
      */
-    public isGestureEnabled( type:number ):boolean
+    public isGestureEnabled( type:Type ):boolean
     {
         return this._isGesturesEnabled;
     }

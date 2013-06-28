@@ -1,6 +1,12 @@
 define(["require", "exports", '../LeapMotionTS'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
     var controller = new Leap.Controller();
+    controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, function (event) {
+        controller.enableGesture(Leap.Type.TYPE_CIRCLE, true);
+        controller.enableGesture(Leap.Type.TYPE_SWIPE, true);
+        controller.enableGesture(Leap.Type.TYPE_SCREEN_TAP, true);
+        controller.enableGesture(Leap.Type.TYPE_KEY_TAP, true);
+    });
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, function (event) {
         var frame = event.frame;
         console.log("Frame id:" + frame.id + ", timestamp:" + frame.timestamp + ", hands:" + frame.hands.length + ", fingers:" + frame.fingers.length + ", tools:" + frame.tools.length + ", gestures:" + frame.gestures().length);
