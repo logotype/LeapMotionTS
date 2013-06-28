@@ -236,12 +236,12 @@ class Gesture
      * and an end. The <code>state</code> attribute reports where in that sequence
      * this Gesture object falls.</p>
      */
-    public state:number;
+    public state:State;
 
     /**
      * The gesture type.
      */
-    public type:number;
+    public type:Type;
 
     /**
      * Constructs a new Gesture object.

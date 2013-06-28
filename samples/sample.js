@@ -55,7 +55,6 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
                             sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                         }
                     }
-
                     console.log("Circle id:" + circle.id + ", " + circle.state + ", progress:" + circle.progress + ", radius:" + circle.radius + ", angle:" + Leap.LeapUtil.toDegrees(sweptAngle) + ", " + clockwiseness);
                     break;
                 case Leap.Type.TYPE_SWIPE:
@@ -69,9 +68,6 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
                 case Leap.Type.TYPE_KEY_TAP:
                     var keyTap = gesture;
                     console.log("Key Tap id:" + keyTap.id + ", " + keyTap.state + ", position:" + keyTap.position + ", direction:" + keyTap.direction);
-                    break;
-                default:
-                    console.log("Unknown gesture type.");
                     break;
             }
         }

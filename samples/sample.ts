@@ -19,8 +19,8 @@ controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEve
         if (fingers.length > 0) {
             // Calculate the hand's average finger tip position
             var avgPos:Leap.Vector3 = Leap.Vector3.zero();
-            for (var i:number = 0; i < fingers.length; i++)
-                avgPos = avgPos.plus(( < Leap.Finger > fingers[i]).tipPosition);
+            for (var i:number = 0; i <fingers.length; i++)
+                avgPos = avgPos.plus(( <Leap.Finger>fingers[i]).tipPosition);
 
             avgPos = avgPos.divide(fingers.length);
             console.log("Hand has " + fingers.length + " fingers, average finger tip position:" + avgPos);
@@ -38,12 +38,12 @@ controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEve
     }
 
     var gestures:Leap.Gesture[] = frame.gestures();
-    for (var i:number = 0; i < gestures.length; i++) {
+    for (var i:number = 0; i <gestures.length; i++) {
         var gesture:Leap.Gesture = gestures[i];
 
         switch (gesture.type) {
             case Leap.Type.TYPE_CIRCLE:
-                var circle:Leap.CircleGesture = < Leap.CircleGesture > gesture;
+                var circle:Leap.CircleGesture = <Leap.CircleGesture>gesture;
 
                 // Calculate clock direction using the angle between circle normal and pointable
                 var clockwiseness:string;
@@ -59,27 +59,23 @@ controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEve
                 if (circle.state != Leap.State.STATE_START) {
                     var previousGesture:Leap.Gesture = controller.frame(1).gesture(circle.id);
                     if (previousGesture.isValid()) {
-                        var previousUpdate:Leap.CircleGesture = ( < Leap.CircleGesture > controller.frame(1).gesture(circle.id));
+                        var previousUpdate:Leap.CircleGesture = ( <Leap.CircleGesture>controller.frame(1).gesture(circle.id));
                         sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                     }
                 }
-
                 console.log("Circle id:" + circle.id + ", " + circle.state + ", progress:" + circle.progress + ", radius:" + circle.radius + ", angle:" + Leap.LeapUtil.toDegrees(sweptAngle) + ", " + clockwiseness);
                 break;
             case Leap.Type.TYPE_SWIPE:
-                var swipe:Leap.SwipeGesture = < Leap.SwipeGesture > gesture;
+                var swipe:Leap.SwipeGesture = <Leap.SwipeGesture>gesture;
                 console.log("Swipe id:" + swipe.id + ", " + swipe.state + ", position:" + swipe.position + ", direction:" + swipe.direction + ", speed:" + swipe.speed);
                 break;
             case Leap.Type.TYPE_SCREEN_TAP:
-                var screenTap:Leap.ScreenTapGesture = < Leap.ScreenTapGesture > gesture;
+                var screenTap:Leap.ScreenTapGesture = <Leap.ScreenTapGesture>gesture;
                 console.log("Screen Tap id:" + screenTap.id + ", " + screenTap.state + ", position:" + screenTap.position + ", direction:" + screenTap.direction);
                 break;
             case Leap.Type.TYPE_KEY_TAP:
-                var keyTap:Leap.KeyTapGesture = < Leap.KeyTapGesture > gesture;
+                var keyTap:Leap.KeyTapGesture = <Leap.KeyTapGesture>gesture;
                 console.log("Key Tap id:" + keyTap.id + ", " + keyTap.state + ", position:" + keyTap.position + ", direction:" + keyTap.direction);
-                break;
-            default:
-                console.log("Unknown gesture type.");
                 break;
         }
     }

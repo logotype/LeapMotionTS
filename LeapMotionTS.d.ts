@@ -75,8 +75,8 @@ export declare class Controller extends EventDispatcher {
     private static getPointableByID(frame, id);
     public frame(history?: number): Frame;
     public setListener(listener: Listener): void;
-    public enableGesture(type: number, enable?: boolean): void;
-    public isGestureEnabled(type: number): boolean;
+    public enableGesture(type: Type, enable?: boolean): void;
+    public isGestureEnabled(type: Type): boolean;
     public isConnected(): boolean;
 }
 export declare class InteractionBox {
@@ -137,8 +137,8 @@ export declare class Gesture {
     public hands: Hand[];
     public id: number;
     public pointables: Pointable[];
-    public state: number;
-    public type: number;
+    public state: State;
+    public type: Type;
     constructor();
     public isEqualTo(other: Gesture): boolean;
     public isValid(): boolean;
