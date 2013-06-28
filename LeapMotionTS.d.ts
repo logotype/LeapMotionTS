@@ -92,6 +92,11 @@ export declare class InteractionBox {
     static invalid(): InteractionBox;
     public toString(): string;
 }
+export declare enum Zone {
+    ZONE_NONE,
+    ZONE_HOVERING,
+    ZONE_TOUCHING,
+}
 export declare class Pointable {
     public touchZone: number;
     public touchDistance: number;
@@ -111,6 +116,19 @@ export declare class Pointable {
     public isEqualTo(other: Pointable): boolean;
     static invalid(): Pointable;
     public toString(): string;
+}
+export declare enum State {
+    STATE_INVALID,
+    STATE_START,
+    STATE_UPDATE,
+    STATE_STOP,
+}
+export declare enum Type {
+    TYPE_INVALID,
+    TYPE_SWIPE,
+    TYPE_CIRCLE,
+    TYPE_SCREEN_TAP,
+    TYPE_KEY_TAP,
 }
 export declare class Gesture {
     public duration: number;

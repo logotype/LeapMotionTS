@@ -1186,7 +1186,7 @@ export class InteractionBox
 /**
  * Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.
  */
-enum Zone {
+export enum Zone {
     /**
      * The Pointable object is too far from the plane to be considered hovering or touching.
      *
@@ -1222,7 +1222,7 @@ export class Pointable
      * it enters the "hovering" zone. When a Pointable reaches or
      * passes through the plane, it enters the "touching" zone.</p>
      *
-     * <p>The possible states are present in the Zone enum of this class:</p>
+     * <p>The possible states are present in the Zone export enum of this class:</p>
      *
      * <code>Zone.NONE – The Pointable is outside the hovering zone.
      * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
@@ -1561,7 +1561,7 @@ export class Pointable
 /**
  * The possible gesture states.
  */
-enum State {
+export enum State {
     /**
      * An invalid state.
      */
@@ -1588,7 +1588,7 @@ enum State {
 /**
  * The supported types of gestures.
  */
-enum Type {
+export enum Type {
     /**
      * An invalid type.
      */

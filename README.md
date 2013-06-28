@@ -15,7 +15,7 @@ Clone the repo, `git clone git://github.com/logotype/LeapMotionTS.git`.
 Import the library and create an instance of the Controller class. What you'll get from the `LEAPMOTION_FRAME` handler is a `Frame` instance,
 with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gestures` and more:
 
-    import Leap = module('LeapMotionTS');
+    import Leap = require('LeapMotionTS');
     var controller:Leap.Controller = new Leap.Controller();
     controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapEvent ) => {
         var frame:Leap.Frame = event.frame;
@@ -51,55 +51,48 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
         }
 
         var gestures:Leap.Gesture[] = frame.gestures();
-        for ( var i:number = 0; i < gestures.length; i++ )
-        {
-            var gesture:Leap.Gesture = gestures[ i ];
+        for (var i:number = 0; i < gestures.length; i++) {
+            var gesture:Leap.Gesture = gestures[i];
 
-            switch ( gesture.type )
-            {
-                case Leap.Gesture.TYPE_CIRCLE:
-                    var circle:Leap.CircleGesture = <Leap.CircleGesture>gesture;
+            switch (gesture.type) {
+                case Leap.Type.TYPE_CIRCLE:
+                    var circle:Leap.CircleGesture = < Leap.CircleGesture > gesture;
 
                     // Calculate clock direction using the angle between circle normal and pointable
-                    var clockwiseness:String;
-                    if ( circle.pointable.direction.angleTo( circle.normal ) <= Math.PI / 4 )
-                    {
+                    var clockwiseness:string;
+                    if (circle.pointable.direction.angleTo(circle.normal) <= Math.PI / 4) {
                         // Clockwise if angle is less than 90 degrees
                         clockwiseness = "clockwise";
-                    }
-                    else
-                    {
+                    } else {
                         clockwiseness = "counterclockwise";
                     }
 
                     // Calculate angle swept since last frame
                     var sweptAngle:number = 0;
-                    if ( circle.state != Leap.Gesture.STATE_START )
-                    {
-                        var previousGesture:Leap.Gesture = controller.frame( 1 ).gesture( circle.id );
-                        if( previousGesture.isValid() )
-                        {
-                            var previousUpdate:Leap.CircleGesture = (<Leap.CircleGesture>controller.frame( 1 ).gesture( circle.id ) );
-                            sweptAngle = ( circle.progress - previousUpdate.progress ) * 2 * Math.PI;
+                    if (circle.state != Leap.State.STATE_START) {
+                        var previousGesture:Leap.Gesture = controller.frame(1).gesture(circle.id);
+                        if (previousGesture.isValid()) {
+                            var previousUpdate:Leap.CircleGesture = ( < Leap.CircleGesture > controller.frame(1).gesture(circle.id));
+                            sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                         }
                     }
 
-                    console.log( "Circle id: " + circle.id + ", " + circle.state + ", progress: " + circle.progress + ", radius: " + circle.radius + ", angle: " + Leap.LeapUtil.toDegrees( sweptAngle ) + ", " + clockwiseness );
+                    console.log("Circle id:" + circle.id + ", " + circle.state + ", progress:" + circle.progress + ", radius:" + circle.radius + ", angle:" + Leap.LeapUtil.toDegrees(sweptAngle) + ", " + clockwiseness);
                     break;
-                case Leap.Gesture.TYPE_SWIPE:
-                    var swipe:Leap.SwipeGesture = <Leap.SwipeGesture>gesture;
-                    console.log( "Swipe id: " + swipe.id + ", " + swipe.state + ", position: " + swipe.position + ", direction: " + swipe.direction + ", speed: " + swipe.speed );
+                case Leap.Type.TYPE_SWIPE:
+                    var swipe:Leap.SwipeGesture = < Leap.SwipeGesture > gesture;
+                    console.log("Swipe id:" + swipe.id + ", " + swipe.state + ", position:" + swipe.position + ", direction:" + swipe.direction + ", speed:" + swipe.speed);
                     break;
-                case Leap.Gesture.TYPE_SCREEN_TAP:
-                    var screenTap:Leap.ScreenTapGesture = <Leap.ScreenTapGesture>gesture;
-                    console.log( "Screen Tap id: " + screenTap.id + ", " + screenTap.state + ", position: " + screenTap.position + ", direction: " + screenTap.direction );
+                case Leap.Type.TYPE_SCREEN_TAP:
+                    var screenTap:Leap.ScreenTapGesture = < Leap.ScreenTapGesture > gesture;
+                    console.log("Screen Tap id:" + screenTap.id + ", " + screenTap.state + ", position:" + screenTap.position + ", direction:" + screenTap.direction);
                     break;
-                case Leap.Gesture.TYPE_KEY_TAP:
-                    var keyTap:Leap.KeyTapGesture = <Leap.KeyTapGesture>gesture;
-                    console.log( "Key Tap id: " + keyTap.id + ", " + keyTap.state + ", position: " + keyTap.position + ", direction: " + keyTap.direction );
+                case Leap.Type.TYPE_KEY_TAP:
+                    var keyTap:Leap.KeyTapGesture = < Leap.KeyTapGesture > gesture;
+                    console.log("Key Tap id:" + keyTap.id + ", " + keyTap.state + ", position:" + keyTap.position + ", direction:" + keyTap.direction);
                     break;
                 default:
-                    console.log( "Unknown gesture type." );
+                    console.log("Unknown gesture type.");
                     break;
             }
         }

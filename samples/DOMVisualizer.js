@@ -1,24 +1,29 @@
 define(["require", "exports", '../LeapMotionTS'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
-    function moveFinger(Finger, posX, posY, posZ, dirX, dirY, dirZ) {
-        Finger.style.webkitTransform = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + dirX + "deg) rotateY(0deg) rotateZ(" + dirZ + "deg)";
+
+    function moveFinger(finger, posX, posY, posZ, dirX, dirY, dirZ) {
+        finger.style["webkitTransform"] = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + dirX + "deg) rotateY(0deg) rotateZ(" + dirZ + "deg)";
     }
-    function moveSphere(Sphere, posX, posY, posZ, rotX, rotY, rotZ) {
-        Sphere.style.webkitTransform = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + rotX + "deg) rotateY(0deg) rotateZ(0deg)";
+
+    function moveSphere(sphere, posX, posY, posZ, rotX, rotY, rotZ) {
+        sphere.style["webkitTransform"] = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + rotX + "deg) rotateY(0deg) rotateZ(0deg)";
     }
-    var fingers = {};
-    var spheres = {};
+
+    var fingers = [];
+    var spheres = [];
+
     var controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, function (event) {
         var frame = event.frame;
-        var fingerIds = {};
-        var handIds = {};
+        var fingerIds = [];
+        var handIds = [];
         if (frame.hands === undefined) {
             var handsLength = 0;
         } else {
             var handsLength = frame.hands.length;
         }
-        for(var handId = 0, handCount = handsLength; handId != handCount; handId++) {
+
+        for (var handId = 0, handCount = handsLength; handId != handCount; handId++) {
             var hand = frame.hands[handId];
             var posX = (hand.palmPosition.x * 3);
             var posY = (hand.palmPosition.z * 3) - 200;
@@ -42,14 +47,15 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
             }
             handIds[hand.id] = true;
         }
-        for(var handIdSphere in spheres) {
+        for (var handIdSphere in spheres) {
             if (!handIds[handIdSphere]) {
                 var sphereDiv = document.getElementById(spheres[handIdSphere]);
                 sphereDiv.parentNode.removeChild(sphereDiv);
                 delete spheres[handIdSphere];
             }
         }
-        for(var pointableId = 0, pointableCount = frame.pointables.length; pointableId != pointableCount; pointableId++) {
+
+        for (var pointableId = 0, pointableCount = frame.pointables.length; pointableId != pointableCount; pointableId++) {
             var pointable = frame.pointables[pointableId];
             var posX = (pointable.tipPosition.x * 3);
             var posY = (pointable.tipPosition.z * 3) - 200;
@@ -72,7 +78,7 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
             }
             fingerIds[pointable.id] = true;
         }
-        for(var fingerId in fingers) {
+        for (var fingerId in fingers) {
             if (!fingerIds[fingerId]) {
                 var fingerDiv = document.getElementById(fingers[fingerId]);
                 fingerDiv.parentNode.removeChild(fingerDiv);
@@ -86,5 +92,5 @@ define(["require", "exports", '../LeapMotionTS'], function(require, exports, __L
             document.getElementById('app').setAttribute('class', '');
         }, false);
     });
-})
+});
 //@ sourceMappingURL=DOMVisualizer.js.map

@@ -599,14 +599,14 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.InteractionBox = InteractionBox;
 
-    var Zone;
     (function (Zone) {
         Zone[Zone["ZONE_NONE"] = 0] = "ZONE_NONE";
 
         Zone[Zone["ZONE_HOVERING"] = 1] = "ZONE_HOVERING";
 
         Zone[Zone["ZONE_TOUCHING"] = 2] = "ZONE_TOUCHING";
-    })(Zone || (Zone = {}));
+    })(exports.Zone || (exports.Zone = {}));
+    var Zone = exports.Zone;
 
     var Pointable = (function () {
         function Pointable() {
@@ -672,7 +672,6 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Pointable = Pointable;
 
-    var State;
     (function (State) {
         State[State["STATE_INVALID"] = 0] = "STATE_INVALID";
 
@@ -681,9 +680,9 @@ define(["require", "exports"], function(require, exports) {
         State[State["STATE_UPDATE"] = 2] = "STATE_UPDATE";
 
         State[State["STATE_STOP"] = 3] = "STATE_STOP";
-    })(State || (State = {}));
+    })(exports.State || (exports.State = {}));
+    var State = exports.State;
 
-    var Type;
     (function (Type) {
         Type[Type["TYPE_INVALID"] = 4] = "TYPE_INVALID";
 
@@ -694,7 +693,8 @@ define(["require", "exports"], function(require, exports) {
         Type[Type["TYPE_SCREEN_TAP"] = 7] = "TYPE_SCREEN_TAP";
 
         Type[Type["TYPE_KEY_TAP"] = 8] = "TYPE_KEY_TAP";
-    })(Type || (Type = {}));
+    })(exports.Type || (exports.Type = {}));
+    var Type = exports.Type;
     var Gesture = (function () {
         function Gesture() {
             this.hands = [];
@@ -1359,3 +1359,4 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Vector3 = Vector3;
 });
+//@ sourceMappingURL=LeapMotionTS.js.map
