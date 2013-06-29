@@ -1,4 +1,4 @@
-define(["require", "exports", '../LeapMotionTS'], function(require, exports, __Leap__) {
+define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
 
     function moveFinger(finger, posX, posY, posZ, dirX, dirY, dirZ) {
