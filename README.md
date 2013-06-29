@@ -1,11 +1,15 @@
 LeapMotionTS
 =================
 
-This is the TypeScript framework for working with the Leap.
+This is the TypeScript framework for working with Leap Motion.
 
 Leap Motion is a motion-control software and hardware company developing the world's most powerful and sensitive 3D motion-control and motion-sensing technology.
 
 [leapmotion.com](http://www.leapmotion.com)
+
+TypeScript is a free and open source programming language developed by Microsoft. TypeScript adds optional types, classes, interfaces and modules to JavaScript. TypeScript supports tools for large-scale JavaScript applications for any browser, for any host, on any OS. TypeScript compiles to readable, standards-based JavaScript.
+
+[typescriptlang.org](http://www.typescriptlang.org)
 
 Quick start
 -----------
