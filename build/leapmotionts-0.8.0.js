@@ -1359,4 +1359,3 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Vector3 = Vector3;
 });
-//@ sourceMappingURL=leapmotionts-0.8.0.js.map

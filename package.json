@@ -1,0 +1,37 @@
+{
+  "name": "LeapMotionTS",
+  "version": "0.8.0",
+  "description": "TypeScript framework for Leap Motion.",
+  "main": "src",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/logotype/LeapMotionTS.git"
+  },
+  "readmeFilename": "README.md",
+  "gitHead": "c2e62df9d73ba1510d39741c21441960c03bef0e",
+  "bugs": {
+    "url": "https://github.com/logotype/LeapMotionTS/issues"
+  },
+  "dependencies": {
+    "grunt": "~0.4.1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-sed": "~0.1.1",
+    "grunt-typescript": "~0.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "leapmotionts",
+    "leapmotion",
+    "leap",
+    "ts",
+    "typescript"
+  ],
+  "author": "Victor Norgren"
+}

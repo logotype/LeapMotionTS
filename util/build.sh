@@ -9,12 +9,9 @@ sed 's/class /export class /' ../build/cat.ts | sed 's/interface /export interfa
 echo "[Running TypeScript compiler...]"
 tsc --declaration -b --module amd --target ES5 ../build/leapmotionts-0.8.0.ts
 
-#echo "[Running RequireJS Optimizer...]"
-#node r.js -o baseUrl=../build/ name=leapmotionts-0.8.0 out=../build/leapmotionts-0.8.0.optimized.js
-
 echo "[Running Closure Compiler...]"
 java \
--jar ./compiler.jar \
+-jar ./build/compiler.jar \
 --js_output_file ../build/leapmotionts-0.8.0.min.js \
 --js ../build/leapmotionts-0.8.0.js
 
