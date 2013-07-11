@@ -22,5 +22,5 @@ node_modules
 # Project specific
 *.js.map
 *.map
-modules/*.js
-modules/*.js.map
+src/*.js
+src/*.js.map
