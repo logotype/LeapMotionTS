@@ -58,9 +58,9 @@ class InteractionBox
     {
         var vec:Vector3 = Vector3.invalid();
 
-        vec.x = ( ( ( normalizedPosition.x + this.center.x ) - 0.5 ) * this.width );
-        vec.y = ( ( ( normalizedPosition.y + this.center.y ) - 0.5 ) * this.height );
-        vec.z = ( ( ( normalizedPosition.z + this.center.z ) - 0.5 ) * this.depth );
+        vec.x = ( normalizedPosition.x - 0.5 ) * this.width + this.center.x;
+        vec.y = ( normalizedPosition.y - 0.5 ) * this.height + this.center.y;
+        vec.z = ( normalizedPosition.z - 0.5 ) * this.depth + this.center.z;
 
         return vec;
     }
