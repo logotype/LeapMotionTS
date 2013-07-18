@@ -162,6 +162,12 @@ class Pointable
     public stabilizedTipPosition:Vector3;
 
     /**
+     * The duration of time this Pointable has been visible to the Leap Motion Controller.
+     * <p>The duration (in seconds) that this Pointable has been tracked.</p>
+     */
+    public timeVisible:number;
+
+    /**
      * The rate of change of the tip position in millimeters/second.
      */
     public tipVelocity:Vector3;

@@ -70,6 +70,7 @@ export declare class Controller extends EventDispatcher {
     public connection: WebSocket;
     public _isConnected: boolean;
     public _isGesturesEnabled: boolean;
+    private heartBeatTimer;
     constructor(host?: string);
     private static getHandByID(frame, id);
     private static getPointableByID(frame, id);
@@ -108,6 +109,7 @@ export declare class Pointable {
     public width: number;
     public tipPosition: Vector3;
     public stabilizedTipPosition: Vector3;
+    public timeVisible: number;
     public tipVelocity: Vector3;
     public isFinger: boolean;
     public isTool: boolean;
@@ -160,6 +162,8 @@ export declare class Hand {
     public id: number;
     public palmNormal: Vector3;
     public palmPosition: Vector3;
+    public stabilizedPalmPosition: Vector3;
+    public timeVisible: number;
     public palmVelocity: Vector3;
     public pointables: Pointable[];
     public sphereCenter: Vector3;
@@ -187,6 +191,7 @@ export declare class Frame {
     public pointables: Pointable[];
     public _gestures: Gesture[];
     public id: number;
+    public currentFramesPerSecond: number;
     public interactionBox: InteractionBox;
     public timestamp: number;
     public tools: Tool[];

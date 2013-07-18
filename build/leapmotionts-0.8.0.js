@@ -244,9 +244,9 @@ define(["require", "exports"], function (require, exports) {
             this.listener = new DefaultListener();
 
             if (!host) {
-                this.connection = new WebSocket("ws://localhost:6437");
+                this.connection = new WebSocket("ws://localhost:6437/v2.json");
             } else {
-                this.connection = new WebSocket("ws://" + host + ":6437");
+                this.connection = new WebSocket("ws://" + host + ":6437/v2.json");
             }
 
             this.listener.onInit(this);
@@ -254,11 +254,17 @@ define(["require", "exports"], function (require, exports) {
             this.connection.onopen = function (event) {
                 _this._isConnected = true;
                 _this.listener.onConnect(_this);
+                _this.heartBeatTimer = setInterval(function () {
+                    var heartBeat = {};
+                    heartBeat.heartbeat = true;
+                    _this.connection.send(JSON.stringify(heartBeat));
+                }, 100);
             };
 
             this.connection.onclose = function (data) {
                 _this._isConnected = false;
                 _this.listener.onDisconnect(_this);
+                clearInterval(_this.heartBeatTimer);
             };
 
             this.connection.onmessage = function (data) {
@@ -274,10 +280,6 @@ define(["require", "exports"], function (require, exports) {
 
                 json = JSON.parse(data.data);
 
-                if (typeof json.timestamp !== "undefined") {
-                    return;
-                }
-
                 currentFrame = new Frame();
                 currentFrame.controller = _this;
 
@@ -291,11 +293,13 @@ define(["require", "exports"], function (require, exports) {
                         hand.id = json.hands[i].id;
                         hand.palmNormal = new Vector3(json.hands[i].palmNormal[0], json.hands[i].palmNormal[1], json.hands[i].palmNormal[2]);
                         hand.palmPosition = new Vector3(json.hands[i].palmPosition[0], json.hands[i].palmPosition[1], json.hands[i].palmPosition[2]);
+                        hand.stabilizedPalmPosition = new Vector3(json.hands[i].stabilizedPalmPosition[0], json.hands[i].stabilizedPalmPosition[1], json.hands[i].stabilizedPalmPosition[2]);
                         hand.palmVelocity = new Vector3(json.hands[i].palmPosition[0], json.hands[i].palmPosition[1], json.hands[i].palmPosition[2]);
                         hand.rotation = new Matrix(new Vector3(json.hands[i].r[0][0], json.hands[i].r[0][1], json.hands[i].r[0][2]), new Vector3(json.hands[i].r[1][0], json.hands[i].r[1][1], json.hands[i].r[1][2]), new Vector3(json.hands[i].r[2][0], json.hands[i].r[2][1], json.hands[i].r[2][2]));
                         hand.scaleFactorNumber = json.hands[i].s;
                         hand.sphereCenter = new Vector3(json.hands[i].sphereCenter[0], json.hands[i].sphereCenter[1], json.hands[i].sphereCenter[2]);
                         hand.sphereRadius = json.hands[i].sphereRadius;
+                        hand.timeVisible = json.hands[i].timeVisible;
                         hand.translationVector = new Vector3(json.hands[i].t[0], json.hands[i].t[1], json.hands[i].t[2]);
                         currentFrame.hands.push(hand);
                     }
@@ -330,6 +334,7 @@ define(["require", "exports"], function (require, exports) {
                         pointable.stabilizedTipPosition = new Vector3(json.pointables[i].stabilizedTipPosition[0], json.pointables[i].stabilizedTipPosition[1], json.pointables[i].stabilizedTipPosition[2]);
                         pointable.tipVelocity = new Vector3(json.pointables[i].tipVelocity[0], json.pointables[i].tipVelocity[1], json.pointables[i].tipVelocity[2]);
                         pointable.touchDistance = json.pointables[i].touchDist;
+                        pointable.timeVisible = json.pointables[i].timeVisible;
                         currentFrame.pointables.push(pointable);
 
                         switch (json.pointables[i].touchZone) {
@@ -558,9 +563,9 @@ define(["require", "exports"], function (require, exports) {
         InteractionBox.prototype.denormalizePoint = function (normalizedPosition) {
             var vec = Vector3.invalid();
 
-            vec.x = (((normalizedPosition.x + this.center.x) - 0.5) * this.width);
-            vec.y = (((normalizedPosition.y + this.center.y) - 0.5) * this.height);
-            vec.z = (((normalizedPosition.z + this.center.z) - 0.5) * this.depth);
+            vec.x = (normalizedPosition.x - 0.5) * this.width + this.center.x;
+            vec.y = (normalizedPosition.y - 0.5) * this.height + this.center.y;
+            vec.z = (normalizedPosition.z - 0.5) * this.depth + this.center.z;
 
             return vec;
         };

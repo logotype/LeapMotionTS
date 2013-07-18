@@ -543,6 +543,11 @@ export class Controller extends EventDispatcher
     public _isGesturesEnabled:boolean = false;
 
     /**
+     * Required to suppress OS controls.
+     */
+    private heartBeatTimer:number;
+
+    /**
      * Constructs a Controller object.
      * @param host IP or hostname of the computer running the Leap software.
      * (currently only supported for socket connections).
@@ -556,11 +561,11 @@ export class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437");
+            this.connection = new WebSocket("ws://localhost:6437/v2.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437");
+            this.connection = new WebSocket("ws://" + host + ":6437/v2.json");
         }
 
         this.listener.onInit( this );
@@ -569,12 +574,19 @@ export class Controller extends EventDispatcher
         {
             this._isConnected = true;
             this.listener.onConnect( this );
+            this.heartBeatTimer = setInterval( () =>
+            {
+                var heartBeat:any = {};
+                heartBeat.heartbeat = true;
+                this.connection.send( JSON.stringify( heartBeat ) );
+            }, 100 );
         };
 
         this.connection.onclose = ( data:Object ) =>
         {
             this._isConnected = false;
             this.listener.onDisconnect( this );
+            clearInterval( this.heartBeatTimer );
         };
 
         this.connection.onmessage = ( data:any ) =>
@@ -590,12 +602,6 @@ export class Controller extends EventDispatcher
             var type:number;
 
             json = JSON.parse( data.data );
-
-            // Ignore all other data than Frames
-            if( typeof json.timestamp !== "undefined" )
-            {
-                return;
-            }
 
             currentFrame = new Frame();
             currentFrame.controller = this;
@@ -613,18 +619,20 @@ export class Controller extends EventDispatcher
                     hand.id = json.hands[ i ].id;
                     hand.palmNormal = new Vector3( json.hands[ i ].palmNormal[ 0 ], json.hands[ i ].palmNormal[ 1 ], json.hands[ i ].palmNormal[ 2 ] );
                     hand.palmPosition = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
+                    hand.stabilizedPalmPosition = new Vector3( json.hands[ i ].stabilizedPalmPosition[ 0 ], json.hands[ i ].stabilizedPalmPosition[ 1 ], json.hands[ i ].stabilizedPalmPosition[ 2 ] );
                     hand.palmVelocity = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
                     hand.rotation = new Matrix( new Vector3( json.hands[ i ].r[ 0 ][ 0 ], json.hands[ i ].r[ 0 ][ 1 ], json.hands[ i ].r[ 0 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 1 ][ 0 ], json.hands[ i ].r[ 1 ][ 1 ], json.hands[ i ].r[ 1 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 2 ][ 0 ], json.hands[ i ].r[ 2 ][ 1 ], json.hands[ i ].r[ 2 ][ 2 ] ) );
                     hand.scaleFactorNumber = json.hands[ i ].s;
                     hand.sphereCenter = new Vector3( json.hands[ i ].sphereCenter[ 0 ], json.hands[ i ].sphereCenter[ 1 ], json.hands[ i ].sphereCenter[ 2 ] );
                     hand.sphereRadius = json.hands[ i ].sphereRadius;
+                    hand.timeVisible = json.hands[ i ].timeVisible;
                     hand.translationVector = new Vector3( json.hands[ i ].t[ 0 ], json.hands[ i ].t[ 1 ], json.hands[ i ].t[ 2 ] );
                     currentFrame.hands.push( hand );
                 }
             }
 
-            // ID
             currentFrame.id = json.id;
+            //currentFrame.currentFramesPerSecond = json.currentFrameRate;
 
             // InteractionBox
             if ( typeof json.interactionBox !== "undefined" )
@@ -658,6 +666,7 @@ export class Controller extends EventDispatcher
                     pointable.stabilizedTipPosition = new Vector3( json.pointables[ i ].stabilizedTipPosition[ 0 ], json.pointables[ i ].stabilizedTipPosition[ 1 ], json.pointables[ i ].stabilizedTipPosition[ 2 ] );
                     pointable.tipVelocity = new Vector3( json.pointables[ i ].tipVelocity[ 0 ], json.pointables[ i ].tipVelocity[ 1 ], json.pointables[ i ].tipVelocity[ 2 ] );
                     pointable.touchDistance = json.pointables[ i ].touchDist;
+                    pointable.timeVisible = json.pointables[ i ].timeVisible;
                     currentFrame.pointables.push( pointable );
 
                     switch( json.pointables[ i ].touchZone )
@@ -1045,9 +1054,9 @@ export class InteractionBox
     {
         var vec:Vector3 = Vector3.invalid();
 
-        vec.x = ( ( ( normalizedPosition.x + this.center.x ) - 0.5 ) * this.width );
-        vec.y = ( ( ( normalizedPosition.y + this.center.y ) - 0.5 ) * this.height );
-        vec.z = ( ( ( normalizedPosition.z + this.center.z ) - 0.5 ) * this.depth );
+        vec.x = ( normalizedPosition.x - 0.5 ) * this.width + this.center.x;
+        vec.y = ( normalizedPosition.y - 0.5 ) * this.height + this.center.y;
+        vec.z = ( normalizedPosition.z - 0.5 ) * this.depth + this.center.z;
 
         return vec;
     }
@@ -1307,6 +1316,12 @@ export class Pointable
      * <p>A modified tip position of this Pointable object with some additional smoothing and stabilization applied.</p> 
      */
     public stabilizedTipPosition:Vector3;
+
+    /**
+     * The duration of time this Pointable has been visible to the Leap Motion Controller.
+     * <p>The duration (in seconds) that this Pointable has been tracked.</p>
+     */
+    public timeVisible:number;
 
     /**
      * The rate of change of the tip position in millimeters/second.
@@ -1885,6 +1900,19 @@ export class Hand
     public palmPosition:Vector3;
 
     /**
+     * The stabilized palm position of this Hand.
+     * <p>Smoothing and stabilization is performed in order to make this value more suitable for interaction with 2D content.</p>
+     * <p>A modified palm position of this Hand object with some additional smoothing and stabilization applied.</p>
+     */
+    public stabilizedPalmPosition:Vector3;
+
+    /**
+     * The duration of time this Hand has been visible to the Leap Motion Controller.
+     * <p>The duration (in seconds) that this Hand has been tracked.</p>
+     */
+    public timeVisible:number;
+
+    /**
      * The rate of change of the palm position in millimeters/second.
      */
     public palmVelocity:Vector3;
@@ -2318,6 +2346,15 @@ export class Frame
      * <p>Consecutive frames processed by the Leap have consecutive increasing values.</p>
      */
     public id:number;
+
+    /**
+     * The current framerate (in frames per second) of the Leap Motion Controller.
+     * <p>This value may fluctuate depending on available computing resources,
+     * activity within the device field of view, software tracking settings,
+     * and other factors.</p>
+     * <p>An estimate of frames per second of the Leap Motion Controller.</p>
+     */
+    public currentFramesPerSecond:number;
 
     /**
      * The current InteractionBox for the frame.

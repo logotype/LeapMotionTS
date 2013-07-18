@@ -38,7 +38,7 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
                 var rotY = (hand.rotation.xBasis.y * 90);
                 var rotZ = (hand.rotation.xBasis.x * 90);
                 var sphere = this.spheres[hand.id];
-                console.log(hand.rotation.yBasis);
+
                 if (!sphere) {
                     var sphereDiv = document.getElementById("sphere").cloneNode(true);
                     sphereDiv.setAttribute('id', hand.id.toString());

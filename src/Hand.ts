@@ -68,6 +68,19 @@ class Hand
     public palmPosition:Vector3;
 
     /**
+     * The stabilized palm position of this Hand.
+     * <p>Smoothing and stabilization is performed in order to make this value more suitable for interaction with 2D content.</p>
+     * <p>A modified palm position of this Hand object with some additional smoothing and stabilization applied.</p>
+     */
+    public stabilizedPalmPosition:Vector3;
+
+    /**
+     * The duration of time this Hand has been visible to the Leap Motion Controller.
+     * <p>The duration (in seconds) that this Hand has been tracked.</p>
+     */
+    public timeVisible:number;
+
+    /**
      * The rate of change of the palm position in millimeters/second.
      */
     public palmVelocity:Vector3;

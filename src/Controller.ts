@@ -82,6 +82,11 @@ class Controller extends EventDispatcher
     public _isGesturesEnabled:boolean = false;
 
     /**
+     * Required to suppress OS controls.
+     */
+    private heartBeatTimer:number;
+
+    /**
      * Constructs a Controller object.
      * @param host IP or hostname of the computer running the Leap software.
      * (currently only supported for socket connections).
@@ -95,11 +100,11 @@ class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437");
+            this.connection = new WebSocket("ws://localhost:6437/v2.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437");
+            this.connection = new WebSocket("ws://" + host + ":6437/v2.json");
         }
 
         this.listener.onInit( this );
@@ -108,12 +113,19 @@ class Controller extends EventDispatcher
         {
             this._isConnected = true;
             this.listener.onConnect( this );
+            this.heartBeatTimer = setInterval( () =>
+            {
+                var heartBeat:any = {};
+                heartBeat.heartbeat = true;
+                this.connection.send( JSON.stringify( heartBeat ) );
+            }, 100 );
         };
 
         this.connection.onclose = ( data:Object ) =>
         {
             this._isConnected = false;
             this.listener.onDisconnect( this );
+            clearInterval( this.heartBeatTimer );
         };
 
         this.connection.onmessage = ( data:any ) =>
@@ -129,12 +141,6 @@ class Controller extends EventDispatcher
             var type:number;
 
             json = JSON.parse( data.data );
-
-            // Ignore all other data than Frames
-            if( typeof json.timestamp !== "undefined" )
-            {
-                return;
-            }
 
             currentFrame = new Frame();
             currentFrame.controller = this;
@@ -152,18 +158,20 @@ class Controller extends EventDispatcher
                     hand.id = json.hands[ i ].id;
                     hand.palmNormal = new Vector3( json.hands[ i ].palmNormal[ 0 ], json.hands[ i ].palmNormal[ 1 ], json.hands[ i ].palmNormal[ 2 ] );
                     hand.palmPosition = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
+                    hand.stabilizedPalmPosition = new Vector3( json.hands[ i ].stabilizedPalmPosition[ 0 ], json.hands[ i ].stabilizedPalmPosition[ 1 ], json.hands[ i ].stabilizedPalmPosition[ 2 ] );
                     hand.palmVelocity = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
                     hand.rotation = new Matrix( new Vector3( json.hands[ i ].r[ 0 ][ 0 ], json.hands[ i ].r[ 0 ][ 1 ], json.hands[ i ].r[ 0 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 1 ][ 0 ], json.hands[ i ].r[ 1 ][ 1 ], json.hands[ i ].r[ 1 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 2 ][ 0 ], json.hands[ i ].r[ 2 ][ 1 ], json.hands[ i ].r[ 2 ][ 2 ] ) );
                     hand.scaleFactorNumber = json.hands[ i ].s;
                     hand.sphereCenter = new Vector3( json.hands[ i ].sphereCenter[ 0 ], json.hands[ i ].sphereCenter[ 1 ], json.hands[ i ].sphereCenter[ 2 ] );
                     hand.sphereRadius = json.hands[ i ].sphereRadius;
+                    hand.timeVisible = json.hands[ i ].timeVisible;
                     hand.translationVector = new Vector3( json.hands[ i ].t[ 0 ], json.hands[ i ].t[ 1 ], json.hands[ i ].t[ 2 ] );
                     currentFrame.hands.push( hand );
                 }
             }
 
-            // ID
             currentFrame.id = json.id;
+            //currentFrame.currentFramesPerSecond = json.currentFrameRate;
 
             // InteractionBox
             if ( typeof json.interactionBox !== "undefined" )
@@ -197,6 +205,7 @@ class Controller extends EventDispatcher
                     pointable.stabilizedTipPosition = new Vector3( json.pointables[ i ].stabilizedTipPosition[ 0 ], json.pointables[ i ].stabilizedTipPosition[ 1 ], json.pointables[ i ].stabilizedTipPosition[ 2 ] );
                     pointable.tipVelocity = new Vector3( json.pointables[ i ].tipVelocity[ 0 ], json.pointables[ i ].tipVelocity[ 1 ], json.pointables[ i ].tipVelocity[ 2 ] );
                     pointable.touchDistance = json.pointables[ i ].touchDist;
+                    pointable.timeVisible = json.pointables[ i ].timeVisible;
                     currentFrame.pointables.push( pointable );
 
                     switch( json.pointables[ i ].touchZone )

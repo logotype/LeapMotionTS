@@ -70,6 +70,15 @@ class Frame
     public id:number;
 
     /**
+     * The current framerate (in frames per second) of the Leap Motion Controller.
+     * <p>This value may fluctuate depending on available computing resources,
+     * activity within the device field of view, software tracking settings,
+     * and other factors.</p>
+     * <p>An estimate of frames per second of the Leap Motion Controller.</p>
+     */
+    public currentFramesPerSecond:number;
+
+    /**
      * The current InteractionBox for the frame.
      * <p>See the InteractionBox class documentation for more details on how this class should be used.</p>
      * @see InteractionBox
