@@ -1,5 +1,4 @@
-LeapMotionTS
-=================
+<img src="http://logotype.se/leapmotion/logo_ts.png">
 
 This is the TypeScript framework for working with Leap Motion.
 
