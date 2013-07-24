@@ -1,4 +1,4 @@
-<img src="http://logotype.se/leapmotion/logo_ts.png">
+[<img src="http://logotype.se/leapmotion/logo_ts.png">](https://github.com/logotype/LeapMotionTS)
 
 This is the TypeScript framework for working with Leap Motion.
 
