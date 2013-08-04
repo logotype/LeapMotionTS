@@ -244,9 +244,9 @@ define(["require", "exports"], function (require, exports) {
             this.listener = new DefaultListener();
 
             if (!host) {
-                this.connection = new WebSocket("ws://localhost:6437/v2.json");
+                this.connection = new WebSocket("ws://localhost:6437/v3.json");
             } else {
-                this.connection = new WebSocket("ws://" + host + ":6437/v2.json");
+                this.connection = new WebSocket("ws://" + host + ":6437/v3.json");
             }
 
             this.listener.onInit(this);
@@ -1401,3 +1401,4 @@ define(["require", "exports"], function (require, exports) {
     })();
     exports.Vector3 = Vector3;
 });
+//@ sourceMappingURL=leapmotionts-0.8.1.js.map
