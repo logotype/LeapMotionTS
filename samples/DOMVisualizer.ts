@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-0.8.0');
+import Leap = require('../build/leapmotionts-1.0.8');
 
 function moveFinger(finger:HTMLDivElement, posX:number, posY:number, posZ:number, dirX:number, dirY:number, dirZ:number) {
     finger.style["webkitTransform"] = "translateX("+posX+"px) translateY("+posY+"px) translateZ("+posZ+"px) rotateX("+dirX+"deg) rotateY(0deg) rotateZ("+dirZ+"deg)";
@@ -48,7 +48,7 @@ controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapE
     }
     for (var handIdSphere in spheres) {
         if (!handIds[handIdSphere]) {
-            var sphereDiv:HTMLDivElement = <HTMLDivElement>document.getElementById(spheres[handIdSphere]);
+            var sphereDiv:HTMLDivElement = <HTMLDivElement>document.getElementById(String(spheres[handIdSphere]));
             sphereDiv.parentNode.removeChild(sphereDiv);
             delete spheres[handIdSphere];
         }
@@ -79,7 +79,7 @@ controller.addEventListener( Leap.LeapEvent.LEAPMOTION_FRAME, ( event:Leap.LeapE
     }
     for (var fingerId in fingers) {
         if (!fingerIds[fingerId]) {
-            var fingerDiv:HTMLDivElement =  <HTMLDivElement>document.getElementById(fingers[fingerId]);
+            var fingerDiv:HTMLDivElement =  <HTMLDivElement>document.getElementById(String(fingers[fingerId]));
             fingerDiv.parentNode.removeChild(fingerDiv);
             delete fingers[fingerId];
         }

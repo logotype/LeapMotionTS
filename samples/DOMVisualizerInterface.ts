@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-0.8.0');
+import Leap = require('../build/leapmotionts-1.0.8');
 
 class DOMVisualizerInterface implements Leap.Listener
 {
@@ -68,7 +68,7 @@ class DOMVisualizerInterface implements Leap.Listener
         }
         for (var handIdSphere in this.spheres) {
             if (!handIds[handIdSphere]) {
-                var sphereDiv:HTMLDivElement = <HTMLDivElement>document.getElementById(this.spheres[handIdSphere]);
+                var sphereDiv:HTMLDivElement = <HTMLDivElement>document.getElementById(String(this.spheres[handIdSphere]));
                 sphereDiv.parentNode.removeChild(sphereDiv);
                 delete this.spheres[handIdSphere];
             }
@@ -99,7 +99,7 @@ class DOMVisualizerInterface implements Leap.Listener
         }
         for (var fingerId in this.fingers) {
             if (!fingerIds[fingerId]) {
-                var fingerDiv:HTMLDivElement =  <HTMLDivElement>document.getElementById(this.fingers[fingerId]);
+                var fingerDiv:HTMLDivElement =  <HTMLDivElement>document.getElementById(String(this.fingers[fingerId]));
                 fingerDiv.parentNode.removeChild(fingerDiv);
                 delete this.fingers[fingerId];
             }

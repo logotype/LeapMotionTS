@@ -1,4 +1,4 @@
-define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, exports, __Leap__) {
+define(["require", "exports", '../build/leapmotionts-1.0.8'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
 
     var DOMVisualizerInterface = (function () {
@@ -55,7 +55,7 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
             }
             for (var handIdSphere in this.spheres) {
                 if (!handIds[handIdSphere]) {
-                    var sphereDiv = document.getElementById(this.spheres[handIdSphere]);
+                    var sphereDiv = document.getElementById(String(this.spheres[handIdSphere]));
                     sphereDiv.parentNode.removeChild(sphereDiv);
                     delete this.spheres[handIdSphere];
                 }
@@ -86,7 +86,7 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
             }
             for (var fingerId in this.fingers) {
                 if (!fingerIds[fingerId]) {
-                    var fingerDiv = document.getElementById(this.fingers[fingerId]);
+                    var fingerDiv = document.getElementById(String(this.fingers[fingerId]));
                     fingerDiv.parentNode.removeChild(fingerDiv);
                     delete this.fingers[fingerId];
                 }
@@ -110,4 +110,4 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
     })();
     new DOMVisualizerInterface();
 });
-//@ sourceMappingURL=DOMVisualizerInterface.js.map
+//# sourceMappingURL=DOMVisualizerInterface.js.map

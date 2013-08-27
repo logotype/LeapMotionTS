@@ -1,4 +1,4 @@
-define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, exports, __Leap__) {
+define(["require", "exports", '../build/leapmotionts-1.0.8'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
 
     function moveFinger(finger, posX, posY, posZ, dirX, dirY, dirZ) {
@@ -49,7 +49,7 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
         }
         for (var handIdSphere in spheres) {
             if (!handIds[handIdSphere]) {
-                var sphereDiv = document.getElementById(spheres[handIdSphere]);
+                var sphereDiv = document.getElementById(String(spheres[handIdSphere]));
                 sphereDiv.parentNode.removeChild(sphereDiv);
                 delete spheres[handIdSphere];
             }
@@ -80,7 +80,7 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
         }
         for (var fingerId in fingers) {
             if (!fingerIds[fingerId]) {
-                var fingerDiv = document.getElementById(fingers[fingerId]);
+                var fingerDiv = document.getElementById(String(fingers[fingerId]));
                 fingerDiv.parentNode.removeChild(fingerDiv);
                 delete fingers[fingerId];
             }
@@ -93,4 +93,4 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
         }, false);
     });
 });
-//@ sourceMappingURL=DOMVisualizer.js.map
+//# sourceMappingURL=DOMVisualizer.js.map

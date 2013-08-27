@@ -1,4 +1,4 @@
-define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, exports, __Leap__) {
+define(["require", "exports", '../build/leapmotionts-1.0.8'], function(require, exports, __Leap__) {
     var Leap = __Leap__;
     var controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, function (event) {
@@ -12,10 +12,13 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
         console.log("Frame id:" + frame.id + ", timestamp:" + frame.timestamp + ", hands:" + frame.hands.length + ", fingers:" + frame.fingers.length + ", tools:" + frame.tools.length + ", gestures:" + frame.gestures().length);
 
         if (frame.hands.length > 0) {
+            // Get the first hand
             var hand = frame.hands[0];
 
+            // Check if the hand has any fingers
             var fingers = hand.fingers;
             if (fingers.length > 0) {
+                // Calculate the hand's average finger tip position
                 var avgPos = Leap.Vector3.zero();
                 for (var i = 0; i < fingers.length; i++)
                     avgPos = avgPos.plus((fingers[i]).tipPosition);
@@ -24,11 +27,14 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
                 console.log("Hand has " + fingers.length + " fingers, average finger tip position:" + avgPos);
             }
 
+            // Get the hand's sphere radius and palm position
             console.log("Hand sphere radius:" + hand.sphereRadius + " mm, palm position:" + hand.palmPosition);
 
+            // Get the hand's normal vector and direction
             var normal = hand.palmNormal;
             var direction = hand.direction;
 
+            // Calculate the hand's pitch, roll, and yaw angles
             console.log("Hand pitch:" + Leap.LeapUtil.toDegrees(direction.pitch) + " degrees, " + "roll:" + Leap.LeapUtil.toDegrees(normal.roll) + " degrees, " + "yaw:" + Leap.LeapUtil.toDegrees(direction.yaw) + " degrees\n");
         }
 
@@ -40,13 +46,16 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
                 case Leap.Type.TYPE_CIRCLE:
                     var circle = gesture;
 
+                    // Calculate clock direction using the angle between circle normal and pointable
                     var clockwiseness;
                     if (circle.pointable.direction.angleTo(circle.normal) <= Math.PI / 4) {
+                        // Clockwise if angle is less than 90 degrees
                         clockwiseness = "clockwise";
                     } else {
                         clockwiseness = "counterclockwise";
                     }
 
+                    // Calculate angle swept since last frame
                     var sweptAngle = 0;
                     if (circle.state != Leap.State.STATE_START) {
                         var previousGesture = controller.frame(1).gesture(circle.id);
@@ -73,4 +82,4 @@ define(["require", "exports", '../build/leapmotionts-0.8.0'], function(require, 
         }
     });
 });
-//@ sourceMappingURL=sample.js.map
+//# sourceMappingURL=sample.js.map

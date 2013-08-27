@@ -95,8 +95,5 @@ module.exports = function (grunt) {
     // Load UglifyJS
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    // Force grunt to finish tasks even if errors
-    grunt.option('force', true);
-
     grunt.registerTask('default', ['concat:merge', 'sed', 'typescript', 'jsbeautifier', 'uglify']);
 };
