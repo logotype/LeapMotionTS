@@ -632,7 +632,7 @@ export class Controller extends EventDispatcher
             }
 
             currentFrame.id = json.id;
-            //currentFrame.currentFramesPerSecond = json.currentFrameRate;
+            currentFrame.currentFramesPerSecond = json.currentFramesPerSecond;
 
             // InteractionBox
             if ( typeof json.interactionBox !== "undefined" )

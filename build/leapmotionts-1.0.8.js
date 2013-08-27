@@ -306,6 +306,7 @@ define(["require", "exports"], function (require, exports) {
                 }
 
                 currentFrame.id = json.id;
+                currentFrame.currentFramesPerSecond = json.currentFramesPerSecond;
 
                 if (typeof json.interactionBox !== "undefined") {
                     currentFrame.interactionBox = new InteractionBox();
