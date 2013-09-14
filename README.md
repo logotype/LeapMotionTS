@@ -39,8 +39,8 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
             if (fingers.length > 0) {
                 // Calculate the hand's average finger tip position
                 var avgPos:Leap.Vector3 = Leap.Vector3.zero();
-                for (var i:number = 0; i <fingers.length; i++)
-                    avgPos = avgPos.plus(( <Leap.Finger>fingers[i]).tipPosition);
+                for (var i:number = 0; i < fingers.length; i++)
+                    avgPos = avgPos.plus((<Leap.Finger>fingers[i]).tipPosition);
 
                 avgPos = avgPos.divide(fingers.length);
                 console.log("Hand has " + fingers.length + " fingers, average finger tip position:" + avgPos);
@@ -58,7 +58,7 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
         }
 
         var gestures:Leap.Gesture[] = frame.gestures();
-        for (var i:number = 0; i <gestures.length; i++) {
+        for (var i:number = 0; i < gestures.length; i++) {
             var gesture:Leap.Gesture = gestures[i];
 
             switch (gesture.type) {
@@ -79,7 +79,7 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
                     if (circle.state != Leap.State.STATE_START) {
                         var previousGesture:Leap.Gesture = controller.frame(1).gesture(circle.id);
                         if (previousGesture.isValid()) {
-                            var previousUpdate:Leap.CircleGesture = ( <Leap.CircleGesture>controller.frame(1).gesture(circle.id));
+                            var previousUpdate:Leap.CircleGesture = (<Leap.CircleGesture>controller.frame(1).gesture(circle.id));
                             sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                         }
                     }
@@ -119,7 +119,7 @@ Authors
 
 + http://twitter.com/logotype
 + http://github.com/logotype
-+ http://logotype.se
++ https://logotype.se
 
 Copyright and license
 ---------------------
