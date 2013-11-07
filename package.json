@@ -1,6 +1,6 @@
 {
   "name": "LeapMotionTS",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "TypeScript framework for Leap Motion.",
   "main": "src",
   "license": "MIT",

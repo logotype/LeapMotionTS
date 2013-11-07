@@ -82,11 +82,6 @@ class Controller extends EventDispatcher
     public _isGesturesEnabled:boolean = false;
 
     /**
-     * Required to suppress OS controls.
-     */
-    private heartBeatTimer:number;
-
-    /**
      * Constructs a Controller object.
      * @param host IP or hostname of the computer running the Leap software.
      * (currently only supported for socket connections).
@@ -100,11 +95,11 @@ class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437/v3.json");
+            this.connection = new WebSocket("ws://localhost:6437/v4.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437/v3.json");
+            this.connection = new WebSocket("ws://" + host + ":6437/v4.json");
         }
 
         this.listener.onInit( this );
@@ -113,19 +108,12 @@ class Controller extends EventDispatcher
         {
             this._isConnected = true;
             this.listener.onConnect( this );
-            this.heartBeatTimer = setInterval( () =>
-            {
-                var heartBeat:any = {};
-                heartBeat.heartbeat = true;
-                this.connection.send( JSON.stringify( heartBeat ) );
-            }, 100 );
         };
 
         this.connection.onclose = ( data:Object ) =>
         {
             this._isConnected = false;
             this.listener.onDisconnect( this );
-            clearInterval( this.heartBeatTimer );
         };
 
         this.connection.onmessage = ( data:any ) =>

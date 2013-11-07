@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-1.0.8');
+import Leap = require('../build/leapmotionts-1.0.9');
 
 class DOMVisualizerInterface implements Leap.Listener
 {
