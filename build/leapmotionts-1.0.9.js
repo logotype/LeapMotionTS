@@ -6,7 +6,7 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports"], function(require, exports) {
     /**
-    * The EventDispatcher export class provides strongly typed events.
+    * The EventDispatcher class provides strongly typed events.
     */
     var EventDispatcher = (function () {
         function EventDispatcher() {
@@ -311,9 +311,9 @@ define(["require", "exports"], function(require, exports) {
     exports.LeapUtil = LeapUtil;
 
     /**
-    * The Controller export class is your main export interface to the Leap Motion Controller.
+    * The Controller class is your main interface to the Leap Motion Controller.
     *
-    * <p>Create an instance of this Controller export class to access frames of tracking
+    * <p>Create an instance of this Controller class to access frames of tracking
     * data and configuration information. Frame data can be polled at any time using
     * the <code>Controller::frame()</code> . Call <code>frame()</code> or <code>frame(0)</code>
     * to get the most recent frame. Set the history parameter to a positive integer
@@ -321,7 +321,7 @@ define(["require", "exports"], function(require, exports) {
     *
     * <p>Polling is an appropriate strategy for applications which already have an
     * intrinsic update loop, such as a game. You can also implement the Leap::Listener
-    * export interface to handle events as they occur. The Leap dispatches events to the listener
+    * interface to handle events as they occur. The Leap dispatches events to the listener
     * upon initialization and exiting, on connection changes, and when a new frame
     * of tracking data is available. When these events occur, the controller object
     * invokes the appropriate callback defined in the Listener interface.</p>
@@ -329,7 +329,7 @@ define(["require", "exports"], function(require, exports) {
     * <p>To access frames of tracking data as they become available:</p>
     *
     * <ul>
-    * <li>Implement the Listener export interface and override the <code>Listener::onFrame()</code> .</li>
+    * <li>Implement the Listener interface and override the <code>Listener::onFrame()</code> .</li>
     * <li>In your <code>Listener::onFrame()</code> , call the <code>Controller::frame()</code> to access the newest frame of tracking data.</li>
     * <li>To start receiving frames, create a Controller object and add event listeners to the <code>Controller::addEventListener()</code> .</li>
     * </ul>
@@ -390,6 +390,9 @@ define(["require", "exports"], function(require, exports) {
             this.connection.onopen = function (event) {
                 _this._isConnected = true;
                 _this.listener.onConnect(_this);
+                var backgroundData = {};
+                backgroundData.background = true;
+                _this.connection.send(JSON.stringify(backgroundData));
             };
 
             this.connection.onclose = function (data) {
@@ -767,12 +770,12 @@ else
     exports.Controller = Controller;
 
     /**
-    * The InteractionBox export class represents a box-shaped region completely within
+    * The InteractionBox class represents a box-shaped region completely within
     * the field of view of the Leap Motion controller.
     *
     * <p>The interaction box is an axis-aligned rectangular prism and provides
     * normalized coordinates for hands, fingers, and tools within this box.
-    * The InteractionBox export class can make it easier to map positions in the
+    * The InteractionBox class can make it easier to map positions in the
     * Leap Motion coordinate system to 2D or 3D coordinate systems used
     * for application drawing.</p>
     *
@@ -899,7 +902,7 @@ else
     exports.InteractionBox = InteractionBox;
 
     /**
-    * The Pointable export class reports the physical characteristics of a detected finger or tool.
+    * The Pointable class reports the physical characteristics of a detected finger or tool.
     * Both fingers and tools are classified as Pointable objects. Use the Pointable.isFinger
     * property to determine whether a Pointable object represents a finger. Use the
     * Pointable.isTool property to determine whether a Pointable object represents a tool.
@@ -956,7 +959,7 @@ else
             * it enters the "hovering" zone. When a Pointable reaches or
             * passes through the plane, it enters the "touching" zone.</p>
             *
-            * <p>The possible states are present in the Zone export enum of this class:</p>
+            * <p>The possible states are present in the Zone enum of this class:</p>
             *
             * <code>Zone.NONE – The Pointable is outside the hovering zone.
             * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
@@ -1093,7 +1096,7 @@ else
     exports.Pointable = Pointable;
 
     /**
-    * The Gesture export class represents a recognized movement by the user.
+    * The Gesture class represents a recognized movement by the user.
     *
     * <p>The Leap watches the activity within its field of view for certain movement
     * patterns typical of a user gesture or command. For example, a movement from
@@ -1138,7 +1141,7 @@ else
     * <code>gesture()</code> returns an Invalid Gesture object (rather than a null value).
     * Always check object validity in situations where a gesture might be invalid.</p>
     *
-    * <p>The following keys can be used with the Config export class to configure the gesture recognizer:</p>
+    * <p>The following keys can be used with the Config class to configure the gesture recognizer:</p>
     *
     * <table class="innertable">
     *   <tr>
@@ -1359,7 +1362,7 @@ else
     exports.Gesture = Gesture;
 
     /**
-    * The Finger export class represents a tracked finger.
+    * The Finger class represents a tracked finger.
     *
     * <p>Fingers are Pointable objects that the Leap has classified as a finger.
     * Get valid Finger objects from a Frame or a Hand object.</p>
@@ -1408,7 +1411,7 @@ else
     exports.Finger = Finger;
 
     /**
-    * The Tool export class represents a tracked tool.
+    * The Tool class represents a tracked tool.
     *
     * <p>Tools are Pointable objects that the Leap has classified as a tool.
     * Tools are longer, thinner, and straighter than a typical finger.
@@ -1451,7 +1454,7 @@ else
     exports.Tool = Tool;
 
     /**
-    * The Hand export class reports the physical characteristics of a detected hand.
+    * The Hand class reports the physical characteristics of a detected hand.
     *
     * <p>Hand tracking data includes a palm position and velocity; vectors for
     * the palm normal and direction to the fingers; properties of a sphere fit
@@ -1795,7 +1798,7 @@ else
     exports.Hand = Hand;
 
     /**
-    * The Frame export class represents a set of hand and finger tracking
+    * The Frame class represents a set of hand and finger tracking
     * data detected in a single frame.
     *
     * <p>The Leap detects hands, fingers and tools within the tracking area,
@@ -2456,7 +2459,7 @@ else
     exports.Matrix = Matrix;
 
     /**
-    * The CircleGesture export class represents a circular finger movement.
+    * The CircleGesture class represents a circular finger movement.
     *
     * <p>A circle movement is recognized when the tip of a finger draws
     * a circle within the Leap field of view.</p>
@@ -2518,7 +2521,7 @@ else
         * Constructs a new CircleGesture object.
         *
         * <p>An uninitialized CircleGesture object is considered invalid.
-        * Get valid instances of the CircleGesture export class from a Frame object.</p>
+        * Get valid instances of the CircleGesture class from a Frame object.</p>
         *
         */
         function CircleGesture() {
@@ -2531,7 +2534,7 @@ else
     exports.CircleGesture = CircleGesture;
 
     /**
-    * The KeyTapGesture export class represents a tapping gesture by a finger or tool.
+    * The KeyTapGesture class represents a tapping gesture by a finger or tool.
     *
     * <p>A key tap gesture is recognized when the tip of a finger rotates down
     * toward the palm and then springs back to approximately the original
@@ -2595,7 +2598,7 @@ else
         * Constructs a new KeyTapGesture object.
         *
         * <p>An uninitialized KeyTapGesture object is considered invalid.
-        * Get valid instances of the KeyTapGesture export class from a Frame object.</p>
+        * Get valid instances of the KeyTapGesture class from a Frame object.</p>
         *
         */
         function KeyTapGesture() {
@@ -2611,7 +2614,7 @@ else
     exports.KeyTapGesture = KeyTapGesture;
 
     /**
-    * The ScreenTapGesture export class represents a tapping gesture by a finger or tool.
+    * The ScreenTapGesture class represents a tapping gesture by a finger or tool.
     *
     * <p>A screen tap gesture is recognized when the tip of a finger pokes forward
     * and then springs back to approximately the original postion, as if tapping
@@ -2674,7 +2677,7 @@ else
         * Constructs a new ScreenTapGesture object.
         *
         * <p>An uninitialized ScreenTapGesture object is considered invalid.
-        * Get valid instances of the ScreenTapGesture export class from a Frame object.</p>
+        * Get valid instances of the ScreenTapGesture class from a Frame object.</p>
         *
         */
         function ScreenTapGesture() {
@@ -2690,7 +2693,7 @@ else
     exports.ScreenTapGesture = ScreenTapGesture;
 
     /**
-    * The SwipeGesture export class represents a swiping motion of a finger or tool.
+    * The SwipeGesture class represents a swiping motion of a finger or tool.
     *
     * <p><strong>Important: To use swipe gestures in your application, you must enable
     * recognition of the swipe gesture.</strong><br/>You can enable recognition with:</p>
@@ -2747,6 +2750,22 @@ else
     })(Gesture);
     exports.SwipeGesture = SwipeGesture;
 
+    /**
+    * The Vector struct represents a three-component mathematical vector
+    * or point such as a direction or position in three-dimensional space.
+    *
+    * <p>The Leap software employs a right-handed Cartesian coordinate system.
+    * Values given are in units of real-world millimeters. The origin is
+    * centered at the center of the Leap Motion Controller. The x- and z-axes lie in
+    * the horizontal plane, with the x-axis running parallel to the long edge
+    * of the device. The y-axis is vertical, with positive values increasing
+    * upwards (in contrast to the downward orientation of most computer
+    * graphics coordinate systems). The z-axis has positive values increasing
+    * away from the computer screen.</p>
+    *
+    * @author logotype
+    *
+    */
     var Vector3 = (function () {
         /**
         * Creates a new Vector with the specified component values.

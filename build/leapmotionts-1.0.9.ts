@@ -1,6 +1,5 @@
-
 /**
- * The EventDispatcher export class provides strongly typed events.
+ * The EventDispatcher class provides strongly typed events.
  */
 export class EventDispatcher
 {
@@ -52,17 +51,16 @@ export class EventDispatcher
         }
     }
 }
-
 /**
- * The Listener export interface defines a set of callback functions that you can
+ * The Listener interface defines a set of callback functions that you can
  * implement to respond to events dispatched by the Leap.
  *
- * <p>To handle Leap events, implement the Listener export interface and assign
+ * <p>To handle Leap events, implement the Listener interface and assign
  * it to the Controller instance. The Controller calls the relevant Listener
  * callback when an event occurs, passing in a reference to itself.
  * You have to implement callbacks for every method specified in the interface.</p>
  *
- * <p>Note: you have to create an instance of the LeapMotion export class and set the Listener to your class:</p>
+ * <p>Note: you have to create an instance of the LeapMotion class and set the Listener to your class:</p>
  *
  * <listing>
  * leap = new LeapMotion();
@@ -156,9 +154,6 @@ export interface Listener
      */
     onInit( controller:Controller ):void;
 }
-
-
-
 export class DefaultListener extends EventDispatcher implements Listener
 {
 
@@ -193,7 +188,6 @@ export class DefaultListener extends EventDispatcher implements Listener
     }
 }
 
-
 export class LeapEvent
 {
     public static LEAPMOTION_INIT:string = "leapMotionInit";
@@ -224,7 +218,6 @@ export class LeapEvent
         return this._type;
     }
 }
-
 /**
  * LeapUtil is a collection of static utility functions.
  *
@@ -474,17 +467,10 @@ export class LeapUtil
         return vec1.plus( vec2.minus( vec1 ).multiply( coefficient ) );
     }
 }
-
-
-
-
-
-
-
 /**
- * The Controller export class is your main export interface to the Leap Motion Controller.
+ * The Controller class is your main interface to the Leap Motion Controller.
  *
- * <p>Create an instance of this Controller export class to access frames of tracking
+ * <p>Create an instance of this Controller class to access frames of tracking
  * data and configuration information. Frame data can be polled at any time using
  * the <code>Controller::frame()</code> . Call <code>frame()</code> or <code>frame(0)</code>
  * to get the most recent frame. Set the history parameter to a positive integer
@@ -492,7 +478,7 @@ export class LeapUtil
  *
  * <p>Polling is an appropriate strategy for applications which already have an
  * intrinsic update loop, such as a game. You can also implement the Leap::Listener
- * export interface to handle events as they occur. The Leap dispatches events to the listener
+ * interface to handle events as they occur. The Leap dispatches events to the listener
  * upon initialization and exiting, on connection changes, and when a new frame
  * of tracking data is available. When these events occur, the controller object
  * invokes the appropriate callback defined in the Listener interface.</p>
@@ -500,7 +486,7 @@ export class LeapUtil
  * <p>To access frames of tracking data as they become available:</p>
  *
  * <ul>
- * <li>Implement the Listener export interface and override the <code>Listener::onFrame()</code> .</li>
+ * <li>Implement the Listener interface and override the <code>Listener::onFrame()</code> .</li>
  * <li>In your <code>Listener::onFrame()</code> , call the <code>Controller::frame()</code> to access the newest frame of tracking data.</li>
  * <li>To start receiving frames, create a Controller object and add event listeners to the <code>Controller::addEventListener()</code> .</li>
  * </ul>
@@ -524,7 +510,7 @@ export class Controller extends EventDispatcher
 {
     /**
      * @private
-     * The Listener subexport class instance.
+     * The Listener subclass instance.
      */
     private listener:Listener;
 
@@ -583,6 +569,9 @@ export class Controller extends EventDispatcher
         {
             this._isConnected = true;
             this.listener.onConnect( this );
+            var backgroundData:any = {};
+            backgroundData.background = true;
+            this.connection.send( JSON.stringify( backgroundData ) );
         };
 
         this.connection.onclose = ( data:Object ) =>
@@ -998,12 +987,12 @@ export class Controller extends EventDispatcher
     }
 }
 /**
- * The InteractionBox export class represents a box-shaped region completely within
+ * The InteractionBox class represents a box-shaped region completely within
  * the field of view of the Leap Motion controller.
  *
  * <p>The interaction box is an axis-aligned rectangular prism and provides
  * normalized coordinates for hands, fingers, and tools within this box.
- * The InteractionBox export class can make it easier to map positions in the
+ * The InteractionBox class can make it easier to map positions in the
  * Leap Motion coordinate system to 2D or 3D coordinate systems used
  * for application drawing.</p>
  *
@@ -1159,10 +1148,8 @@ export class InteractionBox
         return "[InteractionBox depth:" + this.depth + " height:" + this.height + " width:" + this.width + "]";
     }
 }
-
-
 /**
- * The Pointable export class reports the physical characteristics of a detected finger or tool.
+ * The Pointable class reports the physical characteristics of a detected finger or tool.
  * Both fingers and tools are classified as Pointable objects. Use the Pointable.isFinger
  * property to determine whether a Pointable object represents a finger. Use the
  * Pointable.isTool property to determine whether a Pointable object represents a tool.
@@ -1219,7 +1206,7 @@ export class Pointable
      * it enters the "hovering" zone. When a Pointable reaches or
      * passes through the plane, it enters the "touching" zone.</p>
      *
-     * <p>The possible states are present in the Zone export enum of this class:</p>
+     * <p>The possible states are present in the Zone enum of this class:</p>
      *
      * <code>Zone.NONE – The Pointable is outside the hovering zone.
      * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
@@ -1433,10 +1420,8 @@ export class Pointable
         return "[Pointable direction: " + this.direction + " tipPosition: " + this.tipPosition + " tipVelocity: " + this.tipVelocity + "]";
     }
 }
-
-
 /**
- * The Gesture export class represents a recognized movement by the user.
+ * The Gesture class represents a recognized movement by the user.
  *
  * <p>The Leap watches the activity within its field of view for certain movement
  * patterns typical of a user gesture or command. For example, a movement from
@@ -1481,7 +1466,7 @@ export class Pointable
  * <code>gesture()</code> returns an Invalid Gesture object (rather than a null value).
  * Always check object validity in situations where a gesture might be invalid.</p>
  *
- * <p>The following keys can be used with the Config export class to configure the gesture recognizer:</p>
+ * <p>The following keys can be used with the Config class to configure the gesture recognizer:</p>
  *
  * <table class="innertable">
  *   <tr>
@@ -1751,7 +1736,7 @@ export class Gesture
     }
 }
 /**
- * The Finger export class represents a tracked finger.
+ * The Finger class represents a tracked finger.
  *
  * <p>Fingers are Pointable objects that the Leap has classified as a finger.
  * Get valid Finger objects from a Frame or a Hand object.</p>
@@ -1800,7 +1785,7 @@ export class Finger extends Pointable
     }
 }
 /**
- * The Tool export class represents a tracked tool.
+ * The Tool class represents a tracked tool.
  *
  * <p>Tools are Pointable objects that the Leap has classified as a tool.
  * Tools are longer, thinner, and straighter than a typical finger.
@@ -1842,13 +1827,8 @@ export class Tool extends Pointable
         return new Tool();
     }
 }
-
-
-
-
-
 /**
- * The Hand export class reports the physical characteristics of a detected hand.
+ * The Hand class reports the physical characteristics of a detected hand.
  *
  * <p>Hand tracking data includes a palm position and velocity; vectors for
  * the palm normal and direction to the fingers; properties of a sphere fit
@@ -2296,16 +2276,8 @@ export class Hand
         return new Hand();
     }
 }
-
-
-
-
-
-
-
-
 /**
- * The Frame export class represents a set of hand and finger tracking
+ * The Frame class represents a set of hand and finger tracking
  * data detected in a single frame.
  *
  * <p>The Leap detects hands, fingers and tools within the tracking area,
@@ -2377,7 +2349,7 @@ export class Frame
 
     /**
      * The current InteractionBox for the frame.
-     * <p>See the InteractionBox export class documentation for more details on how this class should be used.</p>
+     * <p>See the InteractionBox class documentation for more details on how this class should be used.</p>
      * @see InteractionBox
      */
     public interactionBox:InteractionBox;
@@ -3062,10 +3034,8 @@ export class Matrix
         return "[Matrix xBasis:" + this.xBasis.toString() + " yBasis:" + this.yBasis.toString() + " zBasis:" + this.zBasis.toString() + " origin:" + this.origin.toString() + "]";
     }
 }
-
-
 /**
- * The CircleGesture export class represents a circular finger movement.
+ * The CircleGesture class represents a circular finger movement.
  *
  * <p>A circle movement is recognized when the tip of a finger draws
  * a circle within the Leap field of view.</p>
@@ -3175,7 +3145,7 @@ export class CircleGesture extends Gesture
      * Constructs a new CircleGesture object.
      *
      * <p>An uninitialized CircleGesture object is considered invalid.
-     * Get valid instances of the CircleGesture export class from a Frame object.</p>
+     * Get valid instances of the CircleGesture class from a Frame object.</p>
      *
      */
     constructor()
@@ -3184,10 +3154,8 @@ export class CircleGesture extends Gesture
         this.pointable = Pointable.invalid();
     }
 }
-
-
 /**
- * The KeyTapGesture export class represents a tapping gesture by a finger or tool.
+ * The KeyTapGesture class represents a tapping gesture by a finger or tool.
  *
  * <p>A key tap gesture is recognized when the tip of a finger rotates down
  * toward the palm and then springs back to approximately the original
@@ -3282,7 +3250,7 @@ export class KeyTapGesture extends Gesture
      * Constructs a new KeyTapGesture object.
      *
      * <p>An uninitialized KeyTapGesture object is considered invalid.
-     * Get valid instances of the KeyTapGesture export class from a Frame object.</p>
+     * Get valid instances of the KeyTapGesture class from a Frame object.</p>
      *
      */
     constructor()
@@ -3290,10 +3258,8 @@ export class KeyTapGesture extends Gesture
         super();
     }
 }
-
-
 /**
- * The ScreenTapGesture export class represents a tapping gesture by a finger or tool.
+ * The ScreenTapGesture class represents a tapping gesture by a finger or tool.
  *
  * <p>A screen tap gesture is recognized when the tip of a finger pokes forward
  * and then springs back to approximately the original postion, as if tapping
@@ -3381,7 +3347,7 @@ export class ScreenTapGesture extends Gesture
      * Constructs a new ScreenTapGesture object.
      *
      * <p>An uninitialized ScreenTapGesture object is considered invalid.
-     * Get valid instances of the ScreenTapGesture export class from a Frame object.</p>
+     * Get valid instances of the ScreenTapGesture class from a Frame object.</p>
      *
      */
     constructor()
@@ -3389,10 +3355,8 @@ export class ScreenTapGesture extends Gesture
         super();
     }
 }
-
-
 /**
- * The SwipeGesture export class represents a swiping motion of a finger or tool.
+ * The SwipeGesture class represents a swiping motion of a finger or tool.
  *
  * <p><strong>Important: To use swipe gestures in your application, you must enable
  * recognition of the swipe gesture.</strong><br/>You can enable recognition with:</p>
@@ -3480,7 +3444,8 @@ export class SwipeGesture extends Gesture
     {
         super();
     }
-}/**
+}
+/**
  * The Vector struct represents a three-component mathematical vector
  * or point such as a direction or position in three-dimensional space.
  *
