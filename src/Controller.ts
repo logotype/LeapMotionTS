@@ -108,9 +108,9 @@ class Controller extends EventDispatcher
         {
             this._isConnected = true;
             this.listener.onConnect( this );
-            var backgroundData:any = {};
-            backgroundData.background = true;
-            this.connection.send( JSON.stringify( backgroundData ) );
+            var focusedState:any = {};
+            focusedState.focused = true;
+            this.connection.send( JSON.stringify( focusedState ) );
         };
 
         this.connection.onclose = ( data:Object ) =>
