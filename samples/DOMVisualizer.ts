@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-1.0.9');
+import Leap = require('../build/leapmotionts-1.0.9+8391');
 
 function moveFinger(finger:HTMLDivElement, posX:number, posY:number, posZ:number, dirX:number, dirY:number, dirZ:number) {
     finger.style["webkitTransform"] = "translateX("+posX+"px) translateY("+posY+"px) translateZ("+posZ+"px) rotateX("+dirX+"deg) rotateY(0deg) rotateZ("+dirZ+"deg)";

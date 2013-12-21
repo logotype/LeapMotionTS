@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-1.0.9');
+import Leap = require('../build/leapmotionts-1.0.9+8391');
 
 class DOMVisualizerInterface implements Leap.Listener
 {
@@ -51,7 +51,7 @@ class DOMVisualizerInterface implements Leap.Listener
             var rotY:number = (hand.rotation.xBasis.y*90);
             var rotZ:number = (hand.rotation.xBasis.x*90);
             var sphere:number = this.spheres[hand.id];
-            //console.log(hand.rotation.yBasis);
+
             if (!sphere) {
                 var sphereDiv:HTMLDivElement = <HTMLDivElement>document.getElementById("sphere").cloneNode(true);
                 sphereDiv.setAttribute('id',hand.id.toString());

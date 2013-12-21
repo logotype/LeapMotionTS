@@ -1,11 +1,10 @@
-define(["require", "exports", '../build/leapmotionts-1.0.9'], function(require, exports, __Leap__) {
-    var Leap = __Leap__;
+define(["require", "exports", '../build/leapmotionts-1.0.9+8391'], function(require, exports, Leap) {
     var controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, function (event) {
-        controller.enableGesture(Leap.Type.TYPE_CIRCLE, true);
-        controller.enableGesture(Leap.Type.TYPE_SWIPE, true);
-        controller.enableGesture(Leap.Type.TYPE_SCREEN_TAP, true);
-        controller.enableGesture(Leap.Type.TYPE_KEY_TAP, true);
+        controller.enableGesture(6 /* TYPE_CIRCLE */, true);
+        controller.enableGesture(5 /* TYPE_SWIPE */, true);
+        controller.enableGesture(7 /* TYPE_SCREEN_TAP */, true);
+        controller.enableGesture(8 /* TYPE_KEY_TAP */, true);
     });
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, function (event) {
         var frame = event.frame;
@@ -21,7 +20,7 @@ define(["require", "exports", '../build/leapmotionts-1.0.9'], function(require, 
                 // Calculate the hand's average finger tip position
                 var avgPos = Leap.Vector3.zero();
                 for (var i = 0; i < fingers.length; i++)
-                    avgPos = avgPos.plus((fingers[i]).tipPosition);
+                    avgPos = avgPos.plus(fingers[i].tipPosition);
 
                 avgPos = avgPos.divide(fingers.length);
                 console.log("Hand has " + fingers.length + " fingers, average finger tip position:" + avgPos);
@@ -43,7 +42,7 @@ define(["require", "exports", '../build/leapmotionts-1.0.9'], function(require, 
             var gesture = gestures[i];
 
             switch (gesture.type) {
-                case Leap.Type.TYPE_CIRCLE:
+                case 6 /* TYPE_CIRCLE */:
                     var circle = gesture;
 
                     // Calculate clock direction using the angle between circle normal and pointable
@@ -57,24 +56,24 @@ define(["require", "exports", '../build/leapmotionts-1.0.9'], function(require, 
 
                     // Calculate angle swept since last frame
                     var sweptAngle = 0;
-                    if (circle.state != Leap.State.STATE_START) {
+                    if (circle.state != 1 /* STATE_START */) {
                         var previousGesture = controller.frame(1).gesture(circle.id);
                         if (previousGesture.isValid()) {
-                            var previousUpdate = (controller.frame(1).gesture(circle.id));
+                            var previousUpdate = controller.frame(1).gesture(circle.id);
                             sweptAngle = (circle.progress - previousUpdate.progress) * 2 * Math.PI;
                         }
                     }
                     console.log("Circle id:" + circle.id + ", " + circle.state + ", progress:" + circle.progress + ", radius:" + circle.radius + ", angle:" + Leap.LeapUtil.toDegrees(sweptAngle) + ", " + clockwiseness);
                     break;
-                case Leap.Type.TYPE_SWIPE:
+                case 5 /* TYPE_SWIPE */:
                     var swipe = gesture;
                     console.log("Swipe id:" + swipe.id + ", " + swipe.state + ", position:" + swipe.position + ", direction:" + swipe.direction + ", speed:" + swipe.speed);
                     break;
-                case Leap.Type.TYPE_SCREEN_TAP:
+                case 7 /* TYPE_SCREEN_TAP */:
                     var screenTap = gesture;
                     console.log("Screen Tap id:" + screenTap.id + ", " + screenTap.state + ", position:" + screenTap.position + ", direction:" + screenTap.direction);
                     break;
-                case Leap.Type.TYPE_KEY_TAP:
+                case 8 /* TYPE_KEY_TAP */:
                     var keyTap = gesture;
                     console.log("Key Tap id:" + keyTap.id + ", " + keyTap.state + ", position:" + keyTap.position + ", direction:" + keyTap.direction);
                     break;

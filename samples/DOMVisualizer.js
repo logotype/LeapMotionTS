@@ -1,6 +1,4 @@
-define(["require", "exports", '../build/leapmotionts-1.0.9'], function(require, exports, __Leap__) {
-    var Leap = __Leap__;
-
+define(["require", "exports", '../build/leapmotionts-1.0.9+8391'], function(require, exports, Leap) {
     function moveFinger(finger, posX, posY, posZ, dirX, dirY, dirZ) {
         finger.style["webkitTransform"] = "translateX(" + posX + "px) translateY(" + posY + "px) translateZ(" + posZ + "px) rotateX(" + dirX + "deg) rotateY(0deg) rotateZ(" + dirZ + "deg)";
     }
