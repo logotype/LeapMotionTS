@@ -95,11 +95,11 @@ class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437/v4.json");
+            this.connection = new WebSocket("ws://localhost:6437/v5.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437/v4.json");
+            this.connection = new WebSocket("ws://" + host + ":6437/v5.json");
         }
 
         this.listener.onInit( this );
@@ -156,6 +156,10 @@ class Controller extends EventDispatcher
                     hand.sphereCenter = new Vector3( json.hands[ i ].sphereCenter[ 0 ], json.hands[ i ].sphereCenter[ 1 ], json.hands[ i ].sphereCenter[ 2 ] );
                     hand.sphereRadius = json.hands[ i ].sphereRadius;
                     hand.timeVisible = json.hands[ i ].timeVisible;
+                    hand.isLeft = json.hands[ i ].isLeft;
+                    hand.isRight = json.hands[ i ].isRight;
+                    hand.pinchStrength = json.hands[ i ].pinchStrength;
+                    hand.grabStrength = json.hands[ i ].grabStrength;
                     hand.translationVector = new Vector3( json.hands[ i ].t[ 0 ], json.hands[ i ].t[ 1 ], json.hands[ i ].t[ 2 ] );
                     currentFrame.hands.push( hand );
                 }
@@ -219,6 +223,7 @@ class Controller extends EventDispatcher
                     {
                         pointable.isTool = true;
                         pointable.isFinger = false;
+                        pointable.isExtended = true;
                         pointable.width = json.pointables[ i ].width;
                         currentFrame.tools.push( <Tool>pointable );
                         if ( pointable.hand )
@@ -228,6 +233,11 @@ class Controller extends EventDispatcher
                     {
                         pointable.isTool = false;
                         pointable.isFinger = true;
+                        pointable.isExtended = json.pointables[ i ].extended;
+                        ( <Finger>pointable ).dipPosition = new Vector3( json.pointables[ i ].dipPosition[ 0 ], json.pointables[ i ].dipPosition[ 1 ], json.pointables[ i ].dipPosition[ 2 ] );
+                        ( <Finger>pointable ).pipPosition = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
+                        ( <Finger>pointable ).mcpPosition = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
+                        ( <Finger>pointable ).type = json.pointables[ i ].type;
                         currentFrame.fingers.push( <Finger>pointable );
                         if ( pointable.hand )
                             pointable.hand.fingers.push( <Finger>pointable );

@@ -556,11 +556,11 @@ export class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437/v4.json");
+            this.connection = new WebSocket("ws://localhost:6437/v5.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437/v4.json");
+            this.connection = new WebSocket("ws://" + host + ":6437/v5.json");
         }
 
         this.listener.onInit( this );
@@ -617,6 +617,10 @@ export class Controller extends EventDispatcher
                     hand.sphereCenter = new Vector3( json.hands[ i ].sphereCenter[ 0 ], json.hands[ i ].sphereCenter[ 1 ], json.hands[ i ].sphereCenter[ 2 ] );
                     hand.sphereRadius = json.hands[ i ].sphereRadius;
                     hand.timeVisible = json.hands[ i ].timeVisible;
+                    hand.isLeft = json.hands[ i ].isLeft;
+                    hand.isRight = json.hands[ i ].isRight;
+                    hand.pinchStrength = json.hands[ i ].pinchStrength;
+                    hand.grabStrength = json.hands[ i ].grabStrength;
                     hand.translationVector = new Vector3( json.hands[ i ].t[ 0 ], json.hands[ i ].t[ 1 ], json.hands[ i ].t[ 2 ] );
                     currentFrame.hands.push( hand );
                 }
@@ -680,6 +684,7 @@ export class Controller extends EventDispatcher
                     {
                         pointable.isTool = true;
                         pointable.isFinger = false;
+                        pointable.isExtended = true;
                         pointable.width = json.pointables[ i ].width;
                         currentFrame.tools.push( <Tool>pointable );
                         if ( pointable.hand )
@@ -689,6 +694,11 @@ export class Controller extends EventDispatcher
                     {
                         pointable.isTool = false;
                         pointable.isFinger = true;
+                        pointable.isExtended = json.pointables[ i ].extended;
+                        ( <Finger>pointable ).dipPosition = new Vector3( json.pointables[ i ].dipPosition[ 0 ], json.pointables[ i ].dipPosition[ 1 ], json.pointables[ i ].dipPosition[ 2 ] );
+                        ( <Finger>pointable ).pipPosition = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
+                        ( <Finger>pointable ).mcpPosition = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
+                        ( <Finger>pointable ).type = json.pointables[ i ].type;
                         currentFrame.fingers.push( <Finger>pointable );
                         if ( pointable.hand )
                             pointable.hand.fingers.push( <Finger>pointable );
@@ -1329,6 +1339,19 @@ export class Pointable
      */
     public isTool:boolean;
 
+    /**
+     * Whether or not this Pointable is in an extended posture.
+     *
+     * <p>A finger is considered extended if it is extended straight from the hand as if
+     * pointing. A finger is not extended when it is bent down and curled towards the
+     * palm. Tools are always extended.</p>
+     *
+     * @return True, if the pointable is extended.
+     *
+     * @since 1.f
+     */
+    public isExtended:boolean;
+
     constructor()
     {
         this.direction = Vector3.invalid();
@@ -1752,8 +1775,150 @@ export class Gesture
  * @author logotype
  *
  */
+
+/**
+ * Enumerates the names of the fingers.
+ *
+ * <p>Members of this enumeration are returned by Finger::type() to identify a
+ * Finger object.</p>
+ *
+ * @since 1.f
+ */
+export enum Type {
+    /**
+     * The thumb.
+     */
+    TYPE_THUMB = 0,
+
+    /**
+     * The index or fore- finger.
+     */
+    TYPE_INDEX = 1,
+
+    /**
+     * The middle finger.
+     */
+    TYPE_MIDDLE = 2,
+
+    /**
+     * The ring finger.
+     */
+    TYPE_RING = 3,
+
+    /**
+     * The pinky or little finger.
+     */
+    TYPE_PINKY = 4
+}
+
+/**
+ * Enumerates the joints of a finger.
+ *
+ * <p>The joints along the finger are indexed from 0 to 3 (tip to knuckle). The same
+ * joint identifiers are used for the thumb, even though the thumb has one less
+ * phalanx bone than the other digits. This puts the base joint (JOINT_MCP) at the
+ * base of thumb's metacarpal bone.</p>
+ *
+ * <p>Pass a member of this enumeration to Finger::jointPosition() to get the
+ * physical position of that joint.</p>
+ *
+ * <p>Note: The term "joint" is applied loosely here and the set of joints includes the
+ * finger tip even though it is not an anatomical joint.</p>
+ *
+ * @since 1.f
+ */
+export enum Joint {
+    /**
+     * The metacarpopophalangeal joint, or knuckle, of the finger.
+     *
+     * <p>The metacarpopophalangeal joint is located at the base of a finger between
+     * the metacarpal bone and the first phalanx. The common name for this joint is
+     * the knuckle.</p>
+     *
+     * <p>On a thumb, which has one less phalanx than a finger, this joint index
+     * identifies the thumb joint near the base of the hand, between the carpal
+     * and metacarpal bones.</p>
+     *
+     * @since 1.f
+     */
+    JOINT_MCP = 0,
+
+    /**
+     * The proximal interphalangeal joint of the finger. This joint is the middle
+     * joint of a finger.
+     *
+     * <p>The proximal interphalangeal joint is located between the two finger segments
+     * closest to the hand (the proximal and the intermediate phalanges). On a thumb,
+     * which lacks an intermediate phalanx, this joint index identifies the knuckle joint
+     * between the proximal phalanx and the metacarpal bone.</p>
+     *
+     * @since 1.f
+     */
+    JOINT_PIP = 1,
+
+    /**
+     * The distal interphalangeal joint of the finger.
+     *
+     * <p>This joint is closest to the tip.</p>
+     *
+     * <p>The distal interphalangeal joint is located between the most extreme segment
+     * of the finger (the distal phalanx) and the middle segment (the intermediate
+     * phalanx).</p>
+     *
+     * @since 1.f
+     */
+    JOINT_DIP = 2,
+
+    /**
+     * The tip of the finger.
+     *
+     * @since 1.f
+     */
+    JOINT_TIP = 3
+}
+
 export class Finger extends Pointable
 {
+
+    /**
+     * The name of this finger.
+     */
+    public type:number;
+
+    /**
+     * The position of the distal interphalangeal joint of the finger.
+     * This joint is closest to the tip.
+     *
+     * <p>The distal interphalangeal joint is located between the most extreme segment
+     * of the finger (the distal phalanx) and the middle segment (the intermediate
+     * phalanx).</p>
+     */
+    public dipPosition:Vector3;
+
+    /**
+     * The position of the proximal interphalangeal joint of the finger. This joint is the middle
+     * joint of a finger.
+     *
+     * <p>The proximal interphalangeal joint is located between the two finger segments
+     * closest to the hand (the proximal and the intermediate phalanges). On a thumb,
+     * which lacks an intermediate phalanx, this joint index identifies the knuckle joint
+     * between the proximal phalanx and the metacarpal bone.</p>
+     */
+    public pipPosition:Vector3;
+
+    /**
+     * The position of the metacarpopophalangeal joint, or knuckle, of the finger.
+     *
+     * <p>The metacarpopophalangeal joint is located at the base of a finger between
+     * the metacarpal bone and the first phalanx. The common name for this joint is
+     * the knuckle.</p>
+     *
+     * <p>On a thumb, which has one less phalanx than a finger, this joint index
+     * identifies the thumb joint near the base of the hand, between the carpal
+     * and metacarpal bones.</p>
+     */
+    public mcpPosition:Vector3;
+
     /**
      * Constructs a Finger object.
      *
@@ -1766,6 +1931,53 @@ export class Finger extends Pointable
         super();
         this.isFinger = true;
         this.isTool = false;
+    }
+
+    /**
+     * The position of the specified joint on this finger in millimeters from the Leap Motion origin.
+     *
+     * @param jointIx An index value from the Finger::Joint enumeration identifying the
+     * joint of interest.
+     * @return The Vector containing the coordinates of the joint position.
+     *
+     * @since 1.f
+     */
+    public jointPosition( jointIx:number ):Vector3
+    {
+        switch( jointIx )
+        {
+            case Joint.JOINT_MCP:
+                return this.mcpPosition;
+                break;
+            case Joint.JOINT_PIP:
+                return this.pipPosition;
+                break;
+            case Joint.JOINT_DIP:
+                return this.dipPosition;
+                break;
+            case Joint.JOINT_TIP:
+                return this.tipPosition;
+                break;
+            default:
+                return Vector3.invalid();
+                break;
+        }
+    }
+
+    /**
+     * The joint positions of this finger as a vector in the order base to tip.
+     *
+     * @return A Vector of joint positions.
+     */
+    public positions():Vector3[]
+    {
+        var positionsVector:Vector3[] = [];
+        positionsVector.push(this.mcpPosition);
+        positionsVector.push(this.pipPosition);
+        positionsVector.push(this.dipPosition);
+        positionsVector.push(this.tipPosition);
+
+        return positionsVector;
     }
 
     /**
@@ -1904,6 +2116,24 @@ export class Hand
     public timeVisible:number;
 
     /**
+     * Identifies whether this Hand is a left hand.
+     *
+     * @return True if the hand is identified as a left hand.
+     *
+     * @since 1.f
+     */
+    public isLeft:boolean;
+
+    /**
+     * Identifies whether this Hand is a right hand.
+     *
+     * @return True if the hand is identified as a right hand.
+     *
+     * @since 1.f
+     */
+    public isRight:boolean;
+
+    /**
      * The rate of change of the palm position in millimeters/second.
      */
     public palmVelocity:Vector3;
@@ -1932,6 +2162,33 @@ export class Hand
      * The radius of a sphere fit to the curvature of this hand.
      */
     public sphereRadius:number;
+
+    /**
+     * The holding strength of a pinch hand pose.
+     *
+     * <p>The strength is zero for an open hand, and blends to 1.0 when a pinching
+     * hand pose is recognized. Pinching can be done between the thumb
+     * and any other finger of the same hand.</p>
+     *
+     * @return A float value in the [0..1] range representing the holding strength
+     * of the pinch pose.
+     *
+     * @since 1.f
+     */
+    public pinchStrength:number;
+
+    /**
+     * The strength of a grab hand pose.
+     *
+     * <p>The strength is zero for an open hand, and blends to 1.0 when a grabbing hand
+     * pose is recognized.</p>
+     *
+     * @return A float value in the [0..1] range representing the holding strength
+     * of the pose.
+     *
+     * @since 1.f
+     */
+    public grabStrength:number;
 
     /**
      * The list of Tool objects detected in this frame that are held by this hand, given in arbitrary order.

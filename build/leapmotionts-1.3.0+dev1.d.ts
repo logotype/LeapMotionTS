@@ -112,6 +112,7 @@ export declare class Pointable {
     public tipVelocity: Vector3;
     public isFinger: boolean;
     public isTool: boolean;
+    public isExtended: boolean;
     constructor();
     public isValid(): boolean;
     public isEqualTo(other: Pointable): boolean;
@@ -146,8 +147,27 @@ export declare class Gesture {
     static invalid(): Gesture;
     public toString(): string;
 }
+export declare enum Type {
+    TYPE_THUMB = 0,
+    TYPE_INDEX = 1,
+    TYPE_MIDDLE = 2,
+    TYPE_RING = 3,
+    TYPE_PINKY = 4,
+}
+export declare enum Joint {
+    JOINT_MCP = 0,
+    JOINT_PIP = 1,
+    JOINT_DIP = 2,
+    JOINT_TIP = 3,
+}
 export declare class Finger extends Pointable {
+    public type: number;
+    public dipPosition: Vector3;
+    public pipPosition: Vector3;
+    public mcpPosition: Vector3;
     constructor();
+    public jointPosition(jointIx: number): Vector3;
+    public positions(): Vector3[];
     static invalid(): Finger;
 }
 export declare class Tool extends Pointable {
@@ -163,10 +183,14 @@ export declare class Hand {
     public palmPosition: Vector3;
     public stabilizedPalmPosition: Vector3;
     public timeVisible: number;
+    public isLeft: boolean;
+    public isRight: boolean;
     public palmVelocity: Vector3;
     public pointables: Pointable[];
     public sphereCenter: Vector3;
     public sphereRadius: number;
+    public pinchStrength: number;
+    public grabStrength: number;
     public tools: Tool[];
     public rotation: Matrix;
     public scaleFactorNumber: number;

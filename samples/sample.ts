@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-1.0.9+8391');
+import Leap = require('../build/leapmotionts-1.3.0+dev1');
 var controller:Leap.Controller = new Leap.Controller();
 controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, (event:Leap.LeapEvent) => {
     controller.enableGesture(Leap.Type.TYPE_CIRCLE, true);
@@ -20,7 +20,15 @@ controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEve
             // Calculate the hand's average finger tip position
             var avgPos:Leap.Vector3 = Leap.Vector3.zero();
             for (var i:number = 0; i <fingers.length; i++)
+            {
                 avgPos = avgPos.plus(( <Leap.Finger>fingers[i]).tipPosition);
+
+                // Skeleton API
+                console.log( "Finger distal: " + (<Leap.Finger>fingers[i]).dipPosition );
+                console.log( "Finger proximal: " + (<Leap.Finger>fingers[i]).pipPosition );
+                console.log( "Finger knuckle: " + (<Leap.Finger>fingers[i]).mcpPosition );
+                console.log( "Finger type: " + (<Leap.Finger>fingers[i]).type );
+            }
 
             avgPos = avgPos.divide(fingers.length);
             console.log("Hand has " + fingers.length + " fingers, average finger tip position:" + avgPos);

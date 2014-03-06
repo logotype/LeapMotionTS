@@ -1,4 +1,4 @@
-define(["require", "exports", '../build/leapmotionts-1.0.9+8391'], function(require, exports, Leap) {
+define(["require", "exports", '../build/leapmotionts-1.3.0+dev1'], function(require, exports, Leap) {
     var DOMVisualizerInterface = (function () {
         function DOMVisualizerInterface() {
             this.fingers = [];

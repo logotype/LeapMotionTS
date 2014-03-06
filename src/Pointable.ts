@@ -182,6 +182,19 @@ class Pointable
      */
     public isTool:boolean;
 
+    /**
+     * Whether or not this Pointable is in an extended posture.
+     *
+     * <p>A finger is considered extended if it is extended straight from the hand as if
+     * pointing. A finger is not extended when it is bent down and curled towards the
+     * palm. Tools are always extended.</p>
+     *
+     * @return True, if the pointable is extended.
+     *
+     * @since 1.f
+     */
+    public isExtended:boolean;
+
     constructor()
     {
         this.direction = Vector3.invalid();
