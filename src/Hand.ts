@@ -384,7 +384,7 @@ class Hand
         if( !this.isValid() || !sinceFrame.hand( this.id ).isValid() )
             return 0.0;
 
-        var returnValue:number = 0.0;
+        var returnValue:number;
         var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame );
         var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1 ) * 0.5;
         var angle:number = Math.acos( cs );
