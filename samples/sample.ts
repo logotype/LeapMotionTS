@@ -24,10 +24,16 @@ controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEve
                 avgPos = avgPos.plus(( <Leap.Finger>fingers[i]).tipPosition);
 
                 // Skeleton API
-                console.log( "Finger distal: " + (<Leap.Finger>fingers[i]).dipPosition );
-                console.log( "Finger proximal: " + (<Leap.Finger>fingers[i]).pipPosition );
-                console.log( "Finger knuckle: " + (<Leap.Finger>fingers[i]).mcpPosition );
+                console.log( "Skeleton distal: " + (<Leap.Finger>fingers[i]).dipPosition );
+                console.log( "Skeleton proximal: " + (<Leap.Finger>fingers[i]).pipPosition );
+                console.log( "Skeleton knuckle: " + (<Leap.Finger>fingers[i]).mcpPosition );
                 console.log( "Finger type: " + (<Leap.Finger>fingers[i]).type );
+
+                // Bone API
+                console.log( "Bone metacarpal: " + (<Leap.Finger>fingers[i]).metacarpal );
+                console.log( "Bone proximal: " + (<Leap.Finger>fingers[i]).proximal );
+                console.log( "Bone intermediate: " + (<Leap.Finger>fingers[i]).intermediate );
+                console.log( "Bone distal: " + (<Leap.Finger>fingers[i]).distal );
             }
 
             avgPos = avgPos.divide(fingers.length);

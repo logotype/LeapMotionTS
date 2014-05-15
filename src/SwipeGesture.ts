@@ -42,6 +42,9 @@
  *       controller.config().setFloat(&quot;Gesture.Swipe.MinVelocity&quot;, 750))
  *        controller.config().save();</code>
  *
+ * <p>The Controller object must be connected to the Leap Motion service/daemon
+ * before setting the configuration parameters.</p>
+ *
  * @author logotype
  *
  */

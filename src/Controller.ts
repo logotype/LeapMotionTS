@@ -95,11 +95,11 @@ class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437/v5.json");
+            this.connection = new WebSocket("ws://localhost:6437/v6.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437/v5.json");
+            this.connection = new WebSocket("ws://" + host + ":6437/v6.json");
         }
 
         this.listener.onInit( this );
@@ -126,6 +126,7 @@ class Controller extends EventDispatcher
             var currentFrame:Frame;
             var hand:Hand;
             var pointable:Pointable;
+            var bone:Bone;
             var gesture:Gesture;
             var isTool:boolean;
             var length:number;
@@ -149,6 +150,7 @@ class Controller extends EventDispatcher
                     hand.id = json.hands[ i ].id;
                     hand.palmNormal = new Vector3( json.hands[ i ].palmNormal[ 0 ], json.hands[ i ].palmNormal[ 1 ], json.hands[ i ].palmNormal[ 2 ] );
                     hand.palmPosition = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
+                    hand.palmWidth = json.hands[ i ].palmWidth;
                     hand.stabilizedPalmPosition = new Vector3( json.hands[ i ].stabilizedPalmPosition[ 0 ], json.hands[ i ].stabilizedPalmPosition[ 1 ], json.hands[ i ].stabilizedPalmPosition[ 2 ] );
                     hand.palmVelocity = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
                     hand.rotation = new Matrix( new Vector3( json.hands[ i ].r[ 0 ][ 0 ], json.hands[ i ].r[ 0 ][ 1 ], json.hands[ i ].r[ 0 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 1 ][ 0 ], json.hands[ i ].r[ 1 ][ 1 ], json.hands[ i ].r[ 1 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 2 ][ 0 ], json.hands[ i ].r[ 2 ][ 1 ], json.hands[ i ].r[ 2 ][ 2 ] ) );
@@ -197,6 +199,7 @@ class Controller extends EventDispatcher
                     pointable.length = json.pointables[ i ].length;
                     pointable.direction = new Vector3( json.pointables[ i ].direction[ 0 ], json.pointables[ i ].direction[ 1 ], json.pointables[ i ].direction[ 2 ] );
                     pointable.tipPosition = new Vector3( json.pointables[ i ].tipPosition[ 0 ], json.pointables[ i ].tipPosition[ 1 ], json.pointables[ i ].tipPosition[ 2 ] );
+                    pointable.btipPosition = new Vector3( json.pointables[ i ].btipPosition[ 0 ], json.pointables[ i ].btipPosition[ 1 ], json.pointables[ i ].btipPosition[ 2 ] );
                     pointable.stabilizedTipPosition = new Vector3( json.pointables[ i ].stabilizedTipPosition[ 0 ], json.pointables[ i ].stabilizedTipPosition[ 1 ], json.pointables[ i ].stabilizedTipPosition[ 2 ] );
                     pointable.tipVelocity = new Vector3( json.pointables[ i ].tipVelocity[ 0 ], json.pointables[ i ].tipVelocity[ 1 ], json.pointables[ i ].tipVelocity[ 2 ] );
                     pointable.touchDistance = json.pointables[ i ].touchDistance;
@@ -238,6 +241,44 @@ class Controller extends EventDispatcher
                         ( <Finger>pointable ).pipPosition = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
                         ( <Finger>pointable ).mcpPosition = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
                         ( <Finger>pointable ).type = json.pointables[ i ].type;
+
+                        // Bones
+                        bone = new Bone();
+                        bone.type = Type.TYPE_METACARPAL;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].carpPosition[ 0 ], json.pointables[ i ].carpPosition[ 1 ], json.pointables[ i ].carpPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 0 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 0 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 0 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 0 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 0 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 0 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 0 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 0 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 0 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).metacarpal = bone;
+
+                        bone = new Bone();
+                        bone.type = Type.TYPE_PROXIMAL;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 1 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 1 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 1 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 1 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 1 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 1 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 1 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 1 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 1 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).proximal = bone;
+
+                        bone = new Bone();
+                        bone.type = Type.TYPE_INTERMEDIATE;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].dipPosition[ 0 ], json.pointables[ i ].dipPosition[ 1 ], json.pointables[ i ].dipPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 2 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 2 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 2 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 2 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 2 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 2 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 2 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 2 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 2 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).intermediate = bone;
+
+                        bone = new Bone();
+                        bone.type = Type.TYPE_DISTAL;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].dipPosition[ 0 ], json.pointables[ i ].dipPosition[ 1 ], json.pointables[ i ].dipPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].btipPosition[ 0 ], json.pointables[ i ].btipPosition[ 1 ], json.pointables[ i ].btipPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 3 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 3 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 3 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 3 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 3 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 3 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 3 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 3 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 3 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).distal = bone;
+
                         currentFrame.fingers.push( <Finger>pointable );
                         if ( pointable.hand )
                             pointable.hand.fingers.push( <Finger>pointable );

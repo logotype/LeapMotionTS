@@ -556,11 +556,11 @@ export class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437/v5.json");
+            this.connection = new WebSocket("ws://localhost:6437/v6.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437/v5.json");
+            this.connection = new WebSocket("ws://" + host + ":6437/v6.json");
         }
 
         this.listener.onInit( this );
@@ -587,6 +587,7 @@ export class Controller extends EventDispatcher
             var currentFrame:Frame;
             var hand:Hand;
             var pointable:Pointable;
+            var bone:Bone;
             var gesture:Gesture;
             var isTool:boolean;
             var length:number;
@@ -602,7 +603,7 @@ export class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json.hands.length;
-                for ( i = 0; i < length; i++ )
+                for ( i; i < length; i++ )
                 {
                     hand = new Hand();
                     hand.frame = currentFrame;
@@ -610,6 +611,7 @@ export class Controller extends EventDispatcher
                     hand.id = json.hands[ i ].id;
                     hand.palmNormal = new Vector3( json.hands[ i ].palmNormal[ 0 ], json.hands[ i ].palmNormal[ 1 ], json.hands[ i ].palmNormal[ 2 ] );
                     hand.palmPosition = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
+                    hand.palmWidth = json.hands[ i ].palmWidth;
                     hand.stabilizedPalmPosition = new Vector3( json.hands[ i ].stabilizedPalmPosition[ 0 ], json.hands[ i ].stabilizedPalmPosition[ 1 ], json.hands[ i ].stabilizedPalmPosition[ 2 ] );
                     hand.palmVelocity = new Vector3( json.hands[ i ].palmPosition[ 0 ], json.hands[ i ].palmPosition[ 1 ], json.hands[ i ].palmPosition[ 2 ] );
                     hand.rotation = new Matrix( new Vector3( json.hands[ i ].r[ 0 ][ 0 ], json.hands[ i ].r[ 0 ][ 1 ], json.hands[ i ].r[ 0 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 1 ][ 0 ], json.hands[ i ].r[ 1 ][ 1 ], json.hands[ i ].r[ 1 ][ 2 ] ), new Vector3( json.hands[ i ].r[ 2 ][ 0 ], json.hands[ i ].r[ 2 ][ 1 ], json.hands[ i ].r[ 2 ][ 2 ] ) );
@@ -644,7 +646,7 @@ export class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json.pointables.length;
-                for ( i = 0; i < length; i++ )
+                for ( i; i < length; i++ )
                 {
                     isTool = json.pointables[ i ].tool;
                     if ( isTool )
@@ -658,6 +660,7 @@ export class Controller extends EventDispatcher
                     pointable.length = json.pointables[ i ].length;
                     pointable.direction = new Vector3( json.pointables[ i ].direction[ 0 ], json.pointables[ i ].direction[ 1 ], json.pointables[ i ].direction[ 2 ] );
                     pointable.tipPosition = new Vector3( json.pointables[ i ].tipPosition[ 0 ], json.pointables[ i ].tipPosition[ 1 ], json.pointables[ i ].tipPosition[ 2 ] );
+                    pointable.btipPosition = new Vector3( json.pointables[ i ].btipPosition[ 0 ], json.pointables[ i ].btipPosition[ 1 ], json.pointables[ i ].btipPosition[ 2 ] );
                     pointable.stabilizedTipPosition = new Vector3( json.pointables[ i ].stabilizedTipPosition[ 0 ], json.pointables[ i ].stabilizedTipPosition[ 1 ], json.pointables[ i ].stabilizedTipPosition[ 2 ] );
                     pointable.tipVelocity = new Vector3( json.pointables[ i ].tipVelocity[ 0 ], json.pointables[ i ].tipVelocity[ 1 ], json.pointables[ i ].tipVelocity[ 2 ] );
                     pointable.touchDistance = json.pointables[ i ].touchDistance;
@@ -699,6 +702,44 @@ export class Controller extends EventDispatcher
                         ( <Finger>pointable ).pipPosition = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
                         ( <Finger>pointable ).mcpPosition = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
                         ( <Finger>pointable ).type = json.pointables[ i ].type;
+
+                        // Bones
+                        bone = new Bone();
+                        bone.type = Type.TYPE_METACARPAL;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].carpPosition[ 0 ], json.pointables[ i ].carpPosition[ 1 ], json.pointables[ i ].carpPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 0 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 0 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 0 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 0 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 0 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 0 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 0 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 0 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 0 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).metacarpal = bone;
+
+                        bone = new Bone();
+                        bone.type = Type.TYPE_PROXIMAL;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].mcpPosition[ 0 ], json.pointables[ i ].mcpPosition[ 1 ], json.pointables[ i ].mcpPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 1 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 1 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 1 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 1 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 1 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 1 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 1 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 1 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 1 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).proximal = bone;
+
+                        bone = new Bone();
+                        bone.type = Type.TYPE_INTERMEDIATE;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].pipPosition[ 0 ], json.pointables[ i ].pipPosition[ 1 ], json.pointables[ i ].pipPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].dipPosition[ 0 ], json.pointables[ i ].dipPosition[ 1 ], json.pointables[ i ].dipPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 2 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 2 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 2 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 2 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 2 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 2 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 2 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 2 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 2 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).intermediate = bone;
+
+                        bone = new Bone();
+                        bone.type = Type.TYPE_DISTAL;
+                        bone.width = json.pointables[ i ].width;
+                        bone.length = json.pointables[ i ].length;
+                        bone.prevJoint = new Vector3( json.pointables[ i ].dipPosition[ 0 ], json.pointables[ i ].dipPosition[ 1 ], json.pointables[ i ].dipPosition[ 2 ] );
+                        bone.nextJoint = new Vector3( json.pointables[ i ].btipPosition[ 0 ], json.pointables[ i ].btipPosition[ 1 ], json.pointables[ i ].btipPosition[ 2 ] );
+                        bone.basis = new Matrix( new Vector3( json.pointables[ i ].bases[ 3 ][ 0 ][ 0 ], json.pointables[ i ].bases[ 3 ][ 0 ][ 1 ], json.pointables[ i ].bases[ 3 ][ 0 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 3 ][ 1 ][ 0 ], json.pointables[ i ].bases[ 3 ][ 1 ][ 1 ], json.pointables[ i ].bases[ 3 ][ 1 ][ 2 ] ), new Vector3( json.pointables[ i ].bases[ 3 ][ 2 ][ 0 ], json.pointables[ i ].bases[ 3 ][ 2 ][ 1 ], json.pointables[ i ].bases[ 3 ][ 2 ][ 2 ] ) );
+                        ( <Finger>pointable ).distal = bone;
+
                         currentFrame.fingers.push( <Finger>pointable );
                         if ( pointable.hand )
                             pointable.hand.fingers.push( <Finger>pointable );
@@ -711,7 +752,7 @@ export class Controller extends EventDispatcher
             {
                 i = 0;
                 length = json.gestures.length;
-                for ( i = 0; i < length; i++ )
+                for ( i; i < length; i++ )
                 {
                     switch( json.gestures[ i ].type )
                     {
@@ -857,7 +898,7 @@ export class Controller extends EventDispatcher
         var returnValue:Hand = null;
         var i:number = 0;
 
-        for( i = 0; i < frame.hands.length; i++ )
+        for( i; i < frame.hands.length; i++ )
         {
             if ( (<Hand>frame.hands[ i ]).id === id )
             {
@@ -881,7 +922,7 @@ export class Controller extends EventDispatcher
         var returnValue:Pointable = null;
         var i:number = 0;
 
-        for( i = 0; i < frame.pointables.length; i++ )
+        for( i; i < frame.pointables.length; i++ )
         {
             if ( (<Pointable>frame.pointables[ i ]).id === id )
             {
@@ -1312,6 +1353,11 @@ export class Pointable
     public tipPosition:Vector3;
 
     /**
+     * The btipPosition "bone tip position" is a few mm closer to the wrist than the tipPosition.
+     */
+    public btipPosition:Vector3;
+
+    /**
      * The stabilized tip position of this Pointable.
      * <p>Smoothing and stabilization is performed in order to make this value more suitable for interaction with 2D content.</p>
      * <p>A modified tip position of this Pointable object with some additional smoothing and stabilization applied.</p> 
@@ -1443,6 +1489,218 @@ export class Pointable
         return "[Pointable direction: " + this.direction + " tipPosition: " + this.tipPosition + " tipVelocity: " + this.tipVelocity + "]";
     }
 }
+/**
+ * The Bone class represents a tracked bone.
+ *
+ * <p>All fingers contain 4 bones that make up the anatomy of the finger.
+ * Get valid Bone objects from a Finger object.</p>
+ *
+ * <p>Bones are ordered from base to tip, indexed from 0 to 3. Additionally,
+ * the bone’s Type enum may be used to index a specific bone anatomically.</p>
+ *
+ * <p>The thumb does not have a base metacarpal bone and therefore contains
+ * a valid, zero length bone at that location.</p>
+ *
+ * <p>Note that Bone objects can be invalid, which means that they do not
+ * contain valid tracking data and do not correspond to a physical bone.
+ * Invalid Bone objects can be the result of asking for a Bone object
+ * from an invalid finger, indexing a bone out of range, or constructing
+ * a new bone. Test for validity with the Bone::isValid() function.</p>
+ *
+ * @author logotype
+ *
+ */
+
+/**
+ * Enumerates the names of the bones.
+ *
+ * <p>Members of this enumeration are returned by Bone::type() to identify a
+ * Bone object.</p>
+ */
+export enum Type {
+    /**
+     * Bone connected to the wrist inside the palm
+     */
+    TYPE_METACARPAL = 0,
+
+    /**
+     * Bone connecting to the palm
+     */
+    TYPE_PROXIMAL = 1,
+
+    /**
+     * Bone between the tip and the base
+     */
+    TYPE_INTERMEDIATE = 2,
+
+    /**
+     * Bone at the tip of the finger
+     */
+    TYPE_DISTAL = 3
+}
+
+export class Bone
+{
+    /**
+     * The estimated length of the bone in millimeters.
+     *
+     * @returns The length of the bone in millimeters.
+     * @since 2.0
+     */
+    public length:number;
+
+    /**
+     * The estimated width of the flesh around the bone in millimeters.
+     *
+     * @returns The width of the flesh around the bone in millimeters.
+     * @since 2.0
+     */
+    public width:number;
+
+    /**
+     * The name of this bone.
+     *
+     * @returns The anatomical type of this bone as a member of the Bone::Type
+     * enumeration.
+     * @since 2.0
+     */
+    public type:number;
+
+    /**
+     * The base point the bone is anchored to.
+     *
+     * @returns The Vector containing the coordinates of the previous joint position.
+     * @since 2.0
+     */
+    public prevJoint:Vector3;
+
+    /**
+     * The end point of the bone towards the tip direction.
+     *
+     * @returns The Vector containing the coordinates of the next joint position.
+     * @since 2.0
+     */
+    public nextJoint:Vector3;
+
+    /**
+     * The orientation of the bone as a basis matrix.
+     *
+     * <p>The basis is defined as follows:
+     *   xAxis: Clockwise rotation axis of the bone
+     *   yAxis: Positive above the bone
+     *   zAxis: Positive along the bone towards the wrist
+     *
+     * Note: Since the left hand is a mirror of the right hand, left handed
+     * bones will contain a left-handed basis.</p>
+     *
+     * @returns The basis of the bone as a matrix.
+     * @since 2.0
+     */
+    public basis:Matrix;
+
+    /**
+     * Constructs an invalid Bone object.
+     *
+     * <p>Get valid Bone objects from a Finger object.</p>
+     */
+    constructor()
+    {
+    }
+
+    /**
+     * The midpoint in the center of the bone.
+     *
+     * @returns The midpoint in the center of the bone.
+     * @since 2.0
+     */
+    public center():Vector3
+    {
+        return LeapUtil.lerpVector( this.prevJoint, this.nextJoint, 0.5 );
+    }
+
+    /**
+     * The normalized direction of the bone from base to tip.
+     *
+     * @returns The normalized direction of the bone from base to tip.
+     * @since 2.0
+     */
+    public direction():Vector3
+    {
+        return new Vector3( this.basis.zBasis.x * -1, this.basis.zBasis.y * -1, this.basis.zBasis.z * -1 );
+    }
+
+    /**
+     * Reports whether this is a valid Bone object.
+     *
+     * @returns True, if this Bone object contains valid tracking data.
+     * @since 2.0
+     */
+    public isValid():Boolean
+    {
+        if( ( this.prevJoint && this.prevJoint.isValid() ) && ( this.nextJoint && this.nextJoint.isValid() ) )
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Compare Bone object equality/inequality.
+     *
+     * <p>Two Bone objects are equal if and only if both Bone
+     * objects represent the exact same physical entities in
+     * the same frame and both Bone objects are valid.</p>
+     *
+     * @param other The Bone to compare with.
+     * @return True; if equal, False otherwise.
+     *
+     */
+    public isEqualTo( other:Bone ):Boolean
+    {
+        if( !this.isValid() || !other.isValid() )
+            return false;
+
+        if( this.length != other.length )
+            return false;
+
+        if( this.width != other.width )
+            return false;
+
+        if( this.type != other.type )
+            return false;
+
+        if( this.prevJoint.isEqualTo( other.prevJoint ) )
+            return false;
+
+        if( this.nextJoint.isEqualTo( other.nextJoint ) )
+            return false;
+
+        return true;
+    }
+
+    /**
+     * Returns an invalid Bone object.
+     *
+     * <p>You can use the instance returned by this in comparisons testing
+     * whether a given Finger instance is valid or invalid. (You can also use the
+     * Bone::isValid() function.)</p>
+     *
+     * @returns The invalid Bone instance.
+     * @since 2.0
+     */
+    public static invalid():Bone
+    {
+        return new Bone();
+    }
+
+    /**
+     * A string containing a brief, human readable description of the Pointable object.
+     */
+    public toString():String
+    {
+        return "[Bone direction: " + this.direction() + " type: " + this.type + " prevJoint: " + this.prevJoint + " nextJoint: " + this.nextJoint + "]";
+    }
+}
+
 /**
  * The Gesture class represents a recognized movement by the user.
  *
@@ -1811,72 +2069,6 @@ export enum Type {
     TYPE_PINKY = 4
 }
 
-/**
- * Enumerates the joints of a finger.
- *
- * <p>The joints along the finger are indexed from 0 to 3 (tip to knuckle). The same
- * joint identifiers are used for the thumb, even though the thumb has one less
- * phalanx bone than the other digits. This puts the base joint (JOINT_MCP) at the
- * base of thumb's metacarpal bone.</p>
- *
- * <p>Pass a member of this enumeration to Finger::jointPosition() to get the
- * physical position of that joint.</p>
- *
- * <p>Note: The term "joint" is applied loosely here and the set of joints includes the
- * finger tip even though it is not an anatomical joint.</p>
- *
- * @since 1.f
- */
-export enum Joint {
-    /**
-     * The metacarpopophalangeal joint, or knuckle, of the finger.
-     *
-     * <p>The metacarpopophalangeal joint is located at the base of a finger between
-     * the metacarpal bone and the first phalanx. The common name for this joint is
-     * the knuckle.</p>
-     *
-     * <p>On a thumb, which has one less phalanx than a finger, this joint index
-     * identifies the thumb joint near the base of the hand, between the carpal
-     * and metacarpal bones.</p>
-     *
-     * @since 1.f
-     */
-    JOINT_MCP = 0,
-
-    /**
-     * The proximal interphalangeal joint of the finger. This joint is the middle
-     * joint of a finger.
-     *
-     * <p>The proximal interphalangeal joint is located between the two finger segments
-     * closest to the hand (the proximal and the intermediate phalanges). On a thumb,
-     * which lacks an intermediate phalanx, this joint index identifies the knuckle joint
-     * between the proximal phalanx and the metacarpal bone.</p>
-     *
-     * @since 1.f
-     */
-    JOINT_PIP = 1,
-
-    /**
-     * The distal interphalangeal joint of the finger.
-     *
-     * <p>This joint is closest to the tip.</p>
-     *
-     * <p>The distal interphalangeal joint is located between the most extreme segment
-     * of the finger (the distal phalanx) and the middle segment (the intermediate
-     * phalanx).</p>
-     *
-     * @since 1.f
-     */
-    JOINT_DIP = 2,
-
-    /**
-     * The tip of the finger.
-     *
-     * @since 1.f
-     */
-    JOINT_TIP = 3
-}
-
 export class Finger extends Pointable
 {
 
@@ -1920,6 +2112,26 @@ export class Finger extends Pointable
     public mcpPosition:Vector3;
 
     /**
+     * Bone connected to the wrist inside the palm
+     */
+    public metacarpal:Bone;
+
+    /**
+     * Bone connecting to the palm
+     */
+    public proximal:Bone;
+
+    /**
+     * Bone between the tip and the base
+     */
+    public intermediate:Bone;
+
+    /**
+     * Bone at the tip of the finger
+     */
+    public distal:Bone;
+
+    /**
      * Constructs a Finger object.
      *
      * <p>An uninitialized finger is considered invalid.
@@ -1934,32 +2146,31 @@ export class Finger extends Pointable
     }
 
     /**
-     * The position of the specified joint on this finger in millimeters from the Leap Motion origin.
+     * The bone at a given bone index on this finger.
      *
-     * @param jointIx An index value from the Finger::Joint enumeration identifying the
-     * joint of interest.
-     * @return The Vector containing the coordinates of the joint position.
+     * @param boneIx An index value from the Bone::Type enumeration identifying the bone of interest.
+     * @return The Bone that has the specified bone type.
      *
      * @since 1.f
      */
-    public jointPosition( jointIx:number ):Vector3
+    public bone( boneIx:number ):Bone
     {
-        switch( jointIx )
+        switch( boneIx )
         {
-            case Joint.JOINT_MCP:
-                return this.mcpPosition;
+            case Type.TYPE_METACARPAL:
+                return this.metacarpal;
                 break;
-            case Joint.JOINT_PIP:
-                return this.pipPosition;
+            case Type.TYPE_PROXIMAL:
+                return this.proximal;
                 break;
-            case Joint.JOINT_DIP:
-                return this.dipPosition;
+            case Type.TYPE_INTERMEDIATE:
+                return this.intermediate;
                 break;
-            case Joint.JOINT_TIP:
-                return this.tipPosition;
+            case Type.TYPE_DISTAL:
+                return this.distal;
                 break;
             default:
-                return Vector3.invalid();
+                return Bone.invalid();
                 break;
         }
     }
@@ -2059,6 +2270,22 @@ export class Tool extends Pointable
 export class Hand
 {
     /**
+     * The orientation of the hand as a basis matrix.
+     *
+     * <p>The basis is defined as follows:
+     *
+     * * xAxis: Positive in the direction of the pinky
+     * * yAxis: Positive above the hand
+     * * zAxis: Positive in the direction of the wrist
+     *
+     * Note: Since the left hand is a mirror of the right hand, the
+     * basis matrix will be left-handed for left hands.</p>
+     *
+     * @returns The basis of the hand as a matrix.
+     */
+    public basis:Matrix;
+
+    /**
      * The direction from the palm position toward the fingers.
      *
      * <p>The direction is expressed as a unit vector pointing in the same
@@ -2101,6 +2328,11 @@ export class Hand
      * The center position of the palm in millimeters from the Leap origin.
      */
     public palmPosition:Vector3;
+
+    /**
+     * The estimated width of the palm when the hand is in a flat position.
+     */
+    public palmWidth:number;
 
     /**
      * The stabilized palm position of this Hand.
@@ -2419,7 +2651,7 @@ export class Hand
         if( !this.isValid() || !sinceFrame.hand( this.id ).isValid() )
             return 0.0;
 
-        var returnValue:number = 0.0;
+        var returnValue:number;
         var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame );
         var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1 ) * 0.5;
         var angle:number = Math.acos( cs );
@@ -2931,7 +3163,7 @@ export class Frame
         if( !this.isValid() || !sinceFrame.isValid() )
             return 0.0;
 
-        var returnValue:number = 0.0;
+        var returnValue:number;
         var rotationSinceFrameMatrix:Matrix = this.rotationMatrix( sinceFrame );
         var cs:number = ( rotationSinceFrameMatrix.xBasis.x + rotationSinceFrameMatrix.yBasis.y + rotationSinceFrameMatrix.zBasis.z - 1 ) * 0.5;
         var angle:number = Math.acos( cs );
@@ -3344,6 +3576,9 @@ export class Matrix
  *       controller.config().setFloat(&quot;Gesture.Circle.MinArc&quot;, .5))
  *        controller.config().save();</listing>
  *
+ * <p>The Controller object must be connected to the Leap Motion service/daemon
+ * before setting the configuration parameters.</p>
+ *
  * @author logotype
  * @see Gesture
  *
@@ -3416,7 +3651,7 @@ export class CircleGesture extends Gesture
  *
  * <p>A key tap gesture is recognized when the tip of a finger rotates down
  * toward the palm and then springs back to approximately the original
- * postion, as if tapping. The tapping finger must pause briefly before
+ * position, as if tapping. The tapping finger must pause briefly before
  * beginning the tap.</p>
  *
  * <p><strong>Important: To use key tap gestures in your application, you must enable
@@ -3466,6 +3701,9 @@ export class CircleGesture extends Gesture
  *       controller.config().setFloat(&quot;Gesture.KeyTap.HistorySeconds&quot;, .2) &amp;&amp;
  *       controller.config().setFloat(&quot;Gesture.KeyTap.MinDistance&quot;, 8.0))
  *        controller.config().save();</code>
+ *
+ * <p>The Controller object must be connected to the Leap Motion service/daemon
+ * before setting the configuration parameters.</p>
  *
  * @author logotype
  *
@@ -3570,6 +3808,9 @@ export class KeyTapGesture extends Gesture
  *       controller.config().setFloat(&quot;Gesture.ScreenTap.MinDistance&quot;, 1.0))
  *        controller.config().save();</code>
  *
+ * <p>The Controller object must be connected to the Leap Motion service/daemon
+ * before setting the configuration parameters.</p>
+ *
  * @author logotype
  *
  */
@@ -3652,6 +3893,9 @@ export class ScreenTapGesture extends Gesture
  * <code>if(controller.config().setFloat(&quot;Gesture.Swipe.MinLength&quot;, 200.0) &amp;&amp;
  *       controller.config().setFloat(&quot;Gesture.Swipe.MinVelocity&quot;, 750))
  *        controller.config().save();</code>
+ *
+ * <p>The Controller object must be connected to the Leap Motion service/daemon
+ * before setting the configuration parameters.</p>
  *
  * @author logotype
  *

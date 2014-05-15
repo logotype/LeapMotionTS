@@ -5,7 +5,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
         "concat": {
             merge: {
-                src: ['src/util/EventDispatcher.ts', 'src/Listener.ts', 'src/interfaces/DefaultListener.ts', 'src/util/LeapEvent.ts', 'src/util/LeapUtil.ts', 'src/Controller.ts', 'src/InteractionBox.ts', 'src/Pointable.ts', 'src/Gesture.ts', 'src/Finger.ts', 'src/Tool.ts', 'src/Hand.ts', 'src/Frame.ts', 'src/Matrix.ts', 'src/CircleGesture.ts', 'src/KeyTapGesture.ts', 'src/ScreenTapGesture.ts', 'src/SwipeGesture.ts', 'src/Vector3.ts'],
+                src: ['src/util/EventDispatcher.ts', 'src/Listener.ts', 'src/interfaces/DefaultListener.ts', 'src/util/LeapEvent.ts', 'src/util/LeapUtil.ts', 'src/Controller.ts', 'src/InteractionBox.ts', 'src/Pointable.ts', 'src/Bone.ts', 'src/Gesture.ts', 'src/Finger.ts', 'src/Tool.ts', 'src/Hand.ts', 'src/Frame.ts', 'src/Matrix.ts', 'src/CircleGesture.ts', 'src/KeyTapGesture.ts', 'src/ScreenTapGesture.ts', 'src/SwipeGesture.ts', 'src/Vector3.ts'],
                 dest: 'build/<%= pkg.name.toLowerCase() %>-<%= pkg.version %>.ts'
             }
         },
@@ -42,7 +42,7 @@ module.exports = function (grunt) {
                 options: {
                     module: 'amd',
                     target: 'es5',
-                    sourcemap: true,
+                    sourceMap: true,
                     fullSourceMapPath: false,
                     declaration: true
                 }

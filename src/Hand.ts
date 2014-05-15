@@ -24,6 +24,22 @@
 class Hand
 {
     /**
+     * The orientation of the hand as a basis matrix.
+     *
+     * <p>The basis is defined as follows:
+     *
+     * * xAxis: Positive in the direction of the pinky
+     * * yAxis: Positive above the hand
+     * * zAxis: Positive in the direction of the wrist
+     *
+     * Note: Since the left hand is a mirror of the right hand, the
+     * basis matrix will be left-handed for left hands.</p>
+     *
+     * @returns The basis of the hand as a matrix.
+     */
+    public basis:Matrix;
+
+    /**
      * The direction from the palm position toward the fingers.
      *
      * <p>The direction is expressed as a unit vector pointing in the same
@@ -66,6 +82,11 @@ class Hand
      * The center position of the palm in millimeters from the Leap origin.
      */
     public palmPosition:Vector3;
+
+    /**
+     * The estimated width of the palm when the hand is in a flat position.
+     */
+    public palmWidth:number;
 
     /**
      * The stabilized palm position of this Hand.

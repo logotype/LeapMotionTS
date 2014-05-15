@@ -107,6 +107,7 @@ export declare class Pointable {
     public length: number;
     public width: number;
     public tipPosition: Vector3;
+    public btipPosition: Vector3;
     public stabilizedTipPosition: Vector3;
     public timeVisible: number;
     public tipVelocity: Vector3;
@@ -118,6 +119,27 @@ export declare class Pointable {
     public isEqualTo(other: Pointable): boolean;
     static invalid(): Pointable;
     public toString(): string;
+}
+export declare enum Type {
+    TYPE_METACARPAL = 0,
+    TYPE_PROXIMAL = 1,
+    TYPE_INTERMEDIATE = 2,
+    TYPE_DISTAL = 3,
+}
+export declare class Bone {
+    public length: number;
+    public width: number;
+    public type: number;
+    public prevJoint: Vector3;
+    public nextJoint: Vector3;
+    public basis: Matrix;
+    constructor();
+    public center(): Vector3;
+    public direction(): Vector3;
+    public isValid(): Boolean;
+    public isEqualTo(other: Bone): Boolean;
+    static invalid(): Bone;
+    public toString(): String;
 }
 export declare enum State {
     STATE_INVALID = 0,
@@ -154,19 +176,17 @@ export declare enum Type {
     TYPE_RING = 3,
     TYPE_PINKY = 4,
 }
-export declare enum Joint {
-    JOINT_MCP = 0,
-    JOINT_PIP = 1,
-    JOINT_DIP = 2,
-    JOINT_TIP = 3,
-}
 export declare class Finger extends Pointable {
     public type: number;
     public dipPosition: Vector3;
     public pipPosition: Vector3;
     public mcpPosition: Vector3;
+    public metacarpal: Bone;
+    public proximal: Bone;
+    public intermediate: Bone;
+    public distal: Bone;
     constructor();
-    public jointPosition(jointIx: number): Vector3;
+    public bone(boneIx: number): Bone;
     public positions(): Vector3[];
     static invalid(): Finger;
 }
@@ -175,12 +195,14 @@ export declare class Tool extends Pointable {
     static invalid(): Tool;
 }
 export declare class Hand {
+    public basis: Matrix;
     public direction: Vector3;
     public fingers: Finger[];
     public frame: Frame;
     public id: number;
     public palmNormal: Vector3;
     public palmPosition: Vector3;
+    public palmWidth: number;
     public stabilizedPalmPosition: Vector3;
     public timeVisible: number;
     public isLeft: boolean;
