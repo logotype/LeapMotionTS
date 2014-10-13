@@ -556,11 +556,11 @@ export class Controller extends EventDispatcher
 
         if( !host )
         {
-            this.connection = new WebSocket("ws://localhost:6437/v4.json");
+            this.connection = new WebSocket("ws://localhost:6437/v6.json");
         }
         else
         {
-            this.connection = new WebSocket("ws://" + host + ":6437/v4.json");
+            this.connection = new WebSocket("ws://" + host + ":6437/v6.json");
         }
 
         this.listener.onInit( this );
