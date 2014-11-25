@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-1.3.0+dev1');
+import Leap = require('../build/leapmotionts-2.2.0');
 var controller:Leap.Controller = new Leap.Controller();
 controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, (event:Leap.LeapEvent) => {
     controller.enableGesture(Leap.Type.TYPE_CIRCLE, true);
@@ -20,21 +20,7 @@ controller.addEventListener(Leap.LeapEvent.LEAPMOTION_FRAME, (event:Leap.LeapEve
             // Calculate the hand's average finger tip position
             var avgPos:Leap.Vector3 = Leap.Vector3.zero();
             for (var i:number = 0; i <fingers.length; i++)
-            {
                 avgPos = avgPos.plus(( <Leap.Finger>fingers[i]).tipPosition);
-
-                // Skeleton API
-                console.log( "Skeleton distal: " + (<Leap.Finger>fingers[i]).dipPosition );
-                console.log( "Skeleton proximal: " + (<Leap.Finger>fingers[i]).pipPosition );
-                console.log( "Skeleton knuckle: " + (<Leap.Finger>fingers[i]).mcpPosition );
-                console.log( "Finger type: " + (<Leap.Finger>fingers[i]).type );
-
-                // Bone API
-                console.log( "Bone metacarpal: " + (<Leap.Finger>fingers[i]).metacarpal );
-                console.log( "Bone proximal: " + (<Leap.Finger>fingers[i]).proximal );
-                console.log( "Bone intermediate: " + (<Leap.Finger>fingers[i]).intermediate );
-                console.log( "Bone distal: " + (<Leap.Finger>fingers[i]).distal );
-            }
 
             avgPos = avgPos.divide(fingers.length);
             console.log("Hand has " + fingers.length + " fingers, average finger tip position:" + avgPos);

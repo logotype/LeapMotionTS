@@ -1,6 +1,6 @@
 {
   "name": "LeapMotionTS",
-  "version": "2.0.0+15464",
+  "version": "2.2.0",
   "description": "TypeScript framework for Leap Motion.",
   "main": "src",
   "license": "MIT",
@@ -9,7 +9,6 @@
     "url": "https://github.com/logotype/LeapMotionTS.git"
   },
   "readmeFilename": "README.md",
-  "gitHead": "c2e62df9d73ba1510d39741c21441960c03bef0e",
   "bugs": {
     "url": "https://github.com/logotype/LeapMotionTS/issues"
   },
