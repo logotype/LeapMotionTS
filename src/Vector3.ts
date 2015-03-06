@@ -14,7 +14,7 @@
  * @author logotype
  *
  */
-class Vector3
+export class Vector3
 {
     /**
      * The horizontal component.

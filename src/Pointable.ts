@@ -46,7 +46,7 @@ enum Zone {
     ZONE_TOUCHING = 2
 }
 
-class Pointable
+export class Pointable
 {
     /**
      * The current touch zone of this Pointable object.

@@ -15,24 +15,6 @@ module.exports = function (grunt) {
                 pattern: '\/\/\/.*\n',
                 replacement: '',
                 recursive: true
-            },
-            class: {
-                path: 'build/',
-                pattern: '\nclass ',
-                replacement: '\nexport class ',
-                recursive: true
-            },
-            module: {
-                path: 'build/',
-                pattern: '\ninterface ',
-                replacement: '\nexport interface ',
-                recursive: true
-            },
-            enum: {
-                path: 'build/',
-                pattern: '\nenum ',
-                replacement: '\nexport enum ',
-                recursive: true
             }
         },
         "typescript": {
@@ -41,7 +23,7 @@ module.exports = function (grunt) {
                 dest: '',
                 options: {
                     module: 'amd',
-                    target: 'es5',
+                    target: 'es6',
                     sourceMap: true,
                     fullSourceMapPath: false,
                     declaration: true
@@ -80,20 +62,10 @@ module.exports = function (grunt) {
         }
     });
 
-    // Combine modules
     grunt.loadNpmTasks('grunt-contrib-concat');
-
-    // Make module/interface/enum external...
     grunt.loadNpmTasks('grunt-sed');
-
-    // Load TypeScript compiler
     grunt.loadNpmTasks('grunt-typescript');
-
-    // Load Beautifier
     grunt.loadNpmTasks('grunt-jsbeautifier');
-
-    // Load UglifyJS
     grunt.loadNpmTasks('grunt-contrib-uglify');
-
     grunt.registerTask('default', ['concat:merge', 'sed', 'typescript', 'jsbeautifier', 'uglify']);
 };

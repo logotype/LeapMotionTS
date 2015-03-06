@@ -21,7 +21,7 @@
  * @author logotype
  *
  */
-class Frame
+export class Frame
 {
     /**
      * The list of Finger objects detected in this frame, given in arbitrary order.<br/>

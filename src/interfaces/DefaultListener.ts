@@ -2,9 +2,8 @@
 /// <reference path="./../Frame.ts"/>
 /// <reference path="./../util/LeapEvent.ts"/>
 /// <reference path="./../Listener.ts"/>
-class DefaultListener extends EventDispatcher implements Listener
+export class DefaultListener extends EventDispatcher implements Listener
 {
-
     constructor()
     {
         super();

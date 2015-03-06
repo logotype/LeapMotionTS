@@ -2,7 +2,7 @@
 /**
  * The EventDispatcher class provides strongly typed events.
  */
-class EventDispatcher
+export class EventDispatcher
 {
     private listeners:any[];
 

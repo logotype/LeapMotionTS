@@ -1,4 +1,4 @@
-define(["require", "exports", '../build/leapmotionts-1.0.9+8391'], function(require, exports, Leap) {
+define(["require", "exports", '../build/leapmotionts-2.2.3'], function(require, exports, Leap) {
     var controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, function (event) {
         controller.enableGesture(6 /* TYPE_CIRCLE */, true);

@@ -130,7 +130,7 @@
 /**
  * The possible gesture states.
  */
-enum State {
+export enum State {
     /**
      * An invalid state.
      */
@@ -157,7 +157,7 @@ enum State {
 /**
  * The supported types of gestures.
  */
-enum Type {
+export enum Type {
     /**
      * An invalid type.
      */
@@ -183,7 +183,7 @@ enum Type {
      */
     TYPE_KEY_TAP = 8
 }
-class Gesture
+export class Gesture
 {
     /**
      * The elapsed duration of the recognized movement up to the frame

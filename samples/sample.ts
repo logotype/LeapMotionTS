@@ -1,4 +1,4 @@
-import Leap = require('../build/leapmotionts-1.0.9+8391');
+import Leap = require('../build/leapmotionts-2.2.3');
 var controller:Leap.Controller = new Leap.Controller();
 controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, (event:Leap.LeapEvent) => {
     controller.enableGesture(Leap.Type.TYPE_CIRCLE, true);

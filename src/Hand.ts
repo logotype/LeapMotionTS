@@ -21,7 +21,7 @@
  * @author logotype
  *
  */
-class Hand
+export class Hand
 {
     /**
      * The direction from the palm position toward the fingers.

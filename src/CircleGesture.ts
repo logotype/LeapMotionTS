@@ -58,7 +58,7 @@
  * @see Gesture
  *
  */
-class CircleGesture extends Gesture
+export class CircleGesture extends Gesture
 {
     /**
      * The circle gesture type.<br/>

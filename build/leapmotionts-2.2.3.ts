@@ -156,7 +156,6 @@ export interface Listener
 }
 export class DefaultListener extends EventDispatcher implements Listener
 {
-
     constructor()
     {
         super();
@@ -467,6 +466,7 @@ export class LeapUtil
         return vec1.plus( vec2.minus( vec1 ).multiply( coefficient ) );
     }
 }
+
 /**
  * The Controller class is your main interface to the Leap Motion Controller.
  *
@@ -1170,7 +1170,7 @@ export class InteractionBox
 /**
  * Defines the values for reporting the state of a Pointable object in relation to an adaptive touch plane.
  */
-export enum Zone {
+enum Zone {
     /**
      * The Pointable object is too far from the plane to be considered hovering or touching.
      *

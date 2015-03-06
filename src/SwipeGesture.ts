@@ -45,7 +45,7 @@
  * @author logotype
  *
  */
-class SwipeGesture extends Gesture
+export class SwipeGesture extends Gesture
 {
     /**
      * The type value designating a swipe gesture.

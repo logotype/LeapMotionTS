@@ -4,7 +4,7 @@
  * LeapUtil is a collection of static utility functions.
  *
  */
-class LeapUtil
+export class LeapUtil
 {
     /** The constant pi as a single precision floating point number. */
     public static PI:number = 3.1415926536;

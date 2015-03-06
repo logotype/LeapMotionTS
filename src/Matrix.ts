@@ -13,7 +13,7 @@
  * @author logotype
  *
  */
-class Matrix
+export class Matrix
 {
     /**
      * The translation factors for all three axes.

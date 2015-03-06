@@ -14,7 +14,7 @@
  * @author logotype
  *
  */
-class InteractionBox
+export class InteractionBox
 {
     /**
      * The center of the InteractionBox in device coordinates (millimeters).

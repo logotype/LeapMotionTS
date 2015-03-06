@@ -18,7 +18,7 @@
  * @author logotype
  *
  */
-interface Listener
+export interface Listener
 {
     /**
      * Called when the Controller object connects to the Leap software,

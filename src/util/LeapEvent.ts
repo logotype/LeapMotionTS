@@ -1,6 +1,6 @@
 /// <reference path="./../Frame.ts"/>
 /// <reference path="./../Listener.ts"/>
-class LeapEvent
+export class LeapEvent
 {
     public static LEAPMOTION_INIT:string = "leapMotionInit";
     public static LEAPMOTION_CONNECTED:string = "leapMotionConnected";

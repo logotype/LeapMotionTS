@@ -16,7 +16,7 @@
  * @author logotype
  *
  */
-class Finger extends Pointable
+export class Finger extends Pointable
 {
     /**
      * Constructs a Finger object.

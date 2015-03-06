@@ -17,7 +17,7 @@
  * @author logotype
  *
  */
-class Tool extends Pointable
+export class Tool extends Pointable
 {
     constructor()
     {

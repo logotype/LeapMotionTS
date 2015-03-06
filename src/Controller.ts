@@ -6,6 +6,7 @@
 /// <reference path="./KeyTapGesture.ts"/>
 /// <reference path="./ScreenTapGesture.ts"/>
 /// <reference path="./SwipeGesture.ts"/>
+
 /**
  * The Controller class is your main interface to the Leap Motion Controller.
  *
@@ -45,7 +46,7 @@
  * @author logotype
  *
  */
-class Controller extends EventDispatcher
+export class Controller extends EventDispatcher
 {
     /**
      * @private

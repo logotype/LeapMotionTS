@@ -59,7 +59,7 @@
  * @author logotype
  *
  */
-class ScreenTapGesture extends Gesture
+export class ScreenTapGesture extends Gesture
 {
     /**
      * The type value designating a screen tap gesture.

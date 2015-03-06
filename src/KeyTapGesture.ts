@@ -60,7 +60,7 @@
  * @author logotype
  *
  */
-class KeyTapGesture extends Gesture
+export class KeyTapGesture extends Gesture
 {
     /**
      * The type value designating a key tap gesture.
