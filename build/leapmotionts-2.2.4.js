@@ -1,4 +1,4 @@
-var __extends = this.__extends || function(d, b) {
+var __extends = (this && this.__extends) || function(d, b) {
     for (var p in b)
         if (b.hasOwnProperty(p)) d[p] = b[p];
 
@@ -102,13 +102,13 @@ define(["require", "exports"], function(require, exports) {
      */
     var LeapUtil = (function() {
         function LeapUtil() {}
-            /**
-             * Convert an angle measure from radians to degrees.
-             *
-             * @param radians
-             * @return The value, in degrees.
-             *
-             */
+        /**
+         * Convert an angle measure from radians to degrees.
+         *
+         * @param radians
+         * @return The value, in degrees.
+         *
+         */
         LeapUtil.toDegrees = function(radians) {
             return radians * 180 / Math.PI;
         };
@@ -342,252 +342,252 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Controller(host) {
-                var _this = this;
-                if (host === void 0) {
-                    host = null;
-                }
-                _super.call(this);
-                /**
-                 * @private
-                 * History of frame of tracking data from the Leap.
-                 */
-                this.frameHistory = [];
-                /**
-                 * @private
-                 * Reports whether this Controller is connected to the Leap Motion Controller.
-                 */
-                this._isConnected = false;
-                /**
-                 * @private
-                 * Reports whether gestures is enabled.
-                 */
-                this._isGesturesEnabled = false;
-                this.listener = new DefaultListener();
-                if (!host) {
-                    this.connection = new WebSocket("ws://localhost:6437/v6.json");
-                } else {
-                    this.connection = new WebSocket("ws://" + host + ":6437/v6.json");
-                }
-                this.listener.onInit(this);
-                this.connection.onopen = function(event) {
-                    _this._isConnected = true;
-                    _this.listener.onConnect(_this);
-                    var focusedState = {};
-                    focusedState.focused = true;
-                    _this.connection.send(JSON.stringify(focusedState));
-                };
-                this.connection.onclose = function(data) {
-                    _this._isConnected = false;
-                    _this.listener.onDisconnect(_this);
-                };
-                this.connection.onmessage = function(data) {
-                    var i;
-                    var json;
-                    var currentFrame;
-                    var hand;
-                    var pointable;
-                    var gesture;
-                    var isTool;
-                    var length;
-                    var type;
-                    json = JSON.parse(data.data);
-                    currentFrame = new Frame();
-                    currentFrame.controller = _this;
-                    // Hands
-                    if (typeof json.hands !== "undefined") {
-                        i = 0;
-                        length = json.hands.length;
-                        for (i = 0; i < length; i++) {
-                            hand = new Hand();
-                            hand.frame = currentFrame;
-                            hand.direction = new Vector3(json.hands[i].direction[0], json.hands[i].direction[1], json.hands[i].direction[2]);
-                            hand.id = json.hands[i].id;
-                            hand.palmNormal = new Vector3(json.hands[i].palmNormal[0], json.hands[i].palmNormal[1], json.hands[i].palmNormal[2]);
-                            hand.palmPosition = new Vector3(json.hands[i].palmPosition[0], json.hands[i].palmPosition[1], json.hands[i].palmPosition[2]);
-                            hand.stabilizedPalmPosition = new Vector3(json.hands[i].stabilizedPalmPosition[0], json.hands[i].stabilizedPalmPosition[1], json.hands[i].stabilizedPalmPosition[2]);
-                            hand.palmVelocity = new Vector3(json.hands[i].palmPosition[0], json.hands[i].palmPosition[1], json.hands[i].palmPosition[2]);
-                            hand.rotation = new Matrix(new Vector3(json.hands[i].r[0][0], json.hands[i].r[0][1], json.hands[i].r[0][2]), new Vector3(json.hands[i].r[1][0], json.hands[i].r[1][1], json.hands[i].r[1][2]), new Vector3(json.hands[i].r[2][0], json.hands[i].r[2][1], json.hands[i].r[2][2]));
-                            hand.scaleFactorNumber = json.hands[i].s;
-                            hand.sphereCenter = new Vector3(json.hands[i].sphereCenter[0], json.hands[i].sphereCenter[1], json.hands[i].sphereCenter[2]);
-                            hand.sphereRadius = json.hands[i].sphereRadius;
-                            hand.timeVisible = json.hands[i].timeVisible;
-                            hand.translationVector = new Vector3(json.hands[i].t[0], json.hands[i].t[1], json.hands[i].t[2]);
-                            currentFrame.hands.push(hand);
-                        }
-                    }
-                    currentFrame.id = json.id;
-                    currentFrame.currentFramesPerSecond = json.currentFramesPerSecond;
-                    // InteractionBox
-                    if (typeof json.interactionBox !== "undefined") {
-                        currentFrame.interactionBox = new InteractionBox();
-                        currentFrame.interactionBox.center = new Vector3(json.interactionBox.center[0], json.interactionBox.center[1], json.interactionBox.center[2]);
-                        currentFrame.interactionBox.width = json.interactionBox.size[0];
-                        currentFrame.interactionBox.height = json.interactionBox.size[1];
-                        currentFrame.interactionBox.depth = json.interactionBox.size[2];
-                    }
-                    // Pointables
-                    if (typeof json.pointables !== "undefined") {
-                        i = 0;
-                        length = json.pointables.length;
-                        for (i = 0; i < length; i++) {
-                            isTool = json.pointables[i].tool;
-                            if (isTool)
-                                pointable = new Tool();
-                            else
-                                pointable = new Finger();
-                            pointable.frame = currentFrame;
-                            pointable.id = json.pointables[i].id;
-                            pointable.hand = Controller.getHandByID(currentFrame, json.pointables[i].handId);
-                            pointable.length = json.pointables[i].length;
-                            pointable.direction = new Vector3(json.pointables[i].direction[0], json.pointables[i].direction[1], json.pointables[i].direction[2]);
-                            pointable.tipPosition = new Vector3(json.pointables[i].tipPosition[0], json.pointables[i].tipPosition[1], json.pointables[i].tipPosition[2]);
-                            pointable.stabilizedTipPosition = new Vector3(json.pointables[i].stabilizedTipPosition[0], json.pointables[i].stabilizedTipPosition[1], json.pointables[i].stabilizedTipPosition[2]);
-                            pointable.tipVelocity = new Vector3(json.pointables[i].tipVelocity[0], json.pointables[i].tipVelocity[1], json.pointables[i].tipVelocity[2]);
-                            pointable.touchDistance = json.pointables[i].touchDistance;
-                            pointable.timeVisible = json.pointables[i].timeVisible;
-                            currentFrame.pointables.push(pointable);
-                            switch (json.pointables[i].touchZone) {
-                                case "hovering":
-                                    pointable.touchZone = 1 /* ZONE_HOVERING */ ;
-                                    break;
-                                case "touching":
-                                    pointable.touchZone = 2 /* ZONE_TOUCHING */ ;
-                                    break;
-                                default:
-                                    pointable.touchZone = 0 /* ZONE_NONE */ ;
-                                    break;
-                            }
-                            if (pointable.hand)
-                                pointable.hand.pointables.push(pointable);
-                            if (isTool) {
-                                pointable.isTool = true;
-                                pointable.isFinger = false;
-                                pointable.width = json.pointables[i].width;
-                                currentFrame.tools.push(pointable);
-                                if (pointable.hand)
-                                    pointable.hand.tools.push(pointable);
-                            } else {
-                                pointable.isTool = false;
-                                pointable.isFinger = true;
-                                currentFrame.fingers.push(pointable);
-                                if (pointable.hand)
-                                    pointable.hand.fingers.push(pointable);
-                            }
-                        }
-                    }
-                    // Gestures
-                    if (typeof json.gestures !== "undefined") {
-                        i = 0;
-                        length = json.gestures.length;
-                        for (i = 0; i < length; i++) {
-                            switch (json.gestures[i].type) {
-                                case "circle":
-                                    gesture = new CircleGesture();
-                                    type = 6 /* TYPE_CIRCLE */ ;
-                                    var circle = gesture;
-                                    circle.center = new Vector3(json.gestures[i].center[0], json.gestures[i].center[1], json.gestures[i].center[2]);
-                                    circle.normal = new Vector3(json.gestures[i].normal[0], json.gestures[i].normal[1], json.gestures[i].normal[2]);
-                                    circle.progress = json.gestures[i].progress;
-                                    circle.radius = json.gestures[i].radius;
-                                    break;
-                                case "swipe":
-                                    gesture = new SwipeGesture();
-                                    type = 5 /* TYPE_SWIPE */ ;
-                                    var swipe = gesture;
-                                    swipe.startPosition = new Vector3(json.gestures[i].startPosition[0], json.gestures[i].startPosition[1], json.gestures[i].startPosition[2]);
-                                    swipe.position = new Vector3(json.gestures[i].position[0], json.gestures[i].position[1], json.gestures[i].position[2]);
-                                    swipe.direction = new Vector3(json.gestures[i].direction[0], json.gestures[i].direction[1], json.gestures[i].direction[2]);
-                                    swipe.speed = json.gestures[i].speed;
-                                    break;
-                                case "screenTap":
-                                    gesture = new ScreenTapGesture();
-                                    type = 7 /* TYPE_SCREEN_TAP */ ;
-                                    var screenTap = gesture;
-                                    screenTap.position = new Vector3(json.gestures[i].position[0], json.gestures[i].position[1], json.gestures[i].position[2]);
-                                    screenTap.direction = new Vector3(json.gestures[i].direction[0], json.gestures[i].direction[1], json.gestures[i].direction[2]);
-                                    screenTap.progress = json.gestures[i].progress;
-                                    break;
-                                case "keyTap":
-                                    gesture = new KeyTapGesture();
-                                    type = 8 /* TYPE_KEY_TAP */ ;
-                                    var keyTap = gesture;
-                                    keyTap.position = new Vector3(json.gestures[i].position[0], json.gestures[i].position[1], json.gestures[i].position[2]);
-                                    keyTap.direction = new Vector3(json.gestures[i].direction[0], json.gestures[i].direction[1], json.gestures[i].direction[2]);
-                                    keyTap.progress = json.gestures[i].progress;
-                                    break;
-                                default:
-                                    throw new Error("unkown gesture type");
-                            }
-                            var j = 0;
-                            var lengthInner = 0;
-                            if (typeof json.gestures[i].handIds !== "undefined") {
-                                j = 0;
-                                lengthInner = json.gestures[i].handIds.length;
-                                for (j = 0; j < lengthInner; ++j) {
-                                    var gestureHand = Controller.getHandByID(currentFrame, json.gestures[i].handIds[j]);
-                                    gesture.hands.push(gestureHand);
-                                }
-                            }
-                            if (typeof json.gestures[i].pointableIds !== "undefined") {
-                                j = 0;
-                                lengthInner = json.gestures[i].pointableIds.length;
-                                for (j = 0; j < lengthInner; ++j) {
-                                    var gesturePointable = Controller.getPointableByID(currentFrame, json.gestures[i].pointableIds[j]);
-                                    if (gesturePointable) {
-                                        gesture.pointables.push(gesturePointable);
-                                    }
-                                }
-                                if (gesture instanceof CircleGesture && gesture.pointables.length > 0) {
-                                    gesture.pointable = gesture.pointables[0];
-                                }
-                            }
-                            gesture.frame = currentFrame;
-                            gesture.id = json.gestures[i].id;
-                            gesture.duration = json.gestures[i].duration;
-                            gesture.durationSeconds = gesture.duration / 1000000;
-                            switch (json.gestures[i].state) {
-                                case "start":
-                                    gesture.state = 1 /* STATE_START */ ;
-                                    break;
-                                case "update":
-                                    gesture.state = 2 /* STATE_UPDATE */ ;
-                                    break;
-                                case "stop":
-                                    gesture.state = 3 /* STATE_STOP */ ;
-                                    break;
-                                default:
-                                    gesture.state = 0 /* STATE_INVALID */ ;
-                            }
-                            gesture.type = type;
-                            currentFrame._gestures.push(gesture);
-                        }
-                    }
-                    // Rotation (since last frame), interpolate for smoother motion
-                    if (json.r)
-                        currentFrame.rotation = new Matrix(new Vector3(json.r[0][0], json.r[0][1], json.r[0][2]), new Vector3(json.r[1][0], json.r[1][1], json.r[1][2]), new Vector3(json.r[2][0], json.r[2][1], json.r[2][2]));
-                    // Scale factor (since last frame), interpolate for smoother motion
-                    currentFrame.scaleFactorNumber = json.s;
-                    // Translation (since last frame), interpolate for smoother motion
-                    if (json.t)
-                        currentFrame.translationVector = new Vector3(json.t[0], json.t[1], json.t[2]);
-                    // Timestamp
-                    currentFrame.timestamp = json.timestamp;
-                    // Add frame to history
-                    if (_this.frameHistory.length > 59)
-                        _this.frameHistory.splice(59, 1);
-                    _this.frameHistory.unshift(_this.latestFrame);
-                    _this.latestFrame = currentFrame;
-                    _this.listener.onFrame(_this, _this.latestFrame);
-                };
+            var _this = this;
+            if (host === void 0) {
+                host = null;
             }
+            _super.call(this);
             /**
-             * Finds a Hand object by ID.
-             *
-             * @param frame The Frame object in which the Hand contains
-             * @param id The ID of the Hand object
-             * @return The Hand object if found, otherwise null
-             *
+             * @private
+             * History of frame of tracking data from the Leap.
              */
+            this.frameHistory = [];
+            /**
+             * @private
+             * Reports whether this Controller is connected to the Leap Motion Controller.
+             */
+            this._isConnected = false;
+            /**
+             * @private
+             * Reports whether gestures is enabled.
+             */
+            this._isGesturesEnabled = false;
+            this.listener = new DefaultListener();
+            if (!host) {
+                this.connection = new WebSocket("ws://localhost:6437/v6.json");
+            } else {
+                this.connection = new WebSocket("ws://" + host + ":6437/v6.json");
+            }
+            this.listener.onInit(this);
+            this.connection.onopen = function(event) {
+                _this._isConnected = true;
+                _this.listener.onConnect(_this);
+                var focusedState = {};
+                focusedState.focused = true;
+                _this.connection.send(JSON.stringify(focusedState));
+            };
+            this.connection.onclose = function(data) {
+                _this._isConnected = false;
+                _this.listener.onDisconnect(_this);
+            };
+            this.connection.onmessage = function(data) {
+                var i;
+                var json;
+                var currentFrame;
+                var hand;
+                var pointable;
+                var gesture;
+                var isTool;
+                var length;
+                var type;
+                json = JSON.parse(data.data);
+                currentFrame = new Frame();
+                currentFrame.controller = _this;
+                // Hands
+                if (typeof json.hands !== "undefined") {
+                    i = 0;
+                    length = json.hands.length;
+                    for (i = 0; i < length; i++) {
+                        hand = new Hand();
+                        hand.frame = currentFrame;
+                        hand.direction = new Vector3(json.hands[i].direction[0], json.hands[i].direction[1], json.hands[i].direction[2]);
+                        hand.id = json.hands[i].id;
+                        hand.palmNormal = new Vector3(json.hands[i].palmNormal[0], json.hands[i].palmNormal[1], json.hands[i].palmNormal[2]);
+                        hand.palmPosition = new Vector3(json.hands[i].palmPosition[0], json.hands[i].palmPosition[1], json.hands[i].palmPosition[2]);
+                        hand.stabilizedPalmPosition = new Vector3(json.hands[i].stabilizedPalmPosition[0], json.hands[i].stabilizedPalmPosition[1], json.hands[i].stabilizedPalmPosition[2]);
+                        hand.palmVelocity = new Vector3(json.hands[i].palmPosition[0], json.hands[i].palmPosition[1], json.hands[i].palmPosition[2]);
+                        hand.rotation = new Matrix(new Vector3(json.hands[i].r[0][0], json.hands[i].r[0][1], json.hands[i].r[0][2]), new Vector3(json.hands[i].r[1][0], json.hands[i].r[1][1], json.hands[i].r[1][2]), new Vector3(json.hands[i].r[2][0], json.hands[i].r[2][1], json.hands[i].r[2][2]));
+                        hand.scaleFactorNumber = json.hands[i].s;
+                        hand.sphereCenter = new Vector3(json.hands[i].sphereCenter[0], json.hands[i].sphereCenter[1], json.hands[i].sphereCenter[2]);
+                        hand.sphereRadius = json.hands[i].sphereRadius;
+                        hand.timeVisible = json.hands[i].timeVisible;
+                        hand.translationVector = new Vector3(json.hands[i].t[0], json.hands[i].t[1], json.hands[i].t[2]);
+                        currentFrame.hands.push(hand);
+                    }
+                }
+                currentFrame.id = json.id;
+                currentFrame.currentFramesPerSecond = json.currentFramesPerSecond;
+                // InteractionBox
+                if (typeof json.interactionBox !== "undefined") {
+                    currentFrame.interactionBox = new InteractionBox();
+                    currentFrame.interactionBox.center = new Vector3(json.interactionBox.center[0], json.interactionBox.center[1], json.interactionBox.center[2]);
+                    currentFrame.interactionBox.width = json.interactionBox.size[0];
+                    currentFrame.interactionBox.height = json.interactionBox.size[1];
+                    currentFrame.interactionBox.depth = json.interactionBox.size[2];
+                }
+                // Pointables
+                if (typeof json.pointables !== "undefined") {
+                    i = 0;
+                    length = json.pointables.length;
+                    for (i = 0; i < length; i++) {
+                        isTool = json.pointables[i].tool;
+                        if (isTool)
+                            pointable = new Tool();
+                        else
+                            pointable = new Finger();
+                        pointable.frame = currentFrame;
+                        pointable.id = json.pointables[i].id;
+                        pointable.hand = Controller.getHandByID(currentFrame, json.pointables[i].handId);
+                        pointable.length = json.pointables[i].length;
+                        pointable.direction = new Vector3(json.pointables[i].direction[0], json.pointables[i].direction[1], json.pointables[i].direction[2]);
+                        pointable.tipPosition = new Vector3(json.pointables[i].tipPosition[0], json.pointables[i].tipPosition[1], json.pointables[i].tipPosition[2]);
+                        pointable.stabilizedTipPosition = new Vector3(json.pointables[i].stabilizedTipPosition[0], json.pointables[i].stabilizedTipPosition[1], json.pointables[i].stabilizedTipPosition[2]);
+                        pointable.tipVelocity = new Vector3(json.pointables[i].tipVelocity[0], json.pointables[i].tipVelocity[1], json.pointables[i].tipVelocity[2]);
+                        pointable.touchDistance = json.pointables[i].touchDistance;
+                        pointable.timeVisible = json.pointables[i].timeVisible;
+                        currentFrame.pointables.push(pointable);
+                        switch (json.pointables[i].touchZone) {
+                            case "hovering":
+                                pointable.touchZone = Zone.ZONE_HOVERING;
+                                break;
+                            case "touching":
+                                pointable.touchZone = Zone.ZONE_TOUCHING;
+                                break;
+                            default:
+                                pointable.touchZone = Zone.ZONE_NONE;
+                                break;
+                        }
+                        if (pointable.hand)
+                            pointable.hand.pointables.push(pointable);
+                        if (isTool) {
+                            pointable.isTool = true;
+                            pointable.isFinger = false;
+                            pointable.width = json.pointables[i].width;
+                            currentFrame.tools.push(pointable);
+                            if (pointable.hand)
+                                pointable.hand.tools.push(pointable);
+                        } else {
+                            pointable.isTool = false;
+                            pointable.isFinger = true;
+                            currentFrame.fingers.push(pointable);
+                            if (pointable.hand)
+                                pointable.hand.fingers.push(pointable);
+                        }
+                    }
+                }
+                // Gestures
+                if (typeof json.gestures !== "undefined") {
+                    i = 0;
+                    length = json.gestures.length;
+                    for (i = 0; i < length; i++) {
+                        switch (json.gestures[i].type) {
+                            case "circle":
+                                gesture = new CircleGesture();
+                                type = Type.TYPE_CIRCLE;
+                                var circle = gesture;
+                                circle.center = new Vector3(json.gestures[i].center[0], json.gestures[i].center[1], json.gestures[i].center[2]);
+                                circle.normal = new Vector3(json.gestures[i].normal[0], json.gestures[i].normal[1], json.gestures[i].normal[2]);
+                                circle.progress = json.gestures[i].progress;
+                                circle.radius = json.gestures[i].radius;
+                                break;
+                            case "swipe":
+                                gesture = new SwipeGesture();
+                                type = Type.TYPE_SWIPE;
+                                var swipe = gesture;
+                                swipe.startPosition = new Vector3(json.gestures[i].startPosition[0], json.gestures[i].startPosition[1], json.gestures[i].startPosition[2]);
+                                swipe.position = new Vector3(json.gestures[i].position[0], json.gestures[i].position[1], json.gestures[i].position[2]);
+                                swipe.direction = new Vector3(json.gestures[i].direction[0], json.gestures[i].direction[1], json.gestures[i].direction[2]);
+                                swipe.speed = json.gestures[i].speed;
+                                break;
+                            case "screenTap":
+                                gesture = new ScreenTapGesture();
+                                type = Type.TYPE_SCREEN_TAP;
+                                var screenTap = gesture;
+                                screenTap.position = new Vector3(json.gestures[i].position[0], json.gestures[i].position[1], json.gestures[i].position[2]);
+                                screenTap.direction = new Vector3(json.gestures[i].direction[0], json.gestures[i].direction[1], json.gestures[i].direction[2]);
+                                screenTap.progress = json.gestures[i].progress;
+                                break;
+                            case "keyTap":
+                                gesture = new KeyTapGesture();
+                                type = Type.TYPE_KEY_TAP;
+                                var keyTap = gesture;
+                                keyTap.position = new Vector3(json.gestures[i].position[0], json.gestures[i].position[1], json.gestures[i].position[2]);
+                                keyTap.direction = new Vector3(json.gestures[i].direction[0], json.gestures[i].direction[1], json.gestures[i].direction[2]);
+                                keyTap.progress = json.gestures[i].progress;
+                                break;
+                            default:
+                                throw new Error("unkown gesture type");
+                        }
+                        var j = 0;
+                        var lengthInner = 0;
+                        if (typeof json.gestures[i].handIds !== "undefined") {
+                            j = 0;
+                            lengthInner = json.gestures[i].handIds.length;
+                            for (j = 0; j < lengthInner; ++j) {
+                                var gestureHand = Controller.getHandByID(currentFrame, json.gestures[i].handIds[j]);
+                                gesture.hands.push(gestureHand);
+                            }
+                        }
+                        if (typeof json.gestures[i].pointableIds !== "undefined") {
+                            j = 0;
+                            lengthInner = json.gestures[i].pointableIds.length;
+                            for (j = 0; j < lengthInner; ++j) {
+                                var gesturePointable = Controller.getPointableByID(currentFrame, json.gestures[i].pointableIds[j]);
+                                if (gesturePointable) {
+                                    gesture.pointables.push(gesturePointable);
+                                }
+                            }
+                            if (gesture instanceof CircleGesture && gesture.pointables.length > 0) {
+                                gesture.pointable = gesture.pointables[0];
+                            }
+                        }
+                        gesture.frame = currentFrame;
+                        gesture.id = json.gestures[i].id;
+                        gesture.duration = json.gestures[i].duration;
+                        gesture.durationSeconds = gesture.duration / 1000000;
+                        switch (json.gestures[i].state) {
+                            case "start":
+                                gesture.state = State.STATE_START;
+                                break;
+                            case "update":
+                                gesture.state = State.STATE_UPDATE;
+                                break;
+                            case "stop":
+                                gesture.state = State.STATE_STOP;
+                                break;
+                            default:
+                                gesture.state = State.STATE_INVALID;
+                        }
+                        gesture.type = type;
+                        currentFrame._gestures.push(gesture);
+                    }
+                }
+                // Rotation (since last frame), interpolate for smoother motion
+                if (json.r)
+                    currentFrame.rotation = new Matrix(new Vector3(json.r[0][0], json.r[0][1], json.r[0][2]), new Vector3(json.r[1][0], json.r[1][1], json.r[1][2]), new Vector3(json.r[2][0], json.r[2][1], json.r[2][2]));
+                // Scale factor (since last frame), interpolate for smoother motion
+                currentFrame.scaleFactorNumber = json.s;
+                // Translation (since last frame), interpolate for smoother motion
+                if (json.t)
+                    currentFrame.translationVector = new Vector3(json.t[0], json.t[1], json.t[2]);
+                // Timestamp
+                currentFrame.timestamp = json.timestamp;
+                // Add frame to history
+                if (_this.frameHistory.length > 59)
+                    _this.frameHistory.splice(59, 1);
+                _this.frameHistory.unshift(_this.latestFrame);
+                _this.latestFrame = currentFrame;
+                _this.listener.onFrame(_this, _this.latestFrame);
+            };
+        }
+        /**
+         * Finds a Hand object by ID.
+         *
+         * @param frame The Frame object in which the Hand contains
+         * @param id The ID of the Hand object
+         * @return The Hand object if found, otherwise null
+         *
+         */
         Controller.getHandByID = function(frame, id) {
             var returnValue = null;
             var i = 0;
@@ -733,16 +733,16 @@ define(["require", "exports"], function(require, exports) {
      */
     var InteractionBox = (function() {
         function InteractionBox() {}
-            /**
-             * Converts a position defined by normalized InteractionBox coordinates
-             * into device coordinates in millimeters.
-             *
-             * This function performs the inverse of normalizePoint().
-             *
-             * @param normalizedPosition The input position in InteractionBox coordinates.
-             * @return The corresponding denormalized position in device coordinates.
-             *
-             */
+        /**
+         * Converts a position defined by normalized InteractionBox coordinates
+         * into device coordinates in millimeters.
+         *
+         * This function performs the inverse of normalizePoint().
+         *
+         * @param normalizedPosition The input position in InteractionBox coordinates.
+         * @return The corresponding denormalized position in device coordinates.
+         *
+         */
         InteractionBox.prototype.denormalizePoint = function(normalizedPosition) {
             var vec = Vector3.invalid();
             vec.x = (normalizedPosition.x - 0.5) * this.width + this.center.x;
@@ -877,74 +877,74 @@ define(["require", "exports"], function(require, exports) {
     })(Zone || (Zone = {}));
     var Pointable = (function() {
         function Pointable() {
-                /**
-                 * The current touch zone of this Pointable object.
-                 *
-                 * <p>The Leap Motion software computes the touch zone based on a
-                 * floating touch plane that adapts to the user's finger movement
-                 * and hand posture. The Leap Motion software interprets purposeful
-                 * movements toward this plane as potential touch points.
-                 * When a Pointable moves close to the adaptive touch plane,
-                 * it enters the "hovering" zone. When a Pointable reaches or
-                 * passes through the plane, it enters the "touching" zone.</p>
-                 *
-                 * <p>The possible states are present in the Zone enum of this class:</p>
-                 *
-                 * <code>Zone.NONE – The Pointable is outside the hovering zone.
-                 * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
-                 * Zone.TOUCHING – The Pointable has penetrated the touch plane.</code>
-                 *
-                 * <p>The touchDistance value provides a normalized indication of the
-                 * distance to the touch plane when the Pointable is in the hovering
-                 * or touching zones.</p>
-                 *
-                 */
-                this.touchZone = 0 /* ZONE_NONE */ ;
-                /**
-                 * A value proportional to the distance between this Pointable
-                 * object and the adaptive touch plane.
-                 *
-                 * <p>The touch distance is a value in the range [-1, 1].
-                 * The value 1.0 indicates the Pointable is at the far edge of
-                 * the hovering zone. The value 0 indicates the Pointable is
-                 * just entering the touching zone. A value of -1.0 indicates
-                 * the Pointable is firmly within the touching zone.
-                 * Values in between are proportional to the distance from the plane.
-                 * Thus, the touchDistance of 0.5 indicates that the Pointable
-                 * is halfway into the hovering zone.</p>
-                 *
-                 * <p>You can use the touchDistance value to modulate visual
-                 * feedback given to the user as their fingers close in on a
-                 * touch target, such as a button.</p>
-                 *
-                 */
-                this.touchDistance = 0;
-                /**
-                 * The estimated length of the finger or tool in millimeters.
-                 *
-                 * <p>The reported length is the visible length of the finger or tool from
-                 * the hand to tip.</p>
-                 *
-                 * <p>If the length isn't known, then a value of 0 is returned.</p>
-                 */
-                this.length = 0;
-                /**
-                 * The estimated width of the finger or tool in millimeters.
-                 *
-                 * <p>The reported width is the average width of the visible portion
-                 * of the finger or tool from the hand to the tip.</p>
-                 *
-                 * <p>If the width isn't known, then a value of 0 is returned.</p>
-                 */
-                this.width = 0;
-                this.direction = Vector3.invalid();
-                this.tipPosition = Vector3.invalid();
-                this.tipVelocity = Vector3.invalid();
-            }
             /**
-             * Reports whether this is a valid Pointable object.
-             * @return True if <code>direction</code>, <code>tipPosition</code> and <code>tipVelocity</code> are true.
+             * The current touch zone of this Pointable object.
+             *
+             * <p>The Leap Motion software computes the touch zone based on a
+             * floating touch plane that adapts to the user's finger movement
+             * and hand posture. The Leap Motion software interprets purposeful
+             * movements toward this plane as potential touch points.
+             * When a Pointable moves close to the adaptive touch plane,
+             * it enters the "hovering" zone. When a Pointable reaches or
+             * passes through the plane, it enters the "touching" zone.</p>
+             *
+             * <p>The possible states are present in the Zone enum of this class:</p>
+             *
+             * <code>Zone.NONE – The Pointable is outside the hovering zone.
+             * Zone.HOVERING – The Pointable is close to, but not touching the touch plane.
+             * Zone.TOUCHING – The Pointable has penetrated the touch plane.</code>
+             *
+             * <p>The touchDistance value provides a normalized indication of the
+             * distance to the touch plane when the Pointable is in the hovering
+             * or touching zones.</p>
+             *
              */
+            this.touchZone = Zone.ZONE_NONE;
+            /**
+             * A value proportional to the distance between this Pointable
+             * object and the adaptive touch plane.
+             *
+             * <p>The touch distance is a value in the range [-1, 1].
+             * The value 1.0 indicates the Pointable is at the far edge of
+             * the hovering zone. The value 0 indicates the Pointable is
+             * just entering the touching zone. A value of -1.0 indicates
+             * the Pointable is firmly within the touching zone.
+             * Values in between are proportional to the distance from the plane.
+             * Thus, the touchDistance of 0.5 indicates that the Pointable
+             * is halfway into the hovering zone.</p>
+             *
+             * <p>You can use the touchDistance value to modulate visual
+             * feedback given to the user as their fingers close in on a
+             * touch target, such as a button.</p>
+             *
+             */
+            this.touchDistance = 0;
+            /**
+             * The estimated length of the finger or tool in millimeters.
+             *
+             * <p>The reported length is the visible length of the finger or tool from
+             * the hand to tip.</p>
+             *
+             * <p>If the length isn't known, then a value of 0 is returned.</p>
+             */
+            this.length = 0;
+            /**
+             * The estimated width of the finger or tool in millimeters.
+             *
+             * <p>The reported width is the average width of the visible portion
+             * of the finger or tool from the hand to the tip.</p>
+             *
+             * <p>If the width isn't known, then a value of 0 is returned.</p>
+             */
+            this.width = 0;
+            this.direction = Vector3.invalid();
+            this.tipPosition = Vector3.invalid();
+            this.tipVelocity = Vector3.invalid();
+        }
+        /**
+         * Reports whether this is a valid Pointable object.
+         * @return True if <code>direction</code>, <code>tipPosition</code> and <code>tipVelocity</code> are true.
+         */
         Pointable.prototype.isValid = function() {
             var returnValue = false;
             if ((this.direction && this.direction.isValid()) && (this.tipPosition && this.tipPosition.isValid()) && (this.tipVelocity && this.tipVelocity.isValid()))
@@ -1193,29 +1193,29 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Gesture() {
-                /**
-                 * The list of hands associated with this Gesture, if any.
-                 *
-                 * <p>If no hands are related to this gesture, the list is empty.</p>
-                 */
-                this.hands = [];
-                /**
-                 * The list of fingers and tools associated with this Gesture, if any.
-                 *
-                 * <p>If no Pointable objects are related to this gesture, the list is empty.</p>
-                 */
-                this.pointables = [];
-            }
             /**
-             * Compare Gesture object equality/inequality.
+             * The list of hands associated with this Gesture, if any.
              *
-             * <p>Two Gestures are equal if they represent the same snapshot of
-             * the same recognized movement.</p>
-             *
-             * @param other The Gesture to compare with.
-             * @return True; if equal, False otherwise.
-             *
+             * <p>If no hands are related to this gesture, the list is empty.</p>
              */
+            this.hands = [];
+            /**
+             * The list of fingers and tools associated with this Gesture, if any.
+             *
+             * <p>If no Pointable objects are related to this gesture, the list is empty.</p>
+             */
+            this.pointables = [];
+        }
+        /**
+         * Compare Gesture object equality/inequality.
+         *
+         * <p>Two Gestures are equal if they represent the same snapshot of
+         * the same recognized movement.</p>
+         *
+         * @param other The Gesture to compare with.
+         * @return True; if equal, False otherwise.
+         *
+         */
         Gesture.prototype.isEqualTo = function(other) {
             return (this.id == other.id);
         };
@@ -1288,21 +1288,21 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Finger() {
-                _super.call(this);
-                this.isFinger = true;
-                this.isTool = false;
-            }
-            /**
-             * Returns an invalid Finger object.
-             *
-             * <p>You can use the instance returned by this function in
-             * comparisons testing whether a given Finger instance
-             * is valid or invalid.
-             * (You can also use the <code>Finger.isValid()</code> function.)</p>
-             *
-             * @return The invalid Finger instance.
-             *
-             */
+            _super.call(this);
+            this.isFinger = true;
+            this.isTool = false;
+        }
+        /**
+         * Returns an invalid Finger object.
+         *
+         * <p>You can use the instance returned by this function in
+         * comparisons testing whether a given Finger instance
+         * is valid or invalid.
+         * (You can also use the <code>Finger.isValid()</code> function.)</p>
+         *
+         * @return The invalid Finger instance.
+         *
+         */
         Finger.invalid = function() {
             return new Finger();
         };
@@ -1331,21 +1331,21 @@ define(["require", "exports"], function(require, exports) {
         __extends(Tool, _super);
 
         function Tool() {
-                _super.call(this);
-                this.isFinger = false;
-                this.isTool = true;
-            }
-            /**
-             * Returns an invalid Tool object.
-             *
-             * <p>You can use the instance returned by this function in
-             * comparisons testing whether a given Tool instance
-             * is valid or invalid.
-             * (You can also use the Tool.isValid property.)</p>
-             *
-             * @return The invalid Tool instance.
-             *
-             */
+            _super.call(this);
+            this.isFinger = false;
+            this.isTool = true;
+        }
+        /**
+         * Returns an invalid Tool object.
+         *
+         * <p>You can use the instance returned by this function in
+         * comparisons testing whether a given Tool instance
+         * is valid or invalid.
+         * (You can also use the Tool.isValid property.)</p>
+         *
+         * @return The invalid Tool instance.
+         *
+         */
         Tool.invalid = function() {
             return new Tool();
         };
@@ -1379,38 +1379,38 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Hand() {
-                /**
-                 * The list of Finger objects detected in this frame that are attached
-                 * to this hand, given in arbitrary order.
-                 * @see Finger
-                 */
-                this.fingers = [];
-                /**
-                 * The list of Pointable objects (fingers and tools) detected in this
-                 * frame that are associated with this hand, given in arbitrary order.
-                 *
-                 * <p>The list can be empty if no fingers or tools associated with this hand are detected.
-                 * Use the <code>Pointable.isFinger()</code> to determine whether or not an item in the
-                 * list represents a finger. Use the <code>Pointable.isTool()</code> to determine
-                 * whether or not an item in the list represents a tool. You can also get
-                 * only fingers using the <code>Hand.fingers()</code> or only tools using
-                 * the <code>Hand.tools()</code> function.</p>
-                 *
-                 * @see Pointable
-                 *
-                 */
-                this.pointables = [];
-                /**
-                 * The list of Tool objects detected in this frame that are held by this hand, given in arbitrary order.
-                 * @see Tool
-                 */
-                this.tools = [];
-            }
             /**
-             * Reports whether this is a valid Hand object.
-             * @return True, if this Hand object contains valid tracking data.
+             * The list of Finger objects detected in this frame that are attached
+             * to this hand, given in arbitrary order.
+             * @see Finger
+             */
+            this.fingers = [];
+            /**
+             * The list of Pointable objects (fingers and tools) detected in this
+             * frame that are associated with this hand, given in arbitrary order.
+             *
+             * <p>The list can be empty if no fingers or tools associated with this hand are detected.
+             * Use the <code>Pointable.isFinger()</code> to determine whether or not an item in the
+             * list represents a finger. Use the <code>Pointable.isTool()</code> to determine
+             * whether or not an item in the list represents a tool. You can also get
+             * only fingers using the <code>Hand.fingers()</code> or only tools using
+             * the <code>Hand.tools()</code> function.</p>
+             *
+             * @see Pointable
              *
              */
+            this.pointables = [];
+            /**
+             * The list of Tool objects detected in this frame that are held by this hand, given in arbitrary order.
+             * @see Tool
+             */
+            this.tools = [];
+        }
+        /**
+         * Reports whether this is a valid Hand object.
+         * @return True, if this Hand object contains valid tracking data.
+         *
+         */
         Hand.prototype.isValid = function() {
             if ((this.direction && this.direction.isValid()) && (this.palmNormal && this.palmNormal.isValid()) && (this.palmPosition && this.palmPosition.isValid()) && (this.palmVelocity && this.palmVelocity.isValid()) && (this.sphereCenter && this.sphereCenter.isValid()))
                 return true;
@@ -1696,69 +1696,69 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Frame() {
-                /**
-                 * The list of Finger objects detected in this frame, given in arbitrary order.<br/>
-                 * The list can be empty if no fingers are detected.
-                 */
-                this.fingers = [];
-                /**
-                 * The list of Hand objects detected in this frame, given in arbitrary order.<br/>
-                 * The list can be empty if no hands are detected.
-                 */
-                this.hands = [];
-                /**
-                 * The Pointable object with the specified ID in this frame.
-                 *
-                 * <p>Use the <code>Frame.pointable()</code> to retrieve the Pointable
-                 * object from this frame using an ID value obtained from a previous frame.
-                 * This always returns a Pointable object, but if no finger
-                 * or tool with the specified ID is present, an invalid Pointable
-                 * object is returned.</p>
-                 *
-                 * <p>Note that ID values persist across frames, but only until tracking
-                 * of a particular object is lost. If tracking of a finger or tool is
-                 * lost and subsequently regained, the new Pointable object representing
-                 * that finger or tool may have a different ID than that representing
-                 * the finger or tool in an earlier frame.</p>
-                 *
-                 * @see Pointable
-                 *
-                 */
-                this.pointables = [];
-                /**
-                 * The gestures recognized or continuing in this frame.
-                 *
-                 * <p>Circle and swipe gestures are updated every frame.
-                 * Tap gestures only appear in the list when they start.</p>
-                 */
-                this._gestures = [];
-                /**
-                 * The list of Tool objects detected in this frame, given in arbitrary order.
-                 *
-                 * @see Tool
-                 */
-                this.tools = [];
-            }
             /**
-             * The Hand object with the specified ID in this frame.
+             * The list of Finger objects detected in this frame, given in arbitrary order.<br/>
+             * The list can be empty if no fingers are detected.
+             */
+            this.fingers = [];
+            /**
+             * The list of Hand objects detected in this frame, given in arbitrary order.<br/>
+             * The list can be empty if no hands are detected.
+             */
+            this.hands = [];
+            /**
+             * The Pointable object with the specified ID in this frame.
              *
-             * <p>Use the <code>Frame.hand()</code> to retrieve the Hand object
-             * from this frame using an ID value obtained from a previous frame.
-             * This always returns a Hand object, but if no hand
-             * with the specified ID is present, an invalid Hand object is returned.</p>
+             * <p>Use the <code>Frame.pointable()</code> to retrieve the Pointable
+             * object from this frame using an ID value obtained from a previous frame.
+             * This always returns a Pointable object, but if no finger
+             * or tool with the specified ID is present, an invalid Pointable
+             * object is returned.</p>
              *
              * <p>Note that ID values persist across frames, but only until tracking
-             * of a particular object is lost. If tracking of a hand is lost
-             * and subsequently regained, the new Hand object representing
-             * that physical hand may have a different ID than that
-             * representing the physical hand in an earlier frame.</p>
+             * of a particular object is lost. If tracking of a finger or tool is
+             * lost and subsequently regained, the new Pointable object representing
+             * that finger or tool may have a different ID than that representing
+             * the finger or tool in an earlier frame.</p>
              *
-             * @param id The ID value of a Hand object from a previous frame.
-             * @return The Hand object with the matching ID if one exists
-             * in this frame; otherwise, an invalid Hand object is returned.
-             * @see Hand
+             * @see Pointable
              *
              */
+            this.pointables = [];
+            /**
+             * The gestures recognized or continuing in this frame.
+             *
+             * <p>Circle and swipe gestures are updated every frame.
+             * Tap gestures only appear in the list when they start.</p>
+             */
+            this._gestures = [];
+            /**
+             * The list of Tool objects detected in this frame, given in arbitrary order.
+             *
+             * @see Tool
+             */
+            this.tools = [];
+        }
+        /**
+         * The Hand object with the specified ID in this frame.
+         *
+         * <p>Use the <code>Frame.hand()</code> to retrieve the Hand object
+         * from this frame using an ID value obtained from a previous frame.
+         * This always returns a Hand object, but if no hand
+         * with the specified ID is present, an invalid Hand object is returned.</p>
+         *
+         * <p>Note that ID values persist across frames, but only until tracking
+         * of a particular object is lost. If tracking of a hand is lost
+         * and subsequently regained, the new Hand object representing
+         * that physical hand may have a different ID than that
+         * representing the physical hand in an earlier frame.</p>
+         *
+         * @param id The ID value of a Hand object from a previous frame.
+         * @return The Hand object with the matching ID if one exists
+         * in this frame; otherwise, an invalid Hand object is returned.
+         * @see Hand
+         *
+         */
         Frame.prototype.hand = function(id) {
             var returnValue = Hand.invalid();
             var length = this.hands.length;
@@ -2142,40 +2142,40 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Matrix(x, y, z, _origin) {
-                if (_origin === void 0) {
-                    _origin = null;
-                }
-                /**
-                 * The translation factors for all three axes.
-                 */
-                this.origin = new Vector3(0, 0, 0);
-                /**
-                 * The rotation and scale factors for the x-axis.
-                 */
-                this.xBasis = new Vector3(0, 0, 0);
-                /**
-                 * The rotation and scale factors for the y-axis.
-                 */
-                this.yBasis = new Vector3(0, 0, 0);
-                /**
-                 * The rotation and scale factors for the z-axis.
-                 */
-                this.zBasis = new Vector3(0, 0, 0);
-                this.xBasis = x;
-                this.yBasis = y;
-                this.zBasis = z;
-                if (_origin)
-                    this.origin = _origin;
+            if (_origin === void 0) {
+                _origin = null;
             }
             /**
-             * Sets this transformation matrix to represent a rotation around the specified vector.
-             * This erases any previous rotation and scale transforms applied to this matrix,
-             * but does not affect translation.
-             *
-             * @param _axis A Vector specifying the axis of rotation.
-             * @param angleRadians The amount of rotation in radians.
-             *
+             * The translation factors for all three axes.
              */
+            this.origin = new Vector3(0, 0, 0);
+            /**
+             * The rotation and scale factors for the x-axis.
+             */
+            this.xBasis = new Vector3(0, 0, 0);
+            /**
+             * The rotation and scale factors for the y-axis.
+             */
+            this.yBasis = new Vector3(0, 0, 0);
+            /**
+             * The rotation and scale factors for the z-axis.
+             */
+            this.zBasis = new Vector3(0, 0, 0);
+            this.xBasis = x;
+            this.yBasis = y;
+            this.zBasis = z;
+            if (_origin)
+                this.origin = _origin;
+        }
+        /**
+         * Sets this transformation matrix to represent a rotation around the specified vector.
+         * This erases any previous rotation and scale transforms applied to this matrix,
+         * but does not affect translation.
+         *
+         * @param _axis A Vector specifying the axis of rotation.
+         * @param angleRadians The amount of rotation in radians.
+         *
+         */
         Matrix.prototype.setRotation = function(_axis, angleRadians) {
             var axis = _axis.normalized();
             var s = Math.sin(angleRadians);
@@ -2353,14 +2353,14 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function CircleGesture() {
-                _super.call(this);
-                this.pointable = Pointable.invalid();
-            }
-            /**
-             * The circle gesture type.<br/>
-             * The type value designating a circle gesture.
-             */
-        CircleGesture.classType = 6 /* TYPE_CIRCLE */ ;
+            _super.call(this);
+            this.pointable = Pointable.invalid();
+        }
+        /**
+         * The circle gesture type.<br/>
+         * The type value designating a circle gesture.
+         */
+        CircleGesture.classType = Type.TYPE_CIRCLE;
         return CircleGesture;
     })(Gesture);
     exports.CircleGesture = CircleGesture;
@@ -2433,16 +2433,16 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function KeyTapGesture() {
-                _super.call(this);
-                /**
-                 * The progess value is always 1.0 for a key tap gesture.
-                 */
-                this.progress = 1;
-            }
+            _super.call(this);
             /**
-             * The type value designating a key tap gesture.
+             * The progess value is always 1.0 for a key tap gesture.
              */
-        KeyTapGesture.classType = 8 /* TYPE_KEY_TAP */ ;
+            this.progress = 1;
+        }
+        /**
+         * The type value designating a key tap gesture.
+         */
+        KeyTapGesture.classType = Type.TYPE_KEY_TAP;
         return KeyTapGesture;
     })(Gesture);
     exports.KeyTapGesture = KeyTapGesture;
@@ -2514,16 +2514,16 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function ScreenTapGesture() {
-                _super.call(this);
-                /**
-                 * The progess value is always 1.0 for a screen tap gesture.
-                 */
-                this.progress = 1;
-            }
+            _super.call(this);
             /**
-             * The type value designating a screen tap gesture.
+             * The progess value is always 1.0 for a screen tap gesture.
              */
-        ScreenTapGesture.classType = 7 /* TYPE_SCREEN_TAP */ ;
+            this.progress = 1;
+        }
+        /**
+         * The type value designating a screen tap gesture.
+         */
+        ScreenTapGesture.classType = Type.TYPE_SCREEN_TAP;
         return ScreenTapGesture;
     })(Gesture);
     exports.ScreenTapGesture = ScreenTapGesture;
@@ -2578,12 +2578,12 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function SwipeGesture() {
-                _super.call(this);
-            }
-            /**
-             * The type value designating a swipe gesture.
-             */
-        SwipeGesture.classType = 5 /* TYPE_SWIPE */ ;
+            _super.call(this);
+        }
+        /**
+         * The type value designating a swipe gesture.
+         */
+        SwipeGesture.classType = Type.TYPE_SWIPE;
         return SwipeGesture;
     })(Gesture);
     exports.SwipeGesture = SwipeGesture;
@@ -2613,15 +2613,15 @@ define(["require", "exports"], function(require, exports) {
          *
          */
         function Vector3(x, y, z) {
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
-            /**
-             * A copy of this vector pointing in the opposite direction.
-             * @return A Vector3 object with all components negated.
-             *
-             */
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        /**
+         * A copy of this vector pointing in the opposite direction.
+         * @return A Vector3 object with all components negated.
+         *
+         */
         Vector3.prototype.opposite = function() {
             return new Vector3(-this.x, -this.y, -this.z);
         };
@@ -2984,4 +2984,4 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.Vector3 = Vector3;
 });
-//# sourceMappingURL=leapmotionts-2.2.3.js.map
+//# sourceMappingURL=leapmotionts-2.2.4.js.map

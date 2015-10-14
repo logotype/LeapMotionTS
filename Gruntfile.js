@@ -23,7 +23,7 @@ module.exports = function (grunt) {
                 dest: '',
                 options: {
                     module: 'amd',
-                    target: 'es6',
+                    target: 'es5',
                     sourceMap: true,
                     fullSourceMapPath: false,
                     declaration: true

@@ -124,7 +124,7 @@ Authors
 Copyright and license
 ---------------------
 
-Copyright © 2014 logotype
+Copyright © 2015 logotype
 
 Author: Victor Norgren
 

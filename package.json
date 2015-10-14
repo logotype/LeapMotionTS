@@ -1,6 +1,6 @@
 {
   "name": "LeapMotionTS",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "TypeScript framework for Leap Motion.",
   "main": "src",
   "license": "MIT",
@@ -13,13 +13,13 @@
     "url": "https://github.com/logotype/LeapMotionTS/issues"
   },
   "devDependencies": {
-    "grunt": "latest",
-    "grunt-contrib-uglify": "latest",
-    "grunt-contrib-concat": "latest",
-    "grunt-sed": "latest",
-    "grunt-typescript": "latest",
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-jshint": "latest",
-    "grunt-jsbeautifier": "latest"
+    "grunt-contrib-uglify": "latest",
+    "grunt-jsbeautifier": "latest",
+    "grunt-sed": "^0.1.1",
+    "grunt-typescript": "^0.7.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
