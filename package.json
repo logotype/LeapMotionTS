@@ -1,5 +1,5 @@
 {
-  "name": "LeapMotionTS",
+  "name": "leapmotion-ts",
   "version": "2.2.4",
   "description": "TypeScript framework for Leap Motion.",
   "main": "src",
