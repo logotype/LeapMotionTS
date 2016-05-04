@@ -18,6 +18,7 @@ Clone the repo, `git clone git://github.com/logotype/LeapMotionTS.git`.
 Import the library and create an instance of the Controller class. What you'll get from the `LEAPMOTION_FRAME` handler is a `Frame` instance,
 with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gestures` and more:
 
+```TypeScript
     import Leap = require('../LeapMotionTS');
     var controller:Leap.Controller = new Leap.Controller();
     controller.addEventListener(Leap.LeapEvent.LEAPMOTION_CONNECTED, (event:Leap.LeapEvent) => {
@@ -100,6 +101,7 @@ with strongly typed properties such as `Hands`, `Pointables`, `Direction`, `Gest
             }
         }
     });
+```
 
 Example output:
 
